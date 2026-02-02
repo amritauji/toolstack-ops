@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ToolStack Ops - Kanban Board</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8fafc;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .header {
+            background: white;
+            padding: 20px 30px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .logo {
+            font-size: 20px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .kanban-board {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            min-height: 600px;
+        }
+        .kanban-column {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .column-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f1f5f9;
+        }
+        .column-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #0f172a;
+        }
+        .task-count {
+            background: #e2e8f0;
+            color: #64748b;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        .task-card {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .task-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transform: translateY(-1px);
+        }
+        .task-title {
+            font-size: 14px;
+            font-weight: 500;
+            color: #0f172a;
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+        .task-description {
+            font-size: 12px;
+            color: #64748b;
+            margin-bottom: 12px;
+            line-height: 1.4;
+        }
+        .task-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .task-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .priority-badge {
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 500;
+        }
+        .priority-high { background: #fef2f2; color: #dc2626; }
+        .priority-medium { background: #fffbeb; color: #d97706; }
+        .priority-low { background: #f0fdf4; color: #16a34a; }
+        .due-date {
+            font-size: 10px;
+            color: #64748b;
+        }
+        .avatar {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 10px;
+            font-weight: 600;
+        }
+        .avatar-1 { background: linear-gradient(135deg, #4f46e5, #7c3aed); }
+        .avatar-2 { background: linear-gradient(135deg, #10b981, #059669); }
+        .avatar-3 { background: linear-gradient(135deg, #f59e0b, #d97706); }
+        .avatar-4 { background: linear-gradient(135deg, #ef4444, #dc2626); }
+        .add-task {
+            border: 2px dashed #cbd5e1;
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 16px;
+            text-align: center;
+            color: #64748b;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .add-task:hover {
+            border-color: #4f46e5;
+            color: #4f46e5;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">🚀 ToolStack Ops - Project Board</div>
+        </div>
+        
+        <div class="kanban-board">
+            <div class="kanban-column">
+                <div class="column-header">
+                    <span class="column-title">📋 To Do</span>
+                    <span class="task-count">4</span>
+                </div>
+                
+                <div class="task-card">
+                    <div class="task-title">Design new landing page</div>
+                    <div class="task-description">Create modern, responsive landing page with hero section and features</div>
+                    <div class="task-meta">
+                        <div class="task-left">
+                            <span class="priority-badge priority-high">High</span>
+                            <span class="due-date">Due: Jan 15</span>
+                        </div>
+                        <div class="avatar avatar-1">JD</div>
+                    </div>
+                </div>
+                
+                <div class="task-card">
+                    <div class="task-title">API integration testing</div>
+                    <div class="task-description">Test all API endpoints and error handling</div>
+                    <div class="task-meta">
+                        <div class="task-left">
+                            <span class="priority-badge priority-medium">Medium</span>
+                            <span class="due-date">Due: Jan 18</span>
+                        </div>
+                        <div class="avatar avatar-2">SM</div>
+                    </div>
+                </div>
+                
+                <div class="task-card">
+                    <div class="task-title">User documentation</div>
+                    <div class="task-description">Write comprehensive user guide and tutorials</div>
+                    <div class="task-meta">
+                        <div class="task-left">
+                            <span class="priority-badge priority-low">Low</span>
+                            <span class="due-date">Due: Jan 25</span>
+                        </div>
+                        <div class="avatar avatar-3">MK</div>
+                    </div>
+                </div>
+                
+                <div class="add-task">+ Add new task</div>
+            </div>
+            
+            <div class="kanban-column">
+                <div class="column-header">
+                    <span class="column-title">⚡ In Progress</span>
+                    <span class="task-count">3</span>
+                </div>
+                
+                <div class="task-card">
+                    <div class="task-title">User authentication flow</div>
+                    <div class="task-description">Implement secure login/signup with Supabase Auth</div>
+                    <div class="task-meta">
+                        <div class="task-left">
+                            <span class="priority-badge priority-high">High</span>
+                            <span class="due-date">Due: Jan 12</span>
+                        </div>
+                        <div class="avatar avatar-4">AK</div>
+                    </div>
+                </div>
+                
+                <div class="task-card">
+                    <div class="task-title">Database optimization</div>
+                    <div class="task-description">Optimize queries and add proper indexing</div>
+                    <div class="task-meta">
+                        <div class="task-left">
+                            <span class="priority-badge priority-medium">Medium</span>
+                            <span class="due-date">Due: Jan 20</span>
+                        </div>
+                        <div class="avatar avatar-1">RJ</div>
+                    </div>
+                </div>
+                
+                <div class="task-card">
+                    <div class="task-title">Real-time notifications</div>
+                    <div class="task-description">Setup WebSocket connections for live updates</div>
+                    <div class="task-meta">
+                        <div class="task-left">
+                            <span class="priority-badge priority-high">High</span>
+                            <span class="due-date">Due: Jan 16</span>
+                        </div>
+                        <div class="avatar avatar-2">LM</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="kanban-column">
+                <div class="column-header">
+                    <span class="column-title">✅ Done</span>
+                    <span class="task-count">5</span>
+                </div>
+                
+                <div class="task-card">
+                    <div class="task-title">Setup CI/CD pipeline</div>
+                    <div class="task-description">Configure automated deployment with Vercel</div>
+                    <div class="task-meta">
+                        <div class="task-left">
+                            <span class="priority-badge priority-medium">Medium</span>
+                            <span class="due-date">Completed</span>
+                        </div>
+                        <div class="avatar avatar-3">MK</div>
+                    </div>
+                </div>
+                
+                <div class="task-card">
+                    <div class="task-title">Project structure setup</div>
+                    <div class="task-description">Initialize Next.js project with TypeScript</div>
+                    <div class="task-meta">
+                        <div class="task-left">
+                            <span class="priority-badge priority-high">High</span>
+                            <span class="due-date">Completed</span>
+                        </div>
+                        <div class="avatar avatar-4">JD</div>
+                    </div>
+                </div>
+                
+                <div class="task-card">
+                    <div class="task-title">Database schema design</div>
+                    <div class="task-description">Design tables and relationships in Supabase</div>
+                    <div class="task-meta">
+                        <div class="task-left">
+                            <span class="priority-badge priority-high">High</span>
+                            <span class="due-date">Completed</span>
+                        </div>
+                        <div class="avatar avatar-1">SM</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

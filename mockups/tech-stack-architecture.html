@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ToolStack Ops - Tech Stack Architecture</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            max-width: 1000px;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .title {
+            font-size: 28px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #64748b;
+            font-size: 16px;
+        }
+        .architecture {
+            display: grid;
+            grid-template-rows: auto auto auto;
+            gap: 30px;
+        }
+        .layer {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .tech-card {
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            min-width: 140px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        .tech-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        .tech-card.frontend { border-color: #4f46e5; }
+        .tech-card.backend { border-color: #10b981; }
+        .tech-card.database { border-color: #f59e0b; }
+        .tech-card.deployment { border-color: #ef4444; }
+        .tech-icon {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        .tech-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: #0f172a;
+            margin-bottom: 5px;
+        }
+        .tech-version {
+            font-size: 11px;
+            color: #64748b;
+        }
+        .layer-title {
+            width: 100%;
+            text-align: center;
+            font-size: 18px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 20px;
+            position: relative;
+        }
+        .layer-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 2px;
+            background: linear-gradient(90deg, #4f46e5, #7c3aed);
+            border-radius: 1px;
+        }
+        .arrow {
+            font-size: 24px;
+            color: #94a3b8;
+            margin: 0 10px;
+        }
+        .connection-line {
+            position: absolute;
+            width: 2px;
+            height: 20px;
+            background: linear-gradient(180deg, #4f46e5, #7c3aed);
+            left: 50%;
+            transform: translateX(-50%);
+            top: -30px;
+        }
+        .features-list {
+            margin-top: 30px;
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 20px;
+        }
+        .features-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #0f172a;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+        }
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: #475569;
+        }
+        .feature-icon {
+            color: #10b981;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="title">🚀 ToolStack Ops Architecture</div>
+            <div class="subtitle">Modern, Scalable, Production-Ready Tech Stack</div>
+        </div>
+        
+        <div class="architecture">
+            <!-- Frontend Layer -->
+            <div class="layer">
+                <div class="layer-title">Frontend Layer</div>
+                <div class="tech-card frontend">
+                    <div class="tech-icon">⚛️</div>
+                    <div class="tech-name">React</div>
+                    <div class="tech-version">v19.2.3</div>
+                </div>
+                <div class="arrow">→</div>
+                <div class="tech-card frontend">
+                    <div class="tech-icon">🔺</div>
+                    <div class="tech-name">Next.js</div>
+                    <div class="tech-version">v16.1.6</div>
+                </div>
+                <div class="arrow">→</div>
+                <div class="tech-card frontend">
+                    <div class="tech-icon">🎨</div>
+                    <div class="tech-name">Tailwind CSS</div>
+                    <div class="tech-version">v4.1.18</div>
+                </div>
+                <div class="arrow">→</div>
+                <div class="tech-card frontend">
+                    <div class="tech-icon">🎭</div>
+                    <div class="tech-name">Framer Motion</div>
+                    <div class="tech-version">v12.29.2</div>
+                </div>
+            </div>
+            
+            <!-- Backend Layer -->
+            <div class="layer">
+                <div class="connection-line"></div>
+                <div class="layer-title">Backend & Services</div>
+                <div class="tech-card backend">
+                    <div class="tech-icon">🟢</div>
+                    <div class="tech-name">Supabase</div>
+                    <div class="tech-version">v2.93.3</div>
+                </div>
+                <div class="arrow">→</div>
+                <div class="tech-card backend">
+                    <div class="tech-icon">🔐</div>
+                    <div class="tech-name">Supabase Auth</div>
+                    <div class="tech-version">SSR v0.8.0</div>
+                </div>
+                <div class="arrow">→</div>
+                <div class="tech-card backend">
+                    <div class="tech-icon">⚡</div>
+                    <div class="tech-name">Real-time</div>
+                    <div class="tech-version">WebSockets</div>
+                </div>
+                <div class="arrow">→</div>
+                <div class="tech-card backend">
+                    <div class="tech-icon">🔄</div>
+                    <div class="tech-name">React Query</div>
+                    <div class="tech-version">v5.90.20</div>
+                </div>
+            </div>
+            
+            <!-- Database & Deployment -->
+            <div class="layer">
+                <div class="connection-line"></div>
+                <div class="layer-title">Database & Deployment</div>
+                <div class="tech-card database">
+                    <div class="tech-icon">🐘</div>
+                    <div class="tech-name">PostgreSQL</div>
+                    <div class="tech-version">Supabase</div>
+                </div>
+                <div class="arrow">→</div>
+                <div class="tech-card database">
+                    <div class="tech-icon">📁</div>
+                    <div class="tech-name">Storage</div>
+                    <div class="tech-version">File Upload</div>
+                </div>
+                <div class="arrow">→</div>
+                <div class="tech-card deployment">
+                    <div class="tech-icon">▲</div>
+                    <div class="tech-name">Vercel</div>
+                    <div class="tech-version">Deployment</div>
+                </div>
+                <div class="arrow">→</div>
+                <div class="tech-card deployment">
+                    <div class="tech-icon">🌐</div>
+                    <div class="tech-name">CDN</div>
+                    <div class="tech-version">Global Edge</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="features-list">
+            <div class="features-title">Key Features & Capabilities</div>
+            <div class="features-grid">
+                <div class="feature-item">
+                    <span class="feature-icon">✅</span>
+                    <span>Server-Side Rendering (SSR)</span>
+                </div>
+                <div class="feature-item">
+                    <span class="feature-icon">✅</span>
+                    <span>Real-time Collaboration</span>
+                </div>
+                <div class="feature-item">
+                    <span class="feature-icon">✅</span>
+                    <span>Row Level Security (RLS)</span>
+                </div>
+                <div class="feature-item">
+                    <span class="feature-icon">✅</span>
+                    <span>Automatic API Generation</span>
+                </div>
+                <div class="feature-item">
+                    <span class="feature-icon">✅</span>
+                    <span>TypeScript Support</span>
+                </div>
+                <div class="feature-item">
+                    <span class="feature-icon">✅</span>
+                    <span>Responsive Design</span>
+                </div>
+                <div class="feature-item">
+                    <span class="feature-icon">✅</span>
+                    <span>Performance Optimized</span>
+                </div>
+                <div class="feature-item">
+                    <span class="feature-icon">✅</span>
+                    <span>Scalable Architecture</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

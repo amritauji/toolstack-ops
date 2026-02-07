@@ -42,7 +42,7 @@ export default async function AppLayout({ children }) {
   }
 
   return (
-    <div>
+    <div data-barba-namespace="dashboard">
       <Navbar profile={profile} />
       <AppLayoutClient>{children}</AppLayoutClient>
     </div>

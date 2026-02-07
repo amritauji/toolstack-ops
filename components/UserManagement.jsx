@@ -1,9 +1,24 @@
 "use client";
 
+import { useState } from 'react';
 import { deleteUser } from "@/lib/profileRequests";
+import { checkActionAllowed } from '@/lib/usage';
 import Avatar from "@/components/Avatar";
+import UpgradeModal from '@/components/UpgradeModal';
 
-export default function UserManagement({ users }) {
+export default function UserManagement({ users, currentPlan = 'free' }) {
+  const [upgradeModal, setUpgradeModal] = useState({ isOpen: false, reason: '' });
+
+  const handleAddUser = async () => {
+    const check = await checkActionAllowed('add_user');
+    if (!check.allowed) {
+      setUpgradeModal({ isOpen: true, reason: 'user_limit' });
+      return;
+    }
+    // Proceed with adding user
+    alert('Add user functionality - integrate with your user creation flow');
+  };
+
   const handleDeleteUser = async (userId, userName) => {
     if (confirm(`Are you sure you want to delete ${userName}'s account? This action cannot be undone.`)) {
       await deleteUser(userId);
@@ -22,20 +37,39 @@ export default function UserManagement({ users }) {
   };
 
   return (
+    <>
     <div style={{ background: "white", borderRadius: 8, padding: 20, boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
-      <h2 style={{ fontSize: 18, fontWeight: 600, marginBottom: 16, display: "flex", alignItems: "center", gap: 8 }}>
-        👥 User Management
-        <span style={{ 
-          background: "#e5e7eb", 
-          color: "#374151", 
-          fontSize: 12, 
-          padding: "2px 8px", 
-          borderRadius: 12,
-          fontWeight: 500
-        }}>
-          {users.length} users
-        </span>
-      </h2>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+        <h2 style={{ fontSize: 18, fontWeight: 600, display: "flex", alignItems: "center", gap: 8 }}>
+          👥 User Management
+          <span style={{ 
+            background: "#e5e7eb", 
+            color: "#374151", 
+            fontSize: 12, 
+            padding: "2px 8px", 
+            borderRadius: 12,
+            fontWeight: 500
+          }}>
+            {users.length} users
+          </span>
+        </h2>
+        <button
+          onClick={handleAddUser}
+          style={{
+            background: 'linear-gradient(135deg, #a855f7, #ec4899)',
+            color: 'white',
+            border: 'none',
+            borderRadius: 8,
+            padding: '8px 16px',
+            fontSize: 14,
+            fontWeight: 600,
+            cursor: 'pointer',
+            boxShadow: '0 4px 12px rgba(168, 85, 247, 0.3)'
+          }}
+        >
+          + Add User
+        </button>
+      </div>
 
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
         {users.map(user => {
@@ -119,5 +153,12 @@ export default function UserManagement({ users }) {
         })}
       </div>
     </div>
+    <UpgradeModal 
+      isOpen={upgradeModal.isOpen}
+      onClose={() => setUpgradeModal({ isOpen: false, reason: '' })}
+      reason={upgradeModal.reason}
+      currentPlan={currentPlan}
+    />
+    </>
   );
 }

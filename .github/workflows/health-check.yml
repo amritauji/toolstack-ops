@@ -1,0 +1,24 @@
+name: Health Check
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'  # Every 15 minutes
+  workflow_dispatch:  # Manual trigger
+
+jobs:
+  health-check:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Check application health
+        run: |
+          response=$(curl -s -o /dev/null -w "%{http_code}" ${{ secrets.APP_URL }}/api/health)
+          if [ $response -ne 200 ]; then
+            echo "Health check failed with status $response"
+            exit 1
+          fi
+          echo "Health check passed"
+      
+      - name: Notify on failure
+        if: failure()
+        run: echo "Health check failed - configure notifications"

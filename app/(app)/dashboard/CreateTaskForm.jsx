@@ -1,9 +1,30 @@
 "use client";
 
+import { useState } from 'react';
 import { createTask } from "@/lib/tasks";
+import { checkActionAllowed } from '@/lib/usage';
+import UpgradeModal from '@/components/UpgradeModal';
 
-export default function CreateTaskForm({ users }) {
+export default function CreateTaskForm({ users, currentPlan = 'free' }) {
+  const [upgradeModal, setUpgradeModal] = useState({ isOpen: false, reason: '' });
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    // Check if user can create task
+    const check = await checkActionAllowed('add_task');
+    if (!check.allowed) {
+      setUpgradeModal({ isOpen: true, reason: 'task_limit' });
+      return;
+    }
+
+    // Proceed with task creation
+    const formData = new FormData(e.target);
+    await createTask(formData);
+    e.target.reset();
+  };
   return (
+    <>
     <div style={{
       background: "white",
       borderRadius: 8,
@@ -11,7 +32,7 @@ export default function CreateTaskForm({ users }) {
       border: "1px solid #e2e8f0",
       boxShadow: "0 1px 3px rgba(0,0,0,0.1)"
     }}>
-      <form action={createTask}>
+      <form onSubmit={handleSubmit}>
         <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr auto", gap: 16, alignItems: "end" }}>
           {/* Task Title */}
           <div>
@@ -128,5 +149,12 @@ export default function CreateTaskForm({ users }) {
         </div>
       </form>
     </div>
+    <UpgradeModal 
+      isOpen={upgradeModal.isOpen}
+      onClose={() => setUpgradeModal({ isOpen: false, reason: '' })}
+      reason={upgradeModal.reason}
+      currentPlan={currentPlan}
+    />
+    </>
   );
 }

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import RegionSelector from '../RegionSelector';
 
 export default function ModernNavbar() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -64,12 +65,13 @@ export default function ModernNavbar() {
           <div style={{ display: 'flex', alignItems: 'center', gap: '32px' }} className="hidden md:flex">
             <Link href="#features" style={{ fontSize: '14px', fontWeight: 500, color: '#475569', textDecoration: 'none', transition: 'color 0.2s' }}>Features</Link>
             <Link href="#demo" style={{ fontSize: '14px', fontWeight: 500, color: '#475569', textDecoration: 'none', transition: 'color 0.2s' }}>Demo</Link>
-            <Link href="#pricing" style={{ fontSize: '14px', fontWeight: 500, color: '#475569', textDecoration: 'none', transition: 'color 0.2s' }}>Pricing</Link>
+            <Link href="/pricing" style={{ fontSize: '14px', fontWeight: 500, color: '#475569', textDecoration: 'none', transition: 'color 0.2s' }}>Pricing</Link>
             <Link href="#testimonials" style={{ fontSize: '14px', fontWeight: 500, color: '#475569', textDecoration: 'none', transition: 'color 0.2s' }}>Reviews</Link>
           </div>
 
           {/* CTA Buttons */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }} className="hidden md:flex">
+            <RegionSelector />
             <Link href="/login" style={{
               fontSize: '14px',
               fontWeight: 500,
@@ -122,7 +124,7 @@ export default function ModernNavbar() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             <Link href="#features" onClick={closeMobileMenu} style={{ display: 'block', padding: '12px 16px', borderRadius: '8px', color: '#475569', textDecoration: 'none', fontWeight: 500 }}>Features</Link>
             <Link href="#demo" onClick={closeMobileMenu} style={{ display: 'block', padding: '12px 16px', borderRadius: '8px', color: '#475569', textDecoration: 'none', fontWeight: 500 }}>Demo</Link>
-            <Link href="#pricing" onClick={closeMobileMenu} style={{ display: 'block', padding: '12px 16px', borderRadius: '8px', color: '#475569', textDecoration: 'none', fontWeight: 500 }}>Pricing</Link>
+            <Link href="/pricing" onClick={closeMobileMenu} style={{ display: 'block', padding: '12px 16px', borderRadius: '8px', color: '#475569', textDecoration: 'none', fontWeight: 500 }}>Pricing</Link>
             <Link href="#testimonials" onClick={closeMobileMenu} style={{ display: 'block', padding: '12px 16px', borderRadius: '8px', color: '#475569', textDecoration: 'none', fontWeight: 500 }}>Reviews</Link>
             <div style={{ borderTop: '1px solid #e2e8f0', marginTop: '8px', paddingTop: '16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
               <Link href="/login" onClick={closeMobileMenu} style={{ display: 'block', textAlign: 'center', padding: '12px', borderRadius: '8px', color: '#374151', textDecoration: 'none', fontWeight: 500 }}>Sign In</Link>

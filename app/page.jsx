@@ -3,12 +3,12 @@ import ModernHero from '@/components/landing/ModernHero';
 import ModernFeatures from '@/components/landing/ModernFeatures';
 import ProductDemoSection from '@/components/landing/ProductDemoSection';
 import ModernTestimonials from '@/components/landing/ModernTestimonials';
-import ModernPricing from '@/components/landing/ModernPricing';
+import ModernPricingPage from '@/components/ModernPricingPage';
 import ModernFooter from '@/components/landing/ModernFooter';
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-white overflow-hidden relative">
+    <div className="min-h-screen bg-white overflow-hidden relative" data-barba-namespace="home">
       {/* Animated background */}
       <div className="fixed inset-0 -z-10">
         <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-white to-slate-100" />
@@ -24,7 +24,7 @@ export default function LandingPage() {
         <ModernFeatures />
         <ProductDemoSection />
         <ModernTestimonials />
-        <ModernPricing />
+        <ModernPricingPage />
       </main>
       
       <ModernFooter />

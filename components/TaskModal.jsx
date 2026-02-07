@@ -1,237 +1,215 @@
 "use client";
 
+import {
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  Button,
+  Input,
+  Textarea,
+  Select,
+  SelectItem,
+  DatePicker,
+  Avatar,
+  Chip
+} from "@nextui-org/react";
 import { useState } from "react";
-import Avatar from "./Avatar";
-import PriorityBadge from "./PriorityBadge";
-import { updateTask } from "@/lib/tasks";
+import TaskComments from "@/components/TaskComments";
 
-export default function TaskModal({ task, users, isOpen, onClose }) {
-  const [isEditing, setIsEditing] = useState(false);
-  const [editData, setEditData] = useState({
+const TaskModal = ({ isOpen, onClose, task = null, onSave }) => {
+  const [formData, setFormData] = useState({
     title: task?.title || "",
+    description: task?.description || "",
     priority: task?.priority || "medium",
-    due_date: task?.due_date || "",
-    assigned_to: task?.assigned_to || ""
+    status: task?.status || "todo",
+    assignee: task?.assignee || "",
+    project: task?.project || "",
+    dueDate: task?.dueDate || "",
+    estimatedHours: task?.estimatedHours || ""
   });
+  const [loading, setLoading] = useState(false);
 
-  if (!isOpen || !task) return null;
+  const priorities = [
+    { key: "low", label: "Low", color: "success" },
+    { key: "medium", label: "Medium", color: "warning" },
+    { key: "high", label: "High", color: "danger" }
+  ];
+
+  const statuses = [
+    { key: "todo", label: "To Do" },
+    { key: "in-progress", label: "In Progress" },
+    { key: "review", label: "Review" },
+    { key: "done", label: "Done" }
+  ];
+
+  const projects = [
+    { key: "website", label: "Website Redesign" },
+    { key: "mobile", label: "Mobile App" },
+    { key: "marketing", label: "Marketing Campaign" },
+    { key: "devops", label: "DevOps" }
+  ];
+
+  const teamMembers = [
+    { key: "john", label: "John Doe" },
+    { key: "jane", label: "Jane Smith" },
+    { key: "mike", label: "Mike Johnson" },
+    { key: "sarah", label: "Sarah Wilson" }
+  ];
 
   const handleSave = async () => {
-    const formData = new FormData();
-    Object.entries(editData).forEach(([key, value]) => {
-      formData.append(key, value);
-    });
-    formData.append("taskId", task.id);
-    
-    await updateTask(formData);
-    setIsEditing(false);
-    onClose();
+    setLoading(true);
+    try {
+      const taskData = {
+        ...formData,
+        id: task?.id || Date.now(),
+        createdAt: task?.createdAt || new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+      
+      await onSave?.(taskData);
+      onClose();
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleInputChange = (field, value) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
   };
 
   return (
-    <div style={{
-      position: "fixed",
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      background: "rgba(0,0,0,0.5)",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      zIndex: 1000
-    }}>
-      <div style={{
-        background: "white",
-        borderRadius: 12,
-        padding: 32,
-        maxWidth: 600,
-        width: "90%",
-        maxHeight: "80vh",
-        overflow: "auto"
-      }}>
-        {/* Header */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
-          <h2 style={{ fontSize: 20, fontWeight: 600, color: "#2d3748" }}>
-            Task Details
-          </h2>
-          <button
-            onClick={onClose}
-            style={{
-              background: "none",
-              border: "none",
-              fontSize: 24,
-              cursor: "pointer",
-              color: "#a0aec0"
-            }}
+    <Modal 
+      isOpen={isOpen} 
+      onClose={onClose}
+      size="2xl"
+      scrollBehavior="inside"
+    >
+      <ModalContent>
+        <ModalHeader>
+          <h3 className="text-xl font-semibold">
+            {task ? "Edit Task" : "Create New Task"}
+          </h3>
+        </ModalHeader>
+        
+        <ModalBody className="space-y-4">
+          <Input
+            label="Task Title"
+            placeholder="Enter task title..."
+            value={formData.title}
+            onChange={(e) => handleInputChange("title", e.target.value)}
+            isRequired
+          />
+
+          <Textarea
+            label="Description"
+            placeholder="Describe the task..."
+            value={formData.description}
+            onChange={(e) => handleInputChange("description", e.target.value)}
+            minRows={3}
+          />
+
+          <div className="grid grid-cols-2 gap-4">
+            <Select
+              label="Priority"
+              selectedKeys={[formData.priority]}
+              onChange={(e) => handleInputChange("priority", e.target.value)}
+            >
+              {priorities.map((priority) => (
+                <SelectItem key={priority.key} value={priority.key}>
+                  <div className="flex items-center gap-2">
+                    <Chip size="sm" color={priority.color} variant="dot">
+                      {priority.label}
+                    </Chip>
+                  </div>
+                </SelectItem>
+              ))}
+            </Select>
+
+            <Select
+              label="Status"
+              selectedKeys={[formData.status]}
+              onChange={(e) => handleInputChange("status", e.target.value)}
+            >
+              {statuses.map((status) => (
+                <SelectItem key={status.key} value={status.key}>
+                  {status.label}
+                </SelectItem>
+              ))}
+            </Select>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <Select
+              label="Project"
+              selectedKeys={[formData.project]}
+              onChange={(e) => handleInputChange("project", e.target.value)}
+            >
+              {projects.map((project) => (
+                <SelectItem key={project.key} value={project.key}>
+                  {project.label}
+                </SelectItem>
+              ))}
+            </Select>
+
+            <Select
+              label="Assignee"
+              selectedKeys={[formData.assignee]}
+              onChange={(e) => handleInputChange("assignee", e.target.value)}
+            >
+              {teamMembers.map((member) => (
+                <SelectItem key={member.key} value={member.key}>
+                  <div className="flex items-center gap-2">
+                    <Avatar size="sm" name={member.label.charAt(0)} />
+                    {member.label}
+                  </div>
+                </SelectItem>
+              ))}
+            </Select>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <Input
+              type="date"
+              label="Due Date"
+              value={formData.dueDate}
+              onChange={(e) => handleInputChange("dueDate", e.target.value)}
+            />
+
+            <Input
+              type="number"
+              label="Estimated Hours"
+              placeholder="0"
+              value={formData.estimatedHours}
+              onChange={(e) => handleInputChange("estimatedHours", e.target.value)}
+              endContent={<span className="text-sm text-gray-500">hrs</span>}
+            />
+          </div>
+
+          {task?.id && (
+            <div style={{ marginTop: 24, borderTop: "1px solid #e5e7eb", paddingTop: 24 }}>
+              <TaskComments taskId={task.id} />
+            </div>
+          )}
+        </ModalBody>
+
+        <ModalFooter>
+          <Button variant="light" onPress={onClose} isDisabled={loading}>
+            Cancel
+          </Button>
+          <Button 
+            color="primary" 
+            onPress={handleSave}
+            isDisabled={!formData.title.trim() || loading}
+            isLoading={loading}
           >
-            ×
-          </button>
-        </div>
-
-        {/* Content */}
-        <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-          {/* Title */}
-          <div>
-            <label style={{ display: "block", fontSize: 12, fontWeight: 500, color: "#4a5568", marginBottom: 6 }}>
-              TITLE
-            </label>
-            {isEditing ? (
-              <input
-                type="text"
-                value={editData.title}
-                onChange={(e) => setEditData({...editData, title: e.target.value})}
-                style={{
-                  width: "100%",
-                  padding: "10px 12px",
-                  border: "1px solid #e2e8f0",
-                  borderRadius: 6,
-                  fontSize: 14
-                }}
-              />
-            ) : (
-              <div style={{ fontSize: 16, fontWeight: 500, color: "#2d3748" }}>
-                {task.title}
-              </div>
-            )}
-          </div>
-
-          {/* Priority & Due Date */}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
-            <div>
-              <label style={{ display: "block", fontSize: 12, fontWeight: 500, color: "#4a5568", marginBottom: 6 }}>
-                PRIORITY
-              </label>
-              {isEditing ? (
-                <select
-                  value={editData.priority}
-                  onChange={(e) => setEditData({...editData, priority: e.target.value})}
-                  style={{
-                    width: "100%",
-                    padding: "10px 12px",
-                    border: "1px solid #e2e8f0",
-                    borderRadius: 6,
-                    fontSize: 14
-                  }}
-                >
-                  <option value="low">Low</option>
-                  <option value="medium">Medium</option>
-                  <option value="high">High</option>
-                </select>
-              ) : (
-                <PriorityBadge level={task.priority} />
-              )}
-            </div>
-
-            <div>
-              <label style={{ display: "block", fontSize: 12, fontWeight: 500, color: "#4a5568", marginBottom: 6 }}>
-                DUE DATE
-              </label>
-              {isEditing ? (
-                <input
-                  type="date"
-                  value={editData.due_date}
-                  onChange={(e) => setEditData({...editData, due_date: e.target.value})}
-                  style={{
-                    width: "100%",
-                    padding: "10px 12px",
-                    border: "1px solid #e2e8f0",
-                    borderRadius: 6,
-                    fontSize: 14
-                  }}
-                />
-              ) : (
-                <div style={{ fontSize: 14, color: "#4a5568" }}>
-                  {task.due_date ? new Date(task.due_date).toLocaleDateString() : "No due date"}
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Assignee */}
-          <div>
-            <label style={{ display: "block", fontSize: 12, fontWeight: 500, color: "#4a5568", marginBottom: 6 }}>
-              ASSIGNED TO
-            </label>
-            {isEditing ? (
-              <select
-                value={editData.assigned_to}
-                onChange={(e) => setEditData({...editData, assigned_to: e.target.value})}
-                style={{
-                  width: "100%",
-                  padding: "10px 12px",
-                  border: "1px solid #e2e8f0",
-                  borderRadius: 6,
-                  fontSize: 14
-                }}
-              >
-                <option value="">Unassigned</option>
-                {users.map(user => (
-                  <option key={user.id} value={user.id}>{user.full_name}</option>
-                ))}
-              </select>
-            ) : (
-              task.profiles ? (
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <Avatar src={task.profiles.avatar_url} size={24} />
-                  <span style={{ fontSize: 14, color: "#2d3748" }}>
-                    {task.profiles.full_name}
-                  </span>
-                </div>
-              ) : (
-                <div style={{ fontSize: 14, color: "#a0aec0" }}>Unassigned</div>
-              )
-            )}
-          </div>
-
-          {/* Actions */}
-          <div style={{ display: "flex", gap: 12, justifyContent: "flex-end", marginTop: 20 }}>
-            {isEditing ? (
-              <>
-                <button
-                  onClick={() => setIsEditing(false)}
-                  style={{
-                    padding: "8px 16px",
-                    border: "1px solid #e2e8f0",
-                    background: "white",
-                    borderRadius: 6,
-                    cursor: "pointer"
-                  }}
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleSave}
-                  style={{
-                    padding: "8px 16px",
-                    background: "#3182ce",
-                    color: "white",
-                    border: "none",
-                    borderRadius: 6,
-                    cursor: "pointer"
-                  }}
-                >
-                  Save Changes
-                </button>
-              </>
-            ) : (
-              <button
-                onClick={() => setIsEditing(true)}
-                style={{
-                  padding: "8px 16px",
-                  background: "#3182ce",
-                  color: "white",
-                  border: "none",
-                  borderRadius: 6,
-                  cursor: "pointer"
-                }}
-              >
-                Edit Task
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
+            {task ? "Update Task" : "Create Task"}
+          </Button>
+        </ModalFooter>
+      </ModalContent>
+    </Modal>
   );
-}
+};
+
+export default TaskModal;

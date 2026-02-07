@@ -1,7 +1,13 @@
 import { getUser } from "@/lib/getUser";
 import { supabase } from "@/lib/supabaseClient";
+import { apiRateLimit } from '@/lib/rateLimit';
 
-export async function GET() {
+export async function GET(request) {
+  const rateLimitResult = apiRateLimit(request);
+  if (!rateLimitResult.success) {
+    return Response.json({ error: 'Too many requests' }, { status: 429 });
+  }
+
   const user = await getUser();
   if (!user) return Response.json({ error: "Unauthorized" }, { status: 401 });
 

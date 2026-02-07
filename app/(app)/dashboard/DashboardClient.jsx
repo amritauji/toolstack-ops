@@ -103,8 +103,7 @@ export default function DashboardClient({ initialTasks, users, activities, curre
   return (
     <div style={{
       background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
-      minHeight: '100vh',
-      padding: '24px'
+      minHeight: '100vh'
     }}>
       {/* Real-time indicator */}
       <div style={{
@@ -132,77 +131,13 @@ export default function DashboardClient({ initialTasks, users, activities, curre
         {isConnected ? 'Live' : 'Offline'}
       </div>
 
-      {/* Header */}
-      <div style={{ marginBottom: '32px' }}>
-        <div style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'flex-start',
-          marginBottom: '24px',
-          flexWrap: 'wrap',
-          gap: '16px'
-        }}>
-          <div>
-            <h1 style={{
-              fontSize: '36px',
-              fontWeight: '700',
-              color: '#0f172a',
-              marginBottom: '8px',
-              letterSpacing: '-0.025em'
-            }}>
-              Project Dashboard
-            </h1>
-            <p style={{
-              color: '#64748b',
-              fontSize: '18px',
-              fontWeight: '400'
-            }}>
-              Track progress and manage team workflow
-            </p>
-          </div>
-
-          {/* View Toggle */}
-          <div style={{
-            display: 'flex',
-            background: 'white',
-            borderRadius: '12px',
-            padding: '4px',
-            boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-            border: '1px solid #e2e8f0'
-          }}>
-            {['kanban', 'table', 'calendar'].map((mode) => (
-              <button
-                key={mode}
-                onClick={() => setViewMode(mode)}
-                style={{
-                  padding: '8px 16px',
-                  borderRadius: '8px',
-                  border: 'none',
-                  background: viewMode === mode ? '#7c6df2' : 'transparent',
-                  color: viewMode === mode ? 'white' : '#64748b',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease',
-                  textTransform: 'capitalize'
-                }}
-              >
-                {mode === 'kanban' && '📋'}
-                {mode === 'table' && '📊'}
-                {mode === 'calendar' && '📅'}
-                <span style={{ marginLeft: '6px' }}>{mode}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Stats Cards */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-          gap: '20px',
-          marginBottom: '32px'
-        }}>
+      {/* Stats Cards */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+        gap: '20px',
+        marginBottom: '32px'
+      }}>
           <StatCard 
             title="Total Tasks" 
             value={stats.total} 
@@ -268,6 +203,7 @@ export default function DashboardClient({ initialTasks, users, activities, curre
           </div>
         </div>
 
+      <div style={{ marginBottom: '32px' }}>
         <CreateTaskForm users={users} projectId={activeProject?.id} />
       </div>
 

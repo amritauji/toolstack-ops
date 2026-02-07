@@ -1,7 +1,10 @@
 import { Inter } from 'next/font/google'
 import { AuthProvider } from "./providers";
-import SmoothScrollProvider from '@/components/SmoothScrollProvider';
+import { UIProvider } from '@/components/UIProvider';
+import { Analytics } from '@vercel/analytics/react';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 import './globals.css'
+import './mobile.css'
 
 const inter = Inter({ 
   subsets: ['latin'],
@@ -16,7 +19,12 @@ export const metadata = {
   },
   description: 'Advanced project management platform with real-time collaboration, built for modern teams.',
   keywords: ['project management', 'collaboration', 'productivity', 'teams'],
-  authors: [{ name: 'ToolStack Ops' }]
+  authors: [{ name: 'ToolStack Ops' }],
+  icons: {
+    icon: '/icon.svg',
+    shortcut: '/icon.svg',
+    apple: '/icon.svg'
+  }
 }
 
 export const viewport = {
@@ -25,13 +33,15 @@ export const viewport = {
   themeColor: '#3b82f6'
 }
 
-export default function RootLayout({ children }) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={inter.variable} suppressHydrationWarning>
       <body className="font-sans antialiased">
-        <SmoothScrollProvider>
+        <UIProvider>
           <AuthProvider>{children}</AuthProvider>
-        </SmoothScrollProvider>
+        </UIProvider>
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );

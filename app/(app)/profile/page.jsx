@@ -1,5 +1,7 @@
 import { createSupabaseServer } from "@/lib/supabaseServer";
 import { redirect } from "next/navigation";
+import { getCurrentUsage } from '@/lib/usage';
+import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import ProfileClient from "./ProfileClient";
 
 export default async function ProfilePage() {
@@ -14,17 +16,13 @@ export default async function ProfilePage() {
     .eq("id", user.id)
     .single();
 
-  let requests = [];
-  try {
-    const { data } = await supabase
-      .from("profile_change_requests")
-      .select("*")
-      .eq("user_id", user.id)
-      .order("created_at", { ascending: false });
-    requests = data || [];
-  } catch (error) {
-    // Table doesn't exist yet
-  }
+  // Get usage data
+  const usage = await getCurrentUsage();
 
-  return <ProfileClient profile={profile} requests={requests} />;
+  return (
+    <div style={{ padding: '24px' }}>
+      <DashboardHeader profile={profile} />
+      <ProfileClient profile={profile} usage={usage} />
+    </div>
+  );
 }

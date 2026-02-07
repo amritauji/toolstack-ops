@@ -1,0 +1,92 @@
+/* Mobile Responsive Styles */
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Tablets and below (768px) */
+@media (max-width: 768px) {
+  /* Developer Dashboard */
+  .developer-stats {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  .developer-filters {
+    flex-direction: column !important;
+    gap: 8px !important;
+  }
+
+  .user-card {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+  }
+
+  .user-actions {
+    width: 100%;
+    justify-content: flex-end !important;
+  }
+
+  /* Dashboard */
+  .dashboard-header {
+    flex-direction: column !important;
+    gap: 16px !important;
+  }
+
+  .kanban-board {
+    flex-direction: column !important;
+    overflow-x: auto !important;
+  }
+
+  .kanban-column {
+    min-width: 100% !important;
+  }
+
+  /* Modals */
+  .modal-content {
+    max-width: 95vw !important;
+    margin: 10px !important;
+  }
+
+  /* Forms */
+  .form-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Navigation */
+  .nav-links {
+    display: none;
+  }
+
+  .mobile-menu {
+    display: block !important;
+  }
+}
+
+/* Mobile phones (480px) */
+@media (max-width: 480px) {
+  .developer-stats {
+    grid-template-columns: 1fr !important;
+  }
+
+  .stat-card {
+    padding: 16px !important;
+  }
+
+  .user-card {
+    padding: 12px !important;
+  }
+
+  .button-group {
+    flex-direction: column !important;
+    width: 100%;
+  }
+
+  .button-group button {
+    width: 100% !important;
+  }
+}

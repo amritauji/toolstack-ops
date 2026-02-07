@@ -1,17 +1,33 @@
+"use client";
+
+import { useRouter, usePathname } from 'next/navigation';
+
 export default function DashboardHeader({ profile }) {
+  const router = useRouter();
+  const pathname = usePathname();
+
+  const navItems = [
+    { label: 'Dashboard', path: '/dashboard' },
+    ...(profile?.role === 'admin' || profile?.role === 'developer' ? [{ label: 'Admin', path: '/analytics' }] : []),
+    { label: 'Profile', path: '/profile' },
+    ...(profile?.role === 'developer' ? [{ label: 'Developer', path: '/developer' }] : [])
+  ];
+
   return (
     <div style={styles.header}>
       <div>
-        <h1 style={styles.title}>MindMap AI</h1>
+        <h1 style={styles.title}>ToolStack Ops</h1>
         <div style={styles.tabs}>
-          <button style={styles.tabActive}>Board</button>
-          <button style={styles.tab}>Table</button>
-          <button style={styles.tab}>Timeline</button>
+          {navItems.map((item) => (
+            <button
+              key={item.path}
+              onClick={() => router.push(item.path)}
+              style={pathname === item.path ? styles.tabActive : styles.tab}
+            >
+              {item.label}
+            </button>
+          ))}
         </div>
-      </div>
-      <div style={styles.userSection}>
-        <span style={styles.userName}>{profile?.full_name || 'User'}</span>
-        <button style={styles.newTaskBtn}>+ New task</button>
       </div>
     </div>
   );
@@ -59,24 +75,5 @@ const styles = {
     borderRadius: 6,
     cursor: 'pointer',
     boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-  },
-  userSection: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: 16,
-  },
-  userName: {
-    fontSize: 14,
-    color: '#6b7280',
-  },
-  newTaskBtn: {
-    background: '#111827',
-    color: 'white',
-    border: 'none',
-    padding: '10px 16px',
-    borderRadius: 8,
-    fontSize: 14,
-    fontWeight: 500,
-    cursor: 'pointer',
-  },
+  }
 };

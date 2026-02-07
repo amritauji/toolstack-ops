@@ -1,120 +1,31 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Button, Badge } from "@/components/ui/ModernComponents";
-import { supabase } from "@/lib/supabaseClient";
+import { Card, CardBody, Button, Chip, Progress, Avatar } from "@nextui-org/react";
 
-export default function TimeTracker({ taskId, currentUser }) {
-  const [isTracking, setIsTracking] = useState(false);
-  const [currentSession, setCurrentSession] = useState(null);
+const TimeTracker = ({ tasks = [] }) => {
+  const [activeTimer, setActiveTimer] = useState(null);
   const [timeEntries, setTimeEntries] = useState([]);
-  const [totalTime, setTotalTime] = useState(0);
   const [elapsedTime, setElapsedTime] = useState(0);
 
-  useEffect(() => {
-    if (taskId) {
-      loadTimeEntries();
-      checkActiveSession();
-    }
-  }, [taskId]);
+  // Mock time entries
+  const mockEntries = [
+    { id: 1, taskTitle: "Design homepage", duration: 120, date: "2024-01-20", user: "John Doe" },
+    { id: 2, taskTitle: "Setup CI/CD", duration: 180, date: "2024-01-20", user: "Jane Smith" },
+    { id: 3, taskTitle: "Content review", duration: 60, date: "2024-01-19", user: "Mike Johnson" }
+  ];
+
+  const entries = timeEntries.length > 0 ? timeEntries : mockEntries;
 
   useEffect(() => {
     let interval;
-    if (isTracking && currentSession) {
+    if (activeTimer) {
       interval = setInterval(() => {
-        const now = new Date();
-        const start = new Date(currentSession.start_time);
-        setElapsedTime(Math.floor((now - start) / 1000));
+        setElapsedTime(prev => prev + 1);
       }, 1000);
     }
     return () => clearInterval(interval);
-  }, [isTracking, currentSession]);
-
-  const loadTimeEntries = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('time_entries')
-        .select('*')
-        .eq('task_id', taskId)
-        .order('start_time', { ascending: false });
-      
-      if (error) throw error;
-      
-      setTimeEntries(data || []);
-      const total = data?.reduce((sum, entry) => sum + (entry.duration || 0), 0) || 0;
-      setTotalTime(total);
-    } catch (error) {
-      console.error('Error loading time entries:', error);
-    }
-  };
-
-  const checkActiveSession = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('time_entries')
-        .select('*')
-        .eq('task_id', taskId)
-        .eq('user_id', currentUser.id)
-        .is('end_time', null)
-        .single();
-      
-      if (data) {
-        setCurrentSession(data);
-        setIsTracking(true);
-      }
-    } catch (error) {
-      // No active session
-    }
-  };
-
-  const startTracking = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('time_entries')
-        .insert([{
-          task_id: taskId,
-          user_id: currentUser.id,
-          start_time: new Date().toISOString(),
-          description: ''
-        }])
-        .select()
-        .single();
-      
-      if (error) throw error;
-      
-      setCurrentSession(data);
-      setIsTracking(true);
-      setElapsedTime(0);
-    } catch (error) {
-      console.error('Error starting time tracking:', error);
-    }
-  };
-
-  const stopTracking = async () => {
-    if (!currentSession) return;
-    
-    try {
-      const endTime = new Date();
-      const duration = Math.floor((endTime - new Date(currentSession.start_time)) / 1000);
-      
-      const { error } = await supabase
-        .from('time_entries')
-        .update({
-          end_time: endTime.toISOString(),
-          duration: duration
-        })
-        .eq('id', currentSession.id);
-      
-      if (error) throw error;
-      
-      setIsTracking(false);
-      setCurrentSession(null);
-      setElapsedTime(0);
-      loadTimeEntries();
-    } catch (error) {
-      console.error('Error stopping time tracking:', error);
-    }
-  };
+  }, [activeTimer]);
 
   const formatTime = (seconds) => {
     const hours = Math.floor(seconds / 3600);
@@ -123,140 +34,147 @@ export default function TimeTracker({ taskId, currentUser }) {
     return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const formatDuration = (seconds) => {
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    if (hours > 0) return `${hours}h ${minutes}m`;
-    return `${minutes}m`;
+  const formatDuration = (minutes) => {
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    return hours > 0 ? `${hours}h ${mins}m` : `${mins}m`;
   };
 
+  const startTimer = (taskId, taskTitle) => {
+    if (activeTimer) {
+      stopTimer();
+    }
+    setActiveTimer({ taskId, taskTitle, startTime: Date.now() });
+    setElapsedTime(0);
+  };
+
+  const stopTimer = () => {
+    if (activeTimer) {
+      const duration = Math.floor(elapsedTime / 60); // Convert to minutes
+      const newEntry = {
+        id: Date.now(),
+        taskTitle: activeTimer.taskTitle,
+        duration,
+        date: new Date().toISOString().split('T')[0],
+        user: "Current User"
+      };
+      setTimeEntries(prev => [newEntry, ...prev]);
+    }
+    setActiveTimer(null);
+    setElapsedTime(0);
+  };
+
+  const getTotalTimeToday = () => {
+    const today = new Date().toISOString().split('T')[0];
+    return entries
+      .filter(entry => entry.date === today)
+      .reduce((total, entry) => total + entry.duration, 0);
+  };
+
+  const mockTasks = [
+    { id: 1, title: "Design homepage mockup", project: "Website" },
+    { id: 2, title: "Setup CI/CD pipeline", project: "DevOps" },
+    { id: 3, title: "Content review", project: "Marketing" }
+  ];
+
+  const availableTasks = tasks.length > 0 ? tasks : mockTasks;
+
   return (
-    <div style={{
-      background: 'white',
-      borderRadius: '12px',
-      padding: '16px',
-      border: '1px solid #e2e8f0'
-    }}>
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: '16px'
-      }}>
-        <h4 style={{ fontSize: '16px', fontWeight: '600', color: '#111827' }}>
-          Time Tracking
-        </h4>
-        <Badge variant={isTracking ? "success" : "secondary"} size="sm">
-          {isTracking ? 'Active' : 'Stopped'}
-        </Badge>
-      </div>
+    <div className="space-y-6">
+      {/* Active Timer */}
+      <Card>
+        <CardBody className="p-6">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-xl font-semibold">Time Tracker</h3>
+            <Chip color="primary" variant="flat">
+              Today: {formatDuration(getTotalTimeToday())}
+            </Chip>
+          </div>
 
-      {/* Timer Display */}
-      <div style={{
-        textAlign: 'center',
-        padding: '20px',
-        background: isTracking ? '#f0f4ff' : '#f8fafc',
-        borderRadius: '8px',
-        marginBottom: '16px'
-      }}>
-        <div style={{
-          fontSize: '32px',
-          fontWeight: '700',
-          color: isTracking ? '#7c6df2' : '#6b7280',
-          fontFamily: 'monospace'
-        }}>
-          {formatTime(elapsedTime)}
-        </div>
-        <div style={{ fontSize: '14px', color: '#6b7280', marginTop: '4px' }}>
-          {isTracking ? 'Currently tracking' : 'Timer stopped'}
-        </div>
-      </div>
+          {activeTimer ? (
+            <div className="text-center py-6">
+              <div className="text-4xl font-mono font-bold text-blue-600 mb-2">
+                {formatTime(elapsedTime)}
+              </div>
+              <p className="text-gray-600 mb-4">Working on: {activeTimer.taskTitle}</p>
+              <Button color="danger" onPress={stopTimer}>
+                Stop Timer
+              </Button>
+            </div>
+          ) : (
+            <div className="text-center py-6">
+              <p className="text-gray-500 mb-4">Select a task to start tracking time</p>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                {availableTasks.slice(0, 3).map((task) => (
+                  <Button
+                    key={task.id}
+                    variant="bordered"
+                    className="h-auto p-4"
+                    onPress={() => startTimer(task.id, task.title)}
+                  >
+                    <div className="text-left">
+                      <div className="font-medium text-sm">{task.title}</div>
+                      <div className="text-xs text-gray-500">{task.project}</div>
+                    </div>
+                  </Button>
+                ))}
+              </div>
+            </div>
+          )}
+        </CardBody>
+      </Card>
 
-      {/* Controls */}
-      <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
-        {!isTracking ? (
-          <Button
-            variant="primary"
-            size="sm"
-            onClick={startTracking}
-            style={{ flex: 1 }}
-          >
-            ▶️ Start Timer
-          </Button>
-        ) : (
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={stopTracking}
-            style={{ flex: 1 }}
-          >
-            ⏹️ Stop Timer
-          </Button>
-        )}
-      </div>
-
-      {/* Total Time */}
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        padding: '12px',
-        background: '#f8fafc',
-        borderRadius: '8px',
-        marginBottom: '16px'
-      }}>
-        <span style={{ fontSize: '14px', fontWeight: '500', color: '#374151' }}>
-          Total Time Logged
-        </span>
-        <span style={{ fontSize: '16px', fontWeight: '600', color: '#111827' }}>
-          {formatDuration(totalTime)}
-        </span>
-      </div>
-
-      {/* Recent Entries */}
-      {timeEntries.length > 0 && (
-        <div>
-          <h5 style={{
-            fontSize: '14px',
-            fontWeight: '600',
-            color: '#374151',
-            marginBottom: '8px'
-          }}>
-            Recent Sessions
-          </h5>
-          <div style={{ maxHeight: '200px', overflowY: 'auto' }}>
-            {timeEntries.slice(0, 5).map(entry => (
-              <div
-                key={entry.id}
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  padding: '8px 0',
-                  borderBottom: '1px solid #f1f5f9'
-                }}
-              >
-                <div>
-                  <div style={{ fontSize: '12px', color: '#6b7280' }}>
-                    {new Date(entry.start_time).toLocaleDateString()}
-                  </div>
-                  <div style={{ fontSize: '11px', color: '#9ca3af' }}>
-                    {new Date(entry.start_time).toLocaleTimeString()} - 
-                    {entry.end_time ? new Date(entry.end_time).toLocaleTimeString() : 'Active'}
+      {/* Recent Time Entries */}
+      <Card>
+        <CardBody className="p-6">
+          <h4 className="text-lg font-semibold mb-4">Recent Time Entries</h4>
+          <div className="space-y-3">
+            {entries.slice(0, 5).map((entry) => (
+              <div key={entry.id} className="flex justify-between items-center p-3 border rounded-lg">
+                <div className="flex items-center gap-3">
+                  <Avatar size="sm" name={entry.user.charAt(0)} />
+                  <div>
+                    <p className="font-medium text-sm">{entry.taskTitle}</p>
+                    <p className="text-xs text-gray-500">{entry.user} • {entry.date}</p>
                   </div>
                 </div>
-                <div style={{
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  color: '#374151'
-                }}>
-                  {entry.duration ? formatDuration(entry.duration) : 'Active'}
-                </div>
+                <Chip size="sm" color="primary" variant="flat">
+                  {formatDuration(entry.duration)}
+                </Chip>
               </div>
             ))}
           </div>
-        </div>
-      )}
+        </CardBody>
+      </Card>
+
+      {/* Weekly Summary */}
+      <Card>
+        <CardBody className="p-6">
+          <h4 className="text-lg font-semibold mb-4">This Week</h4>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="text-center">
+              <div className="text-2xl font-bold text-blue-600">32h</div>
+              <div className="text-sm text-gray-500">Total Hours</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-green-600">18</div>
+              <div className="text-sm text-gray-500">Tasks Completed</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-purple-600">6.4h</div>
+              <div className="text-sm text-gray-500">Daily Average</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-orange-600">94%</div>
+              <div className="text-sm text-gray-500">Productivity</div>
+            </div>
+          </div>
+          <Progress value={75} className="mt-4" color="primary" />
+          <p className="text-sm text-gray-500 mt-2">75% of weekly goal (40h)</p>
+        </CardBody>
+      </Card>
     </div>
   );
-}
+};
+
+export default TimeTracker;

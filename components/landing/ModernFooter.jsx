@@ -7,9 +7,9 @@ export default function ModernFooter() {
     {
       title: "Product",
       links: [
-        { name: "Features", href: "#features" },
-        { name: "Pricing", href: "#pricing" },
-        { name: "Demo", href: "#demo" },
+        { name: "Features", href: "/#features" },
+        { name: "Pricing", href: "/pricing" },
+        { name: "Demo", href: "/#demo" },
         { name: "API", href: "/api" },
         { name: "Integrations", href: "/integrations" },
         { name: "Security", href: "/security" }

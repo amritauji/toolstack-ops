@@ -79,10 +79,10 @@ export default function ModernNavbar() {
 
           {/* Desktop Navigation */}
           <div style={{ display: isMobile ? 'none' : 'flex', alignItems: 'center', gap: '32px' }}>
-            <Link href="#features" style={{ fontSize: '14px', fontWeight: 500, color: isDark ? '#cbd5e1' : '#475569', textDecoration: 'none', transition: 'color 0.2s' }}>Features</Link>
-            <a href="#demo" style={{ fontSize: '14px', fontWeight: 500, color: isDark ? '#cbd5e1' : '#475569', textDecoration: 'none', transition: 'color 0.2s' }}>Demo</a>
+            <a href="/#features" style={{ fontSize: '14px', fontWeight: 500, color: isDark ? '#cbd5e1' : '#475569', textDecoration: 'none', transition: 'color 0.2s' }}>Features</a>
+            <a href="/#demo" style={{ fontSize: '14px', fontWeight: 500, color: isDark ? '#cbd5e1' : '#475569', textDecoration: 'none', transition: 'color 0.2s' }}>Demo</a>
             <Link href="/pricing" style={{ fontSize: '14px', fontWeight: 500, color: isDark ? '#cbd5e1' : '#475569', textDecoration: 'none', transition: 'color 0.2s' }}>Pricing</Link>
-            <Link href="#testimonials" style={{ fontSize: '14px', fontWeight: 500, color: isDark ? '#cbd5e1' : '#475569', textDecoration: 'none', transition: 'color 0.2s' }}>Reviews</Link>
+            <a href="/#testimonials" style={{ fontSize: '14px', fontWeight: 500, color: isDark ? '#cbd5e1' : '#475569', textDecoration: 'none', transition: 'color 0.2s' }}>Reviews</a>
           </div>
 
           {/* CTA Buttons */}
@@ -167,10 +167,10 @@ export default function ModernNavbar() {
           padding: '16px'
         }} className="md:hidden">
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <Link href="#features" onClick={closeMobileMenu} style={{ display: 'block', padding: '12px 16px', borderRadius: '8px', color: isDark ? '#cbd5e1' : '#475569', textDecoration: 'none', fontWeight: 500 }}>Features</Link>
-            <a href="#demo" onClick={closeMobileMenu} style={{ display: 'block', padding: '12px 16px', borderRadius: '8px', color: isDark ? '#cbd5e1' : '#475569', textDecoration: 'none', fontWeight: 500 }}>Demo</a>
+            <a href="/#features" onClick={closeMobileMenu} style={{ display: 'block', padding: '12px 16px', borderRadius: '8px', color: isDark ? '#cbd5e1' : '#475569', textDecoration: 'none', fontWeight: 500 }}>Features</a>
+            <a href="/#demo" onClick={closeMobileMenu} style={{ display: 'block', padding: '12px 16px', borderRadius: '8px', color: isDark ? '#cbd5e1' : '#475569', textDecoration: 'none', fontWeight: 500 }}>Demo</a>
             <Link href="/pricing" onClick={closeMobileMenu} style={{ display: 'block', padding: '12px 16px', borderRadius: '8px', color: isDark ? '#cbd5e1' : '#475569', textDecoration: 'none', fontWeight: 500 }}>Pricing</Link>
-            <Link href="#testimonials" onClick={closeMobileMenu} style={{ display: 'block', padding: '12px 16px', borderRadius: '8px', color: isDark ? '#cbd5e1' : '#475569', textDecoration: 'none', fontWeight: 500 }}>Reviews</Link>
+            <a href="/#testimonials" onClick={closeMobileMenu} style={{ display: 'block', padding: '12px 16px', borderRadius: '8px', color: isDark ? '#cbd5e1' : '#475569', textDecoration: 'none', fontWeight: 500 }}>Reviews</a>
             <div style={{ borderTop: isDark ? '1px solid #334155' : '1px solid #e2e8f0', marginTop: '8px', paddingTop: '16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
               <Link href="/login" onClick={closeMobileMenu} style={{ display: 'block', textAlign: 'center', padding: '12px', borderRadius: '8px', color: isDark ? '#cbd5e1' : '#374151', textDecoration: 'none', fontWeight: 500 }}>Sign In</Link>
               <Link href="/signup" onClick={closeMobileMenu} style={{ display: 'block', textAlign: 'center', background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', color: 'white', padding: '12px', borderRadius: '10px', textDecoration: 'none', fontWeight: 600 }}>Get Started</Link>

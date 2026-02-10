@@ -28,7 +28,9 @@ export default function LandingPage() {
       
       <main className="relative z-10">
         <ModernHero />
-        <ProblemStatement />
+        <div id="features">
+          <ProblemStatement />
+        </div>
         <ThreePillars />
         
         {/* Transition */}
@@ -39,8 +41,12 @@ export default function LandingPage() {
         </div>
         
         <AIFeaturesSection />
-        <ProductDemoSection />
-        <ModernTestimonials />
+        <div id="demo">
+          <ProductDemoSection />
+        </div>
+        <div id="testimonials">
+          <ModernTestimonials />
+        </div>
         
         {/* Transition */}
         <div style={{ textAlign: 'center', padding: '40px 20px', background: isDark ? '#0f172a' : 'white' }}>
@@ -49,7 +55,9 @@ export default function LandingPage() {
           </p>
         </div>
         
-        <ModernPricingPage />
+        <div id="pricing">
+          <ModernPricingPage />
+        </div>
       </main>
       
       <ModernFooter />

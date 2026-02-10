@@ -1,10 +1,22 @@
-import ModernPricingPage from '@/components/ModernPricingPage';
+"use client";
 
-export const metadata = {
-  title: 'Pricing - ToolStack Ops',
-  description: 'Simple, transparent pricing for teams of all sizes. Start with a 14-day free trial.',
-};
+import { useTheme } from '@/contexts/ThemeContext';
+import ModernNavbar from '@/components/landing/ModernNavbar';
+import ModernPricingPage from '@/components/ModernPricingPage';
+import ModernFooter from '@/components/landing/ModernFooter';
 
 export default function Pricing() {
-  return <ModernPricingPage />;
+  const { isDark } = useTheme();
+  
+  return (
+    <div className={`min-h-screen ${isDark ? 'dark bg-gradient-to-b from-slate-900 to-slate-800' : 'bg-white'}`}>
+      <ModernNavbar />
+      
+      <main style={{ paddingTop: '72px' }}>
+        <ModernPricingPage />
+      </main>
+      
+      <ModernFooter />
+    </div>
+  );
 }

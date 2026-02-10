@@ -144,10 +144,7 @@ export default function DashboardClient({ initialTasks, users, activities, curre
   }, [isModalOpen, showAdvancedFeatures]);
 
   return (
-    <div style={{
-      background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
-      minHeight: '100vh'
-    }}>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-slate-900 dark:to-slate-800 transition-colors duration-300 p-6">
       {/* Onboarding Tour */}
       <OnboardingTour />
       
@@ -220,40 +217,16 @@ export default function DashboardClient({ initialTasks, users, activities, curre
             bgColor="#ecfdf5"
             onClick={() => setFilters({ ...filters, status: 'done' })}
           />
-          <div style={{
-            background: 'white',
-            borderRadius: '16px',
-            padding: '24px',
-            boxShadow: '0 1px 3px rgba(0,0,0,0.05), 0 4px 12px rgba(0,0,0,0.05)',
-            border: '1px solid #e2e8f0',
-            transition: 'all 0.2s ease'
-          }}>
+          <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm border border-gray-200 dark:border-slate-700 transition-colors">
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
-              <p style={{
-                fontSize: '14px',
-                color: '#64748b',
-                fontWeight: '500'
-              }}>
+              <p className="text-sm text-gray-600 dark:text-gray-400 font-medium">
                 Completion Rate
               </p>
-              <span style={{
-                background: '#f0f4ff',
-                color: '#7c6df2',
-                padding: '4px 8px',
-                borderRadius: '12px',
-                fontSize: '12px',
-                fontWeight: '600'
-              }}>
+              <span className="bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 px-2 py-1 rounded-xl text-xs font-semibold">
                 {Math.round(completionRate)}%
               </span>
             </div>
-            <div style={{
-              width: '100%',
-              height: '8px',
-              background: '#f1f5f9',
-              borderRadius: '4px',
-              overflow: 'hidden'
-            }}>
+            <div className="w-full h-2 bg-gray-100 dark:bg-slate-700 rounded-full overflow-hidden">
               <div style={{
                 width: `${completionRate}%`,
                 height: '100%',
@@ -276,19 +249,11 @@ export default function DashboardClient({ initialTasks, users, activities, curre
         <button
           onClick={() => setShowMyTasks(!showMyTasks)}
           title="Show only my tasks"
+          className="px-4 py-3 rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-300 hover:bg-purple-50 dark:hover:bg-purple-900/20 font-semibold text-sm transition-all flex items-center gap-2"
           style={{
-            padding: '12px 16px',
-            borderRadius: '10px',
-            border: '1px solid #e2e8f0',
-            background: showMyTasks ? '#7c6df2' : 'white',
-            color: showMyTasks ? 'white' : '#475569',
-            cursor: 'pointer',
-            fontSize: '14px',
-            fontWeight: 600,
-            transition: 'all 0.2s',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px'
+            background: showMyTasks ? '#7c6df2' : undefined,
+            color: showMyTasks ? 'white' : undefined,
+            borderColor: showMyTasks ? '#7c6df2' : undefined
           }}
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -312,24 +277,7 @@ export default function DashboardClient({ initialTasks, users, activities, curre
           aria-label="Search tasks by title"
           value={filters.search}
           onChange={(e) => setFilters({ ...filters, search: e.target.value })}
-          style={{
-            flex: '1 1 300px',
-            padding: '12px 16px',
-            borderRadius: '12px',
-            border: '1px solid #e2e8f0',
-            fontSize: '14px',
-            outline: 'none',
-            transition: 'border-color 0.2s'
-          }}
-          onFocus={(e) => {
-            e.target.style.borderColor = '#7c6df2';
-            e.target.style.outline = '2px solid #7c6df2';
-            e.target.style.outlineOffset = '2px';
-          }}
-          onBlur={(e) => {
-            e.target.style.borderColor = '#e2e8f0';
-            e.target.style.outline = 'none';
-          }}
+          className="flex-1 min-w-[300px] px-4 py-3 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
         />
 
         {/* View Switcher */}
@@ -458,15 +406,8 @@ export default function DashboardClient({ initialTasks, users, activities, curre
 
       {/* Advanced Features (collapsible) */}
       {showAdvancedFeatures && (
-        <div style={{
-          background: 'white',
-          borderRadius: '12px',
-          padding: '20px',
-          marginBottom: '24px',
-          border: '1px solid #e2e8f0',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
-        }}>
-          <h3 style={{ fontSize: '16px', fontWeight: 600, marginBottom: '16px', color: '#0f172a' }}>Advanced Features</h3>
+        <div className="bg-white dark:bg-slate-800 rounded-xl p-5 mb-6 border border-gray-200 dark:border-slate-700 shadow-sm transition-colors">
+          <h3 className="text-base font-semibold mb-4 text-gray-900 dark:text-white">Advanced Features</h3>
           
           <ProjectsManager 
             currentUser={currentUser} 
@@ -525,13 +466,7 @@ export default function DashboardClient({ initialTasks, users, activities, curre
       {/* Main Content */}
       <div>
         {viewMode === 'kanban' && (
-          <div style={{
-            background: 'white',
-            borderRadius: '16px',
-            padding: '24px',
-            boxShadow: '0 1px 3px rgba(0,0,0,0.05), 0 4px 12px rgba(0,0,0,0.05)',
-            border: '1px solid #e2e8f0'
-          }}>
+          <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm border border-gray-200 dark:border-slate-700 transition-colors">
             <div style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(3, 1fr)',
@@ -659,54 +594,22 @@ function StatCard({ title, value, icon, color, bgColor, onClick }) {
       onMouseEnter={(e) => {
         if (onClick) {
           e.currentTarget.style.transform = 'translateY(-2px)';
-          e.currentTarget.style.boxShadow = '0 8px 25px rgba(0,0,0,0.15)';
         }
       }}
       onMouseLeave={(e) => {
         if (onClick) {
           e.currentTarget.style.transform = 'translateY(0)';
-          e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.05), 0 4px 12px rgba(0,0,0,0.05)';
         }
       }}
-      onFocus={(e) => {
-        if (onClick) {
-          e.currentTarget.style.outline = '2px solid #7c6df2';
-          e.currentTarget.style.outlineOffset = '2px';
-        }
-      }}
-      onBlur={(e) => {
-        if (onClick) {
-          e.currentTarget.style.outline = 'none';
-        }
-      }}
-      style={{
-        background: 'white',
-        borderRadius: '16px',
-        padding: '24px',
-        boxShadow: '0 1px 3px rgba(0,0,0,0.05), 0 4px 12px rgba(0,0,0,0.05)',
-        border: '1px solid #e2e8f0',
-        transition: 'all 0.2s ease',
-        cursor: onClick ? 'pointer' : 'default',
-        textAlign: 'left',
-        width: '100%',
-        outline: 'none'
-      }}
+      className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm border border-gray-200 dark:border-slate-700 transition-all hover:shadow-lg cursor-pointer"
+      style={{ outline: 'none', width: '100%', textAlign: 'left' }}
     >
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div>
-          <p style={{
-            fontSize: '14px',
-            color: '#475569',
-            marginBottom: '4px',
-            fontWeight: '500'
-          }}>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mb-1 font-medium">
             {title}
           </p>
-          <p style={{
-            fontSize: '30px',
-            fontWeight: '700',
-            color: '#0f172a'
-          }}>
+          <p className="text-3xl font-bold text-gray-900 dark:text-white">
             {value}
           </p>
         </div>

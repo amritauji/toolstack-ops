@@ -189,7 +189,11 @@ export default function Navbar({ profile }) {
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             {/* Dark Mode Toggle */}
             <button
-              onClick={() => {/* Add dark mode toggle */}}
+              onClick={() => {
+                const html = document.documentElement;
+                html.classList.toggle('dark');
+                localStorage.setItem('theme', html.classList.contains('dark') ? 'dark' : 'light');
+              }}
               aria-label="Toggle dark mode"
               style={{
                 padding: '8px',

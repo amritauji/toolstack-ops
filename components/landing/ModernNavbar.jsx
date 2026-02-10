@@ -3,17 +3,31 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import RegionSelector from '../RegionSelector';
+import { useTheme } from '@/contexts/ThemeContext';
 
 export default function ModernNavbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const { isDark, toggleTheme } = useTheme();
 
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
     };
+    
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
     window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener('resize', handleResize);
+    handleResize(); // Initial check
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', handleResize);
+    };
   }, []);
 
   const closeMobileMenu = () => setIsMobileMenuOpen(false);
@@ -26,9 +40,11 @@ export default function ModernNavbar() {
       right: 0,
       zIndex: 50,
       transition: 'all 0.3s ease',
-      background: isScrolled || isMobileMenuOpen ? 'rgba(255, 255, 255, 0.95)' : 'transparent',
+      background: isScrolled || isMobileMenuOpen 
+        ? (isDark ? 'rgba(15, 23, 42, 0.95)' : 'rgba(255, 255, 255, 0.95)') 
+        : 'transparent',
       backdropFilter: isScrolled || isMobileMenuOpen ? 'blur(12px)' : 'none',
-      borderBottom: isScrolled ? '1px solid rgba(226, 232, 240, 0.5)' : 'none',
+      borderBottom: isScrolled ? (isDark ? '1px solid rgba(71, 85, 105, 0.5)' : '1px solid rgba(226, 232, 240, 0.5)') : 'none',
       boxShadow: isScrolled ? '0 1px 3px rgba(0, 0, 0, 0.05)' : 'none'
     }}>
       <div style={{
@@ -58,24 +74,53 @@ export default function ModernNavbar() {
                 <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-            <span style={{ fontSize: '20px', fontWeight: 700, color: '#0f172a' }}>ToolStack</span>
+            <span style={{ fontSize: '20px', fontWeight: 700, color: isDark ? '#f1f5f9' : '#0f172a' }}>ToolStack</span>
           </Link>
 
           {/* Desktop Navigation */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '32px' }} className="hidden md:flex">
-            <Link href="#features" style={{ fontSize: '14px', fontWeight: 500, color: '#475569', textDecoration: 'none', transition: 'color 0.2s' }}>Features</Link>
-            <Link href="#demo" style={{ fontSize: '14px', fontWeight: 500, color: '#475569', textDecoration: 'none', transition: 'color 0.2s' }}>Demo</Link>
-            <Link href="/pricing" style={{ fontSize: '14px', fontWeight: 500, color: '#475569', textDecoration: 'none', transition: 'color 0.2s' }}>Pricing</Link>
-            <Link href="#testimonials" style={{ fontSize: '14px', fontWeight: 500, color: '#475569', textDecoration: 'none', transition: 'color 0.2s' }}>Reviews</Link>
+          <div style={{ display: isMobile ? 'none' : 'flex', alignItems: 'center', gap: '32px' }}>
+            <Link href="#features" style={{ fontSize: '14px', fontWeight: 500, color: isDark ? '#cbd5e1' : '#475569', textDecoration: 'none', transition: 'color 0.2s' }}>Features</Link>
+            <a href="#demo" style={{ fontSize: '14px', fontWeight: 500, color: isDark ? '#cbd5e1' : '#475569', textDecoration: 'none', transition: 'color 0.2s' }}>Demo</a>
+            <Link href="/pricing" style={{ fontSize: '14px', fontWeight: 500, color: isDark ? '#cbd5e1' : '#475569', textDecoration: 'none', transition: 'color 0.2s' }}>Pricing</Link>
+            <Link href="#testimonials" style={{ fontSize: '14px', fontWeight: 500, color: isDark ? '#cbd5e1' : '#475569', textDecoration: 'none', transition: 'color 0.2s' }}>Reviews</Link>
           </div>
 
           {/* CTA Buttons */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }} className="hidden md:flex">
+          <div style={{ display: isMobile ? 'none' : 'flex', alignItems: 'center', gap: '12px' }}>
             <RegionSelector />
+            
+            {/* Dark Mode Toggle */}
+            <button
+              onClick={toggleTheme}
+              style={{
+                padding: '10px',
+                borderRadius: '10px',
+                border: 'none',
+                background: isDark ? 'rgba(71, 85, 105, 0.5)' : 'rgba(241, 245, 249, 0.8)',
+                cursor: 'pointer',
+                transition: 'all 0.3s',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+              aria-label="Toggle theme"
+            >
+              {isDark ? (
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="#fbbf24" stroke="#fbbf24">
+                  <circle cx="12" cy="12" r="5"/>
+                  <path d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+                </svg>
+              ) : (
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="#475569">
+                  <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                </svg>
+              )}
+            </button>
+            
             <Link href="/login" style={{
               fontSize: '14px',
               fontWeight: 500,
-              color: '#475569',
+              color: isDark ? '#cbd5e1' : '#475569',
               textDecoration: 'none',
               padding: '10px 16px',
               borderRadius: '8px',
@@ -98,16 +143,16 @@ export default function ModernNavbar() {
           <button 
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} 
             style={{
+              display: isMobile ? 'block' : 'none',
               padding: '8px',
               borderRadius: '8px',
               border: 'none',
               background: 'transparent',
               cursor: 'pointer'
             }}
-            className="md:hidden"
             aria-label="Toggle menu"
           >
-            <svg style={{ width: '24px', height: '24px', color: '#374151' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg style={{ width: '24px', height: '24px', color: isDark ? '#cbd5e1' : '#374151' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={isMobileMenuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"} />
             </svg>
           </button>
@@ -117,17 +162,17 @@ export default function ModernNavbar() {
       {/* Mobile Menu Dropdown */}
       {isMobileMenuOpen && (
         <div style={{
-          background: 'white',
-          borderTop: '1px solid #e2e8f0',
+          background: isDark ? '#0f172a' : 'white',
+          borderTop: isDark ? '1px solid #334155' : '1px solid #e2e8f0',
           padding: '16px'
         }} className="md:hidden">
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <Link href="#features" onClick={closeMobileMenu} style={{ display: 'block', padding: '12px 16px', borderRadius: '8px', color: '#475569', textDecoration: 'none', fontWeight: 500 }}>Features</Link>
-            <Link href="#demo" onClick={closeMobileMenu} style={{ display: 'block', padding: '12px 16px', borderRadius: '8px', color: '#475569', textDecoration: 'none', fontWeight: 500 }}>Demo</Link>
-            <Link href="/pricing" onClick={closeMobileMenu} style={{ display: 'block', padding: '12px 16px', borderRadius: '8px', color: '#475569', textDecoration: 'none', fontWeight: 500 }}>Pricing</Link>
-            <Link href="#testimonials" onClick={closeMobileMenu} style={{ display: 'block', padding: '12px 16px', borderRadius: '8px', color: '#475569', textDecoration: 'none', fontWeight: 500 }}>Reviews</Link>
-            <div style={{ borderTop: '1px solid #e2e8f0', marginTop: '8px', paddingTop: '16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <Link href="/login" onClick={closeMobileMenu} style={{ display: 'block', textAlign: 'center', padding: '12px', borderRadius: '8px', color: '#374151', textDecoration: 'none', fontWeight: 500 }}>Sign In</Link>
+            <Link href="#features" onClick={closeMobileMenu} style={{ display: 'block', padding: '12px 16px', borderRadius: '8px', color: isDark ? '#cbd5e1' : '#475569', textDecoration: 'none', fontWeight: 500 }}>Features</Link>
+            <a href="#demo" onClick={closeMobileMenu} style={{ display: 'block', padding: '12px 16px', borderRadius: '8px', color: isDark ? '#cbd5e1' : '#475569', textDecoration: 'none', fontWeight: 500 }}>Demo</a>
+            <Link href="/pricing" onClick={closeMobileMenu} style={{ display: 'block', padding: '12px 16px', borderRadius: '8px', color: isDark ? '#cbd5e1' : '#475569', textDecoration: 'none', fontWeight: 500 }}>Pricing</Link>
+            <Link href="#testimonials" onClick={closeMobileMenu} style={{ display: 'block', padding: '12px 16px', borderRadius: '8px', color: isDark ? '#cbd5e1' : '#475569', textDecoration: 'none', fontWeight: 500 }}>Reviews</Link>
+            <div style={{ borderTop: isDark ? '1px solid #334155' : '1px solid #e2e8f0', marginTop: '8px', paddingTop: '16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <Link href="/login" onClick={closeMobileMenu} style={{ display: 'block', textAlign: 'center', padding: '12px', borderRadius: '8px', color: isDark ? '#cbd5e1' : '#374151', textDecoration: 'none', fontWeight: 500 }}>Sign In</Link>
               <Link href="/signup" onClick={closeMobileMenu} style={{ display: 'block', textAlign: 'center', background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', color: 'white', padding: '12px', borderRadius: '10px', textDecoration: 'none', fontWeight: 600 }}>Get Started</Link>
             </div>
           </div>

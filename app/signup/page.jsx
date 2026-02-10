@@ -25,6 +25,18 @@ export default function SignupPage() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [passwordStrength, setPasswordStrength] = useState(0);
+
+  const calculatePasswordStrength = (pwd) => {
+    let strength = 0;
+    if (pwd.length >= 8) strength += 25;
+    if (pwd.length >= 12) strength += 25;
+    if (/[a-z]/.test(pwd) && /[A-Z]/.test(pwd)) strength += 25;
+    if (/[0-9]/.test(pwd)) strength += 15;
+    if (/[^a-zA-Z0-9]/.test(pwd)) strength += 10;
+    return Math.min(strength, 100);
+  };
 
   const handleAvatarChange = (e) => {
     const file = e.target.files[0];
@@ -216,7 +228,10 @@ export default function SignupPage() {
             <input
               type={showPassword ? "text" : "password"}
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                setPasswordStrength(calculatePasswordStrength(e.target.value));
+              }}
               style={{...styles.input, paddingRight: 42}}
               placeholder=" "
               required
@@ -237,6 +252,52 @@ export default function SignupPage() {
             <span style={styles.inputBorder}></span>
           </div>
 
+          {/* Password Strength Indicator */}
+          {password && (
+            <div style={{ marginBottom: 24, marginTop: -16 }}>
+              <div style={{
+                height: '4px',
+                background: '#f3f4f6',
+                borderRadius: '2px',
+                overflow: 'hidden',
+                marginBottom: '8px'
+              }}>
+                <div style={{
+                  height: '100%',
+                  width: `${passwordStrength}%`,
+                  background: passwordStrength < 33 ? '#ef4444' : 
+                             passwordStrength < 66 ? '#f59e0b' : '#10b981',
+                  transition: 'all 0.3s ease'
+                }} />
+              </div>
+              <p style={{ 
+                fontSize: '12px', 
+                color: passwordStrength < 33 ? '#ef4444' : 
+                       passwordStrength < 66 ? '#f59e0b' : '#10b981',
+                fontWeight: 500,
+                margin: 0
+              }}>
+                {passwordStrength < 33 ? 'Weak password' : 
+                 passwordStrength < 66 ? 'Medium password' : 'Strong password'}
+              </p>
+            </div>
+          )}
+
+          {/* Terms & Conditions */}
+          <div style={{ display: 'flex', gap: '8px', marginBottom: 16, alignItems: 'flex-start' }}>
+            <input
+              type="checkbox"
+              id="terms"
+              checked={acceptedTerms}
+              onChange={(e) => setAcceptedTerms(e.target.checked)}
+              required
+              style={{ marginTop: '2px', cursor: 'pointer' }}
+            />
+            <label htmlFor="terms" style={{ fontSize: '13px', color: '#6b7280', lineHeight: '1.5', cursor: 'pointer' }}>
+              I agree to the <a href="/terms" style={{ color: '#635BFF', textDecoration: 'none', fontWeight: 500 }}>Terms of Service</a> and <a href="/privacy" style={{ color: '#635BFF', textDecoration: 'none', fontWeight: 500 }}>Privacy Policy</a>
+            </label>
+          </div>
+
           {error && (
             <div style={styles.errorMessage}>
               {error}
@@ -247,9 +308,9 @@ export default function SignupPage() {
             type="submit" 
             style={{
               ...styles.submitBtn,
-              ...(loading ? styles.submitBtnLoading : {})
+              ...((loading || !acceptedTerms) ? styles.submitBtnLoading : {})
             }}
-            disabled={loading}
+            disabled={loading || !acceptedTerms}
           >
             <span style={{
               ...styles.btnText,

@@ -1,9 +1,11 @@
 "use client";
 
 import { useState, useEffect } from 'react';
+import { useTheme } from '@/contexts/ThemeContext';
 
 export default function ModernTestimonials() {
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
+  const { isDark } = useTheme();
 
   const testimonials = [
     {
@@ -54,7 +56,7 @@ export default function ModernTestimonials() {
   return (
     <section id="testimonials" style={{
       padding: '100px 0',
-      background: 'linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)',
+      background: isDark ? 'linear-gradient(180deg, #0f172a 0%, #1e293b 100%)' : 'linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)',
       position: 'relative'
     }}>
       {/* Decorative top border */}
@@ -64,7 +66,7 @@ export default function ModernTestimonials() {
         left: 0,
         right: 0,
         height: '1px',
-        background: 'linear-gradient(90deg, transparent, #e2e8f0, transparent)'
+        background: isDark ? 'linear-gradient(90deg, transparent, #334155, transparent)' : 'linear-gradient(90deg, transparent, #e2e8f0, transparent)'
       }} />
       
       <div style={{
@@ -79,11 +81,11 @@ export default function ModernTestimonials() {
             alignItems: 'center',
             padding: '8px 20px',
             borderRadius: '9999px',
-            background: 'linear-gradient(135deg, #fef3c7, #ffedd5)',
-            border: '1px solid rgba(245, 158, 11, 0.2)',
+            background: isDark ? 'linear-gradient(135deg, #422006, #451a03)' : 'linear-gradient(135deg, #fef3c7, #ffedd5)',
+            border: isDark ? '1px solid rgba(245, 158, 11, 0.3)' : '1px solid rgba(245, 158, 11, 0.2)',
             marginBottom: '24px'
           }}>
-            <span style={{ fontSize: '14px', fontWeight: 500, color: '#b45309' }}>
+            <span style={{ fontSize: '14px', fontWeight: 500, color: isDark ? '#fbbf24' : '#b45309' }}>
               Customer Stories
             </span>
           </div>
@@ -94,7 +96,7 @@ export default function ModernTestimonials() {
             lineHeight: 1.2
           }}>
             <span style={{
-              background: 'linear-gradient(135deg, #0f172a, #334155)',
+              backgroundImage: isDark ? 'linear-gradient(135deg, #f1f5f9, #cbd5e1)' : 'linear-gradient(135deg, #0f172a, #334155)',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               backgroundClip: 'text'
@@ -103,7 +105,7 @@ export default function ModernTestimonials() {
             </span>
             <br />
             <span style={{
-              background: 'linear-gradient(135deg, #f59e0b, #ea580c)',
+              backgroundImage: 'linear-gradient(135deg, #f59e0b, #ea580c)',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               backgroundClip: 'text'
@@ -113,7 +115,7 @@ export default function ModernTestimonials() {
           </h2>
           <p style={{
             fontSize: '18px',
-            color: '#475569',
+            color: isDark ? '#94a3b8' : '#475569',
             maxWidth: '640px',
             margin: '0 auto',
             lineHeight: 1.7
@@ -126,10 +128,10 @@ export default function ModernTestimonials() {
         {/* Main Testimonial */}
         <div style={{ position: 'relative', marginBottom: '64px' }}>
           <div style={{
-            background: 'white',
+            background: isDark ? '#1e293b' : 'white',
             borderRadius: '24px',
-            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.1)',
-            border: '1px solid rgba(226, 232, 240, 0.8)',
+            boxShadow: isDark ? '0 25px 50px -12px rgba(0, 0, 0, 0.5)' : '0 25px 50px -12px rgba(0, 0, 0, 0.1)',
+            border: isDark ? '1px solid #334155' : '1px solid rgba(226, 232, 240, 0.8)',
             padding: '48px',
             position: 'relative',
             overflow: 'hidden'
@@ -141,7 +143,7 @@ export default function ModernTestimonials() {
               right: 0,
               width: '256px',
               height: '256px',
-              background: 'linear-gradient(135deg, rgba(254, 243, 199, 0.5), rgba(255, 237, 213, 0.5))',
+              background: isDark ? 'linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(234, 88, 12, 0.1))' : 'linear-gradient(135deg, rgba(254, 243, 199, 0.5), rgba(255, 237, 213, 0.5))',
               borderRadius: '50%',
               filter: 'blur(48px)',
               transform: 'translate(50%, -50%)'
@@ -169,7 +171,7 @@ export default function ModernTestimonials() {
               <blockquote style={{
                 fontSize: 'clamp(18px, 3vw, 28px)',
                 fontWeight: 500,
-                color: '#1e293b',
+                color: isDark ? '#e2e8f0' : '#1e293b',
                 lineHeight: 1.5,
                 marginBottom: '32px'
               }}>
@@ -200,10 +202,10 @@ export default function ModernTestimonials() {
                     {testimonials[currentTestimonial].avatar}
                   </div>
                   <div>
-                    <div style={{ fontWeight: 700, color: '#0f172a', fontSize: '16px' }}>
+                    <div style={{ fontWeight: 700, color: isDark ? '#f1f5f9' : '#0f172a', fontSize: '16px' }}>
                       {testimonials[currentTestimonial].author}
                     </div>
-                    <div style={{ color: '#64748b', fontSize: '14px' }}>
+                    <div style={{ color: isDark ? '#94a3b8' : '#64748b', fontSize: '14px' }}>
                       {testimonials[currentTestimonial].role} at {testimonials[currentTestimonial].company}
                     </div>
                   </div>
@@ -211,12 +213,12 @@ export default function ModernTestimonials() {
 
                 {/* Metrics Badge */}
                 <div style={{
-                  background: 'linear-gradient(135deg, #ecfdf5, #d1fae5)',
-                  border: '1px solid #a7f3d0',
+                  background: isDark ? 'linear-gradient(135deg, #064e3b, #065f46)' : 'linear-gradient(135deg, #ecfdf5, #d1fae5)',
+                  border: isDark ? '1px solid #10b981' : '1px solid #a7f3d0',
                   borderRadius: '12px',
                   padding: '10px 16px'
                 }}>
-                  <div style={{ fontSize: '14px', fontWeight: 600, color: '#047857' }}>
+                  <div style={{ fontSize: '14px', fontWeight: 600, color: isDark ? '#6ee7b7' : '#047857' }}>
                     {testimonials[currentTestimonial].metrics}
                   </div>
                 </div>
@@ -248,7 +250,7 @@ export default function ModernTestimonials() {
                   width: index === currentTestimonial ? '32px' : '12px',
                   background: index === currentTestimonial 
                     ? 'linear-gradient(135deg, #f59e0b, #ea580c)' 
-                    : '#cbd5e1'
+                    : isDark ? '#475569' : '#cbd5e1'
                 }}
               />
             ))}
@@ -271,45 +273,44 @@ export default function ModernTestimonials() {
             <div key={stat.label} style={{
               textAlign: 'center',
               padding: '32px 24px',
-              background: 'white',
+              background: isDark ? '#1e293b' : 'white',
               borderRadius: '16px',
-              border: '1px solid rgba(226, 232, 240, 0.8)',
-              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)'
+              border: isDark ? '1px solid #334155' : '1px solid rgba(226, 232, 240, 0.8)',
+              boxShadow: isDark ? '0 4px 6px -1px rgba(0, 0, 0, 0.3)' : '0 4px 6px -1px rgba(0, 0, 0, 0.05)'
             }}>
               <div style={{
                 fontSize: '36px',
                 fontWeight: 700,
                 marginBottom: '8px',
-                background: stat.gradient,
+                backgroundImage: stat.gradient,
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 backgroundClip: 'text'
               }}>
                 {stat.value}
               </div>
-              <div style={{ color: '#64748b', fontWeight: 500, fontSize: '14px' }}>{stat.label}</div>
+              <div style={{ color: isDark ? '#94a3b8' : '#64748b', fontWeight: 500, fontSize: '14px' }}>{stat.label}</div>
             </div>
-          ))}
-        </div>
+          ))}</div>
 
         {/* Bottom CTA */}
         <div style={{ textAlign: 'center' }}>
           <div style={{
-            background: 'linear-gradient(135deg, #f8fafc, #f1f5f9)',
+            background: isDark ? 'linear-gradient(135deg, #1e293b, #0f172a)' : 'linear-gradient(135deg, #f8fafc, #f1f5f9)',
             borderRadius: '24px',
             padding: '48px 32px',
-            border: '1px solid rgba(226, 232, 240, 0.8)'
+            border: isDark ? '1px solid #334155' : '1px solid rgba(226, 232, 240, 0.8)'
           }}>
             <h3 style={{
               fontSize: '24px',
               fontWeight: 700,
-              color: '#0f172a',
+              color: isDark ? '#f1f5f9' : '#0f172a',
               marginBottom: '16px'
             }}>
               Join thousands of satisfied customers
             </h3>
             <p style={{
-              color: '#64748b',
+              color: isDark ? '#94a3b8' : '#64748b',
               marginBottom: '24px',
               maxWidth: '512px',
               margin: '0 auto 24px',
@@ -342,7 +343,7 @@ export default function ModernTestimonials() {
               <a 
                 href="#demo" 
                 style={{
-                  color: '#475569',
+                  color: isDark ? '#cbd5e1' : '#475569',
                   fontWeight: 500,
                   textDecoration: 'none',
                   display: 'flex',

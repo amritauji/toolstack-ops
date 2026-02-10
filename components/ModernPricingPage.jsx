@@ -3,11 +3,13 @@
 import { useState, useEffect } from 'react';
 import { REGIONS, BASE_PRICES, calculatePrice } from '@/lib/pricing';
 import { getTranslation, getLocaleFromRegion } from '@/lib/translations';
+import { useTheme } from '@/contexts/ThemeContext';
 
 export default function ModernPricingPage() {
   const [selectedRegion, setSelectedRegion] = useState('US');
   const [billingCycle, setBillingCycle] = useState('annual');
   const [t, setT] = useState(getTranslation('en-US'));
+  const { isDark } = useTheme();
 
   useEffect(() => {
     const savedRegion = localStorage.getItem('selectedRegion') || 'US';
@@ -30,29 +32,29 @@ export default function ModernPricingPage() {
   const plans = ['free', 'starter', 'professional', 'enterprise'];
 
   return (
-    <section style={styles.section}>
-      <div style={styles.decorativeBorder} />
+    <section style={{...styles.section, background: isDark ? 'linear-gradient(180deg, #0f172a 0%, #1e293b 100%)' : 'linear-gradient(180deg, #f8fafc 0%, #ffffff 100%)'}}>
+      <div style={{...styles.decorativeBorder, background: isDark ? 'linear-gradient(90deg, transparent, #334155, transparent)' : 'linear-gradient(90deg, transparent, #e2e8f0, transparent)'}} />
       
       <div style={styles.container}>
         {/* Header */}
         <div style={styles.header}>
-          <div style={styles.badge}>
-            <span style={styles.badgeText}>{t.pricing.title.split(' ')[0]} {t.pricing.title.split(' ')[1]}</span>
+          <div style={{...styles.badge, background: isDark ? 'linear-gradient(135deg, #1e1b4b, #312e81)' : 'linear-gradient(135deg, #faf5ff, #fdf2f8)', border: isDark ? '1px solid rgba(168, 85, 247, 0.3)' : '1px solid rgba(168, 85, 247, 0.2)'}}>
+            <span style={{...styles.badgeText, color: isDark ? '#c084fc' : '#7e22ce'}}>{t.pricing.title.split(' ')[0]} {t.pricing.title.split(' ')[1]}</span>
           </div>
           <h2 style={styles.mainTitle}>
-            <span style={styles.titlePrimary}>{t.pricing.title}</span>
+            <span style={{...styles.titlePrimary, backgroundImage: isDark ? 'linear-gradient(135deg, #f1f5f9, #cbd5e1)' : 'linear-gradient(135deg, #0f172a, #334155)'}}>{t.pricing.title}</span>
             <br />
-            <span style={styles.titleGradient}>{t.pricing.subtitle}</span>
+            <span style={{...styles.titleGradient, backgroundImage: 'linear-gradient(135deg, #a855f7, #ec4899)'}}>{t.pricing.subtitle}</span>
           </h2>
-          <p style={styles.description}>{t.pricing.description}</p>
+          <p style={{...styles.description, color: isDark ? '#94a3b8' : '#475569'}}>{t.pricing.description}</p>
 
           {/* Billing Toggle */}
-          <div style={styles.billingToggle}>
+          <div style={{...styles.billingToggle, background: isDark ? '#1e293b' : '#f1f5f9'}}>
             <button
               onClick={() => setBillingCycle('monthly')}
               style={{
                 ...styles.toggleButton,
-                ...(billingCycle === 'monthly' ? styles.toggleButtonActive : {})
+                ...(billingCycle === 'monthly' ? {...styles.toggleButtonActive, background: isDark ? '#334155' : 'white', color: isDark ? '#f1f5f9' : '#0f172a'} : {color: isDark ? '#94a3b8' : '#64748b'})
               }}
             >
               {t.pricing.monthly}
@@ -61,7 +63,7 @@ export default function ModernPricingPage() {
               onClick={() => setBillingCycle('annual')}
               style={{
                 ...styles.toggleButton,
-                ...(billingCycle === 'annual' ? styles.toggleButtonActive : {})
+                ...(billingCycle === 'annual' ? {...styles.toggleButtonActive, background: isDark ? '#334155' : 'white', color: isDark ? '#f1f5f9' : '#0f172a'} : {color: isDark ? '#94a3b8' : '#64748b'})
               }}
             >
               {t.pricing.annual}
@@ -82,7 +84,7 @@ export default function ModernPricingPage() {
                 key={plan}
                 style={{
                   ...styles.card,
-                  ...(isPopular ? styles.cardPopular : {})
+                  ...(isPopular ? {...styles.cardPopular, background: isDark ? '#1e293b' : 'white', border: '2px solid #a855f7'} : {background: isDark ? '#1e293b' : 'white', border: isDark ? '2px solid #334155' : '2px solid #e2e8f0'})
                 }}
               >
                 {isPopular && (
@@ -92,13 +94,13 @@ export default function ModernPricingPage() {
                 )}
 
                 <div style={{ ...styles.cardHeader, marginTop: isPopular ? '8px' : 0 }}>
-                  <h3 style={styles.planName}>{planData.name}</h3>
-                  <p style={styles.planDescription}>{planData.description}</p>
+                  <h3 style={{...styles.planName, color: isDark ? '#f1f5f9' : '#0f172a'}}>{planData.name}</h3>
+                  <p style={{...styles.planDescription, color: isDark ? '#94a3b8' : '#64748b'}}>{planData.description}</p>
                   
                   <div style={styles.priceSection}>
                     <div style={styles.priceContainer}>
-                      <span style={styles.price}>{pricing.formatted}</span>
-                      {plan !== 'free' && <span style={styles.period}>{t.pricing.perMonth}</span>}
+                      <span style={{...styles.price, color: isDark ? '#f1f5f9' : '#0f172a'}}>{pricing.formatted}</span>
+                      {plan !== 'free' && <span style={{...styles.period, color: isDark ? '#94a3b8' : '#64748b'}}>{t.pricing.perMonth}</span>}
                     </div>
                     {billingCycle === 'annual' && plan !== 'free' && (
                       <div style={styles.annualNote}>
@@ -118,7 +120,7 @@ export default function ModernPricingPage() {
                 </div>
 
                 <div style={styles.cardBody}>
-                  <div style={styles.featuresHeader}>{t.pricing.whatsIncluded}</div>
+                  <div style={{...styles.featuresHeader, color: isDark ? '#f1f5f9' : '#0f172a'}}>{t.pricing.whatsIncluded}</div>
                   <div style={styles.featuresList}>
                     {planData.features.map((feature, index) => (
                       <div key={index} style={styles.featureItem}>
@@ -132,7 +134,7 @@ export default function ModernPricingPage() {
                             <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                           </svg>
                         </div>
-                        <span style={styles.featureText}>{feature}</span>
+                        <span style={{...styles.featureText, color: isDark ? '#94a3b8' : '#475569'}}>{feature}</span>
                       </div>
                     ))}
                   </div>
@@ -143,13 +145,13 @@ export default function ModernPricingPage() {
         </div>
 
         {/* FAQ Section */}
-        <div style={styles.faqSection}>
-          <h3 style={styles.faqTitle}>{t.pricing.faqTitle}</h3>
+        <div style={{...styles.faqSection, background: isDark ? 'linear-gradient(135deg, #1e293b, #0f172a)' : 'linear-gradient(135deg, #f8fafc, #f1f5f9)', border: isDark ? '1px solid #334155' : '1px solid rgba(226, 232, 240, 0.8)'}}>
+          <h3 style={{...styles.faqTitle, color: isDark ? '#f1f5f9' : '#0f172a'}}>{t.pricing.faqTitle}</h3>
           <div style={styles.faqGrid}>
             {t.pricing.faqs.map((faq, i) => (
-              <div key={i} style={styles.faqCard}>
-                <h4 style={styles.faqQuestion}>{faq.q}</h4>
-                <p style={styles.faqAnswer}>{faq.a}</p>
+              <div key={i} style={{...styles.faqCard, background: isDark ? '#0f172a' : 'white', border: isDark ? '1px solid #334155' : '1px solid rgba(226, 232, 240, 0.5)'}}>
+                <h4 style={{...styles.faqQuestion, color: isDark ? '#f1f5f9' : '#0f172a'}}>{faq.q}</h4>
+                <p style={{...styles.faqAnswer, color: isDark ? '#94a3b8' : '#64748b'}}>{faq.a}</p>
               </div>
             ))}
           </div>
@@ -157,11 +159,11 @@ export default function ModernPricingPage() {
 
         {/* Bottom CTA */}
         <div style={styles.bottomCta}>
-          <h3 style={styles.ctaTitle}>{t.pricing.readyTitle}</h3>
-          <p style={styles.ctaDescription}>{t.pricing.readyDescription}</p>
+          <h3 style={{...styles.ctaTitle, color: isDark ? '#f1f5f9' : '#0f172a'}}>{t.pricing.readyTitle}</h3>
+          <p style={{...styles.ctaDescription, color: isDark ? '#94a3b8' : '#64748b'}}>{t.pricing.readyDescription}</p>
           <div style={styles.ctaButtons}>
             <a href="/signup" style={styles.ctaButtonPrimary}>{t.pricing.startTrial}</a>
-            <a href="/contact" style={styles.ctaButtonSecondary}>
+            <a href="/contact" style={{...styles.ctaButtonSecondary, color: isDark ? '#cbd5e1' : '#475569'}}>
               <span>{t.pricing.contactSales}</span>
               <svg style={styles.arrow} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -219,13 +221,13 @@ const styles = {
     lineHeight: 1.2
   },
   titlePrimary: {
-    background: 'linear-gradient(135deg, #0f172a, #334155)',
+    backgroundImage: 'linear-gradient(135deg, #0f172a, #334155)',
     WebkitBackgroundClip: 'text',
     WebkitTextFillColor: 'transparent',
     backgroundClip: 'text'
   },
   titleGradient: {
-    background: 'linear-gradient(135deg, #a855f7, #ec4899)',
+    backgroundImage: 'linear-gradient(135deg, #a855f7, #ec4899)',
     WebkitBackgroundClip: 'text',
     WebkitTextFillColor: 'transparent',
     backgroundClip: 'text'

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { TASK_COLUMNS } from "@/lib/constants";
 import CreateTaskForm from "./CreateTaskForm";
 import KanbanColumn from "./KanbanColumn";
@@ -100,38 +100,72 @@ export default function DashboardClient({ initialTasks, users, activities, curre
     }
   }, []);
 
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyPress = (e) => {
+      const activeElement = document.activeElement;
+      const isInputFocused = activeElement?.tagName === 'INPUT' || activeElement?.tagName === 'TEXTAREA';
+      
+      // / = Focus search
+      if (e.key === '/' && !isInputFocused) {
+        e.preventDefault();
+        document.querySelector('[data-search-input]')?.focus();
+      }
+      
+      // Escape = Close modal/menu
+      if (e.key === 'Escape') {
+        if (isModalOpen) setIsModalOpen(false);
+        if (showAdvancedFeatures) setShowAdvancedFeatures(false);
+      }
+      
+      // 1, 2, 3 = Switch views (only when not typing)
+      if (!isInputFocused) {
+        if (e.key === '1') setViewMode('kanban');
+        if (e.key === '2') setViewMode('table');
+        if (e.key === '3') setViewMode('calendar');
+      }
+    };
+    
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [isModalOpen, showAdvancedFeatures]);
+
   return (
     <div style={{
       background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
       minHeight: '100vh'
     }}>
-      {/* Real-time indicator */}
-      <div style={{
-        position: 'fixed',
-        top: '80px',
-        right: '24px',
-        background: isConnected ? '#10b981' : '#ef4444',
-        color: 'white',
-        padding: '6px 12px',
-        borderRadius: '20px',
-        fontSize: '12px',
-        fontWeight: '500',
-        zIndex: 40,
-        boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '6px'
-      }}>
+      {/* Real-time indicator - moved to bottom-right */}
+      <div 
+        role="status"
+        aria-live="polite"
+        aria-label={isConnected ? 'Real-time connection active' : 'Reconnecting to server'}
+        style={{
+          position: 'fixed',
+          bottom: '24px',
+          right: '24px',
+          background: isConnected ? '#10b981' : '#ef4444',
+          color: 'white',
+          padding: '8px 12px',
+          borderRadius: '20px',
+          fontSize: '11px',
+          fontWeight: '600',
+          zIndex: 50,
+          boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '6px'
+        }}>
         <div style={{
           width: '6px',
           height: '6px',
           borderRadius: '50%',
           background: 'currentColor'
         }} />
-        {isConnected ? 'Live' : 'Offline'}
+        {isConnected ? 'Live' : 'Reconnecting...'}
       </div>
 
-      {/* Stats Cards */}
+      {/* Stats Cards - now clickable to filter */}
       <div style={{
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
@@ -144,6 +178,7 @@ export default function DashboardClient({ initialTasks, users, activities, curre
             icon="📋" 
             color="#7c6df2"
             bgColor="#f0f4ff"
+            onClick={() => setFilters({ search: '', assignee: '', priority: '', status: '' })}
           />
           <StatCard 
             title="In Progress" 
@@ -151,6 +186,7 @@ export default function DashboardClient({ initialTasks, users, activities, curre
             icon="⚡" 
             color="#f59e0b"
             bgColor="#fffbeb"
+            onClick={() => setFilters({ ...filters, status: 'in_progress' })}
           />
           <StatCard 
             title="Completed" 
@@ -158,12 +194,13 @@ export default function DashboardClient({ initialTasks, users, activities, curre
             icon="✅" 
             color="#10b981"
             bgColor="#ecfdf5"
+            onClick={() => setFilters({ ...filters, status: 'done' })}
           />
           <div style={{
             background: 'white',
             borderRadius: '16px',
             padding: '24px',
-            boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.05), 0 4px 12px rgba(0,0,0,0.05)',
             border: '1px solid #e2e8f0',
             transition: 'all 0.2s ease'
           }}>
@@ -203,110 +240,304 @@ export default function DashboardClient({ initialTasks, users, activities, curre
           </div>
         </div>
 
-      <div style={{ marginBottom: '32px' }}>
-        <CreateTaskForm users={users} projectId={activeProject?.id} />
-      </div>
+      {/* Quick Actions Bar */}
+      <div style={{
+        display: 'flex',
+        gap: '12px',
+        marginBottom: '24px',
+        alignItems: 'center',
+        flexWrap: 'wrap'
+      }}>
+        {/* Create Task Button */}
+        <div style={{ flex: '0 0 auto' }}>
+          <CreateTaskForm users={users} projectId={activeProject?.id} />
+        </div>
 
-      {/* Projects Manager */}
-      <ProjectsManager 
-        currentUser={currentUser} 
-        onProjectChange={setActiveProject}
-      />
-
-      {/* Filters */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '24px' }}>
-        <button
-          onClick={() => setUseAdvancedFilters(!useAdvancedFilters)}
+        {/* Search */}
+        <input 
+          data-search-input
+          type="text"
+          placeholder="Search tasks..."
+          aria-label="Search tasks by title"
+          value={filters.search}
+          onChange={(e) => setFilters({ ...filters, search: e.target.value })}
           style={{
-            padding: '8px 16px',
-            borderRadius: '8px',
+            flex: '1 1 300px',
+            padding: '12px 16px',
+            borderRadius: '12px',
             border: '1px solid #e2e8f0',
-            background: useAdvancedFilters ? '#7c6df2' : 'white',
-            color: useAdvancedFilters ? 'white' : '#64748b',
             fontSize: '14px',
-            fontWeight: '500',
-            cursor: 'pointer',
-            transition: 'all 0.2s ease'
+            outline: 'none',
+            transition: 'border-color 0.2s'
           }}
+          onFocus={(e) => {
+            e.target.style.borderColor = '#7c6df2';
+            e.target.style.outline = '2px solid #7c6df2';
+            e.target.style.outlineOffset = '2px';
+          }}
+          onBlur={(e) => {
+            e.target.style.borderColor = '#e2e8f0';
+            e.target.style.outline = 'none';
+          }}
+        />
+
+        {/* View Switcher */}
+        <div style={{
+          display: 'flex',
+          gap: '4px',
+          background: '#f9fafb',
+          padding: '4px',
+          borderRadius: '10px'
+        }}>
+          <button 
+            onClick={() => setViewMode('kanban')}
+            aria-label="Switch to board view (Press 1)"
+            aria-pressed={viewMode === 'kanban'}
+            title="Switch to board view (Press 1)"
+            style={{
+              padding: '8px 16px',
+              borderRadius: '8px',
+              border: 'none',
+              background: viewMode === 'kanban' ? 'white' : 'transparent',
+              color: viewMode === 'kanban' ? '#111827' : '#6b7280',
+              fontSize: '14px',
+              fontWeight: 600,
+              cursor: 'pointer',
+              boxShadow: viewMode === 'kanban' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+              transition: 'all 0.2s',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              outline: 'none'
+            }}
+            onFocus={(e) => {
+              e.target.style.outline = '2px solid #7c6df2';
+              e.target.style.outlineOffset = '2px';
+            }}
+            onBlur={(e) => e.target.style.outline = 'none'}
+          >
+            📋 Board
+          </button>
+          <button 
+            onClick={() => setViewMode('table')}
+            aria-label="Switch to table view (Press 2)"
+            aria-pressed={viewMode === 'table'}
+            title="Switch to table view (Press 2)"
+            style={{
+              padding: '8px 16px',
+              borderRadius: '8px',
+              border: 'none',
+              background: viewMode === 'table' ? 'white' : 'transparent',
+              color: viewMode === 'table' ? '#111827' : '#6b7280',
+              fontSize: '14px',
+              fontWeight: 600,
+              cursor: 'pointer',
+              boxShadow: viewMode === 'table' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+              transition: 'all 0.2s',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              outline: 'none'
+            }}
+            onFocus={(e) => {
+              e.target.style.outline = '2px solid #7c6df2';
+              e.target.style.outlineOffset = '2px';
+            }}
+            onBlur={(e) => e.target.style.outline = 'none'}
+          >
+            📊 Table
+          </button>
+          <button 
+            onClick={() => setViewMode('calendar')}
+            aria-label="Switch to calendar view (Press 3)"
+            aria-pressed={viewMode === 'calendar'}
+            title="Switch to calendar view (Press 3)"
+            style={{
+              padding: '8px 16px',
+              borderRadius: '8px',
+              border: 'none',
+              background: viewMode === 'calendar' ? 'white' : 'transparent',
+              color: viewMode === 'calendar' ? '#111827' : '#6b7280',
+              fontSize: '14px',
+              fontWeight: 600,
+              cursor: 'pointer',
+              boxShadow: viewMode === 'calendar' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+              transition: 'all 0.2s',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              outline: 'none'
+            }}
+            onFocus={(e) => {
+              e.target.style.outline = '2px solid #7c6df2';
+              e.target.style.outlineOffset = '2px';
+            }}
+            onBlur={(e) => e.target.style.outline = 'none'}
+          >
+            📅 Calendar
+          </button>
+        </div>
+
+        {/* More Menu */}
+        <button 
+          onClick={() => setShowAdvancedFeatures(!showAdvancedFeatures)}
+          aria-label={showAdvancedFeatures ? 'Close advanced features' : 'Show more options'}
+          aria-expanded={showAdvancedFeatures}
+          style={{
+            padding: '12px 16px',
+            borderRadius: '10px',
+            border: '1px solid #e2e8f0',
+            background: showAdvancedFeatures ? '#7c6df2' : 'white',
+            color: showAdvancedFeatures ? 'white' : '#475569',
+            cursor: 'pointer',
+            fontSize: '14px',
+            fontWeight: 600,
+            transition: 'all 0.2s',
+            outline: 'none'
+          }}
+          onFocus={(e) => {
+            e.target.style.outline = '2px solid #7c6df2';
+            e.target.style.outlineOffset = '2px';
+          }}
+          onBlur={(e) => e.target.style.outline = 'none'}
         >
-          {useAdvancedFilters ? '🔍 Advanced' : '⚡ Basic'} Filters
+          {showAdvancedFeatures ? '✕ Close' : '••• More'}
         </button>
       </div>
 
-      {useAdvancedFilters ? (
-        <AdvancedFilters 
-          users={users} 
-          onFilter={setFilteredTasks}
-          tasks={initialTasks}
-        />
-      ) : (
-        <TaskFilters users={users} onFilter={setFilters} />
+      {/* Advanced Features (collapsible) */}
+      {showAdvancedFeatures && (
+        <div style={{
+          background: 'white',
+          borderRadius: '12px',
+          padding: '20px',
+          marginBottom: '24px',
+          border: '1px solid #e2e8f0',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
+        }}>
+          <h3 style={{ fontSize: '16px', fontWeight: 600, marginBottom: '16px', color: '#0f172a' }}>Advanced Features</h3>
+          
+          <ProjectsManager 
+            currentUser={currentUser} 
+            onProjectChange={setActiveProject}
+          />
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginTop: '16px', marginBottom: '16px' }}>
+            <button
+              onClick={() => setUseAdvancedFilters(!useAdvancedFilters)}
+              style={{
+                padding: '8px 16px',
+                borderRadius: '8px',
+                border: '1px solid #e2e8f0',
+                background: useAdvancedFilters ? '#7c6df2' : 'white',
+                color: useAdvancedFilters ? 'white' : '#64748b',
+                fontSize: '14px',
+                fontWeight: '500',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              {useAdvancedFilters ? '🔍 Advanced' : '⚡ Basic'} Filters
+            </button>
+          </div>
+
+          {useAdvancedFilters ? (
+            <AdvancedFilters 
+              users={users} 
+              onFilter={setFilteredTasks}
+              tasks={initialTasks}
+            />
+          ) : (
+            <TaskFilters users={users} onFilter={setFilters} />
+          )}
+
+          <BulkOperations 
+            tasks={currentTasks} 
+            users={users} 
+            selectedTasks={selectedTasks} 
+            onSelectionChange={setSelectedTasks} 
+          />
+
+          <div style={{ marginTop: '16px' }}>
+            <ExportImport tasks={currentTasks} onImport={handleImport} />
+          </div>
+        </div>
       )}
 
-      {/* Bulk Operations */}
-      <BulkOperations 
-        tasks={currentTasks} 
-        users={users} 
-        selectedTasks={selectedTasks} 
-        onSelectionChange={setSelectedTasks} 
-      />
+      {/* Simple Filters (always visible) */}
+      {!showAdvancedFeatures && (
+        <div style={{ marginBottom: '24px' }}>
+          <TaskFilters users={users} onFilter={setFilters} />
+        </div>
+      )}
 
       {/* Main Content */}
       <div>
-        {/* Content Area */}
-        <div>
-          {viewMode === 'kanban' && (
+        {viewMode === 'kanban' && (
+          <div style={{
+            background: 'white',
+            borderRadius: '16px',
+            padding: '24px',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.05), 0 4px 12px rgba(0,0,0,0.05)',
+            border: '1px solid #e2e8f0'
+          }}>
             <div style={{
-              background: 'white',
-              borderRadius: '16px',
-              padding: '24px',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-              border: '1px solid #e2e8f0'
+              display: 'grid',
+              gridTemplateColumns: 'repeat(3, 1fr)',
+              gap: '24px',
+              minHeight: '600px'
             }}>
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(3, 1fr)',
-                gap: '24px',
-                minHeight: '600px'
-              }}>
-                {TASK_COLUMNS.map(col => (
-                  <KanbanColumn
-                    key={col.key}
-                    title={col.label}
-                    tasks={grouped[col.key]}
-                    users={users}
-                    status={col.key}
-                    selectedTasks={selectedTasks}
-                    onSelectionChange={setSelectedTasks}
-                    onTaskClick={handleTaskClick}
-                  />
-                ))}
-              </div>
+              {TASK_COLUMNS.map(col => (
+                <KanbanColumn
+                  key={col.key}
+                  title={col.label}
+                  tasks={grouped[col.key]}
+                  users={users}
+                  status={col.key}
+                  selectedTasks={selectedTasks}
+                  onSelectionChange={setSelectedTasks}
+                  onTaskClick={handleTaskClick}
+                  emptyState={
+                    <div style={{
+                      textAlign: 'center',
+                      padding: '40px 20px',
+                      color: '#94a3b8'
+                    }}>
+                      <div style={{ fontSize: '48px', marginBottom: '12px' }}>
+                        {col.key === 'todo' ? '📝' : col.key === 'in_progress' ? '⚡' : '✅'}
+                      </div>
+                      <p style={{ fontSize: '14px', fontWeight: 500, marginBottom: '4px' }}>
+                        No {col.label.toLowerCase()} tasks
+                      </p>
+                      {col.key === 'todo' && (
+                        <p style={{ fontSize: '12px', color: '#cbd5e1' }}>
+                          Create your first task to get started
+                        </p>
+                      )}
+                    </div>
+                  }
+                />
+              ))}
             </div>
-          )}
-          {viewMode === 'table' && (
-            <TableView
-              tasks={currentTasks}
-              users={users}
-              selectedTasks={selectedTasks}
-              onSelectionChange={setSelectedTasks}
-              onTaskClick={handleTaskClick}
-            />
-          )}
-          
-          {viewMode === 'calendar' && (
-            <CalendarView
-              tasks={currentTasks}
-              users={users}
-              onTaskClick={handleTaskClick}
-            />
-          )}
-        </div>
-      </div>
-
-      {/* Export/Import */}
-      <div style={{ marginTop: '32px' }}>
-        <ExportImport tasks={currentTasks} onImport={handleImport} />
+          </div>
+        )}
+        {viewMode === 'table' && (
+          <TableView
+            tasks={currentTasks}
+            users={users}
+            selectedTasks={selectedTasks}
+            onSelectionChange={setSelectedTasks}
+            onTaskClick={handleTaskClick}
+          />
+        )}
+        
+        {viewMode === 'calendar' && (
+          <CalendarView
+            tasks={currentTasks}
+            users={users}
+            onTaskClick={handleTaskClick}
+          />
+        )}
       </div>
 
       {/* Task Modal */}
@@ -317,35 +548,118 @@ export default function DashboardClient({ initialTasks, users, activities, curre
         onClose={() => setIsModalOpen(false)}
         currentUser={currentUser}
       />
+
+      {/* Keyboard Shortcuts Hint */}
+      <div style={{
+        position: 'fixed',
+        bottom: '24px',
+        left: '24px',
+        background: 'white',
+        padding: '12px 16px',
+        borderRadius: '8px',
+        border: '1px solid #e2e8f0',
+        fontSize: '12px',
+        color: '#475569',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+        zIndex: 40,
+        display: 'flex',
+        gap: '12px',
+        alignItems: 'center'
+      }}>
+        <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+          <kbd style={{
+            background: '#f1f5f9',
+            padding: '2px 6px',
+            borderRadius: '4px',
+            fontFamily: 'monospace',
+            fontSize: '11px',
+            border: '1px solid #cbd5e1'
+          }}>/</kbd>
+          <span>Search</span>
+        </span>
+        <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+          <kbd style={{
+            background: '#f1f5f9',
+            padding: '2px 6px',
+            borderRadius: '4px',
+            fontFamily: 'monospace',
+            fontSize: '11px',
+            border: '1px solid #cbd5e1'
+          }}>1-3</kbd>
+          <span>Views</span>
+        </span>
+        <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+          <kbd style={{
+            background: '#f1f5f9',
+            padding: '2px 6px',
+            borderRadius: '4px',
+            fontFamily: 'monospace',
+            fontSize: '11px',
+            border: '1px solid #cbd5e1'
+          }}>Esc</kbd>
+          <span>Close</span>
+        </span>
+      </div>
     </div>
   );
 }
 
-function StatCard({ title, value, icon, color, bgColor }) {
+function StatCard({ title, value, icon, color, bgColor, onClick }) {
+  const Component = onClick ? 'button' : 'div';
+  
   return (
-    <div style={{
-      background: 'white',
-      borderRadius: '16px',
-      padding: '24px',
-      boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-      border: '1px solid #e2e8f0',
-      transition: 'all 0.2s ease',
-      cursor: 'pointer'
-    }}
-    onMouseEnter={(e) => {
-      e.target.style.transform = 'translateY(-2px)';
-      e.target.style.boxShadow = '0 8px 25px rgba(0,0,0,0.15)';
-    }}
-    onMouseLeave={(e) => {
-      e.target.style.transform = 'translateY(0)';
-      e.target.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
-    }}
+    <Component
+      role={onClick ? 'button' : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      aria-label={onClick ? `Filter by ${title.toLowerCase()}. Currently showing ${value} tasks` : undefined}
+      onClick={onClick}
+      onKeyPress={(e) => {
+        if (onClick && (e.key === 'Enter' || e.key === ' ')) {
+          e.preventDefault();
+          onClick();
+        }
+      }}
+      onMouseEnter={(e) => {
+        if (onClick) {
+          e.currentTarget.style.transform = 'translateY(-2px)';
+          e.currentTarget.style.boxShadow = '0 8px 25px rgba(0,0,0,0.15)';
+        }
+      }}
+      onMouseLeave={(e) => {
+        if (onClick) {
+          e.currentTarget.style.transform = 'translateY(0)';
+          e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.05), 0 4px 12px rgba(0,0,0,0.05)';
+        }
+      }}
+      onFocus={(e) => {
+        if (onClick) {
+          e.currentTarget.style.outline = '2px solid #7c6df2';
+          e.currentTarget.style.outlineOffset = '2px';
+        }
+      }}
+      onBlur={(e) => {
+        if (onClick) {
+          e.currentTarget.style.outline = 'none';
+        }
+      }}
+      style={{
+        background: 'white',
+        borderRadius: '16px',
+        padding: '24px',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.05), 0 4px 12px rgba(0,0,0,0.05)',
+        border: '1px solid #e2e8f0',
+        transition: 'all 0.2s ease',
+        cursor: onClick ? 'pointer' : 'default',
+        textAlign: 'left',
+        width: '100%',
+        outline: 'none'
+      }}
     >
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div>
           <p style={{
             fontSize: '14px',
-            color: '#64748b',
+            color: '#475569',
             marginBottom: '4px',
             fontWeight: '500'
           }}>
@@ -372,6 +686,6 @@ function StatCard({ title, value, icon, color, bgColor }) {
           {icon}
         </div>
       </div>
-    </div>
+    </Component>
   );
 }

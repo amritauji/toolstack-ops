@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 import { Avatar, Button, Badge } from "@/components/ui/ModernComponents";
@@ -10,7 +10,27 @@ import { ROUTES } from "@/lib/routes";
 export default function Navbar({ profile }) {
   const router = useRouter();
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [regionMenuOpen, setRegionMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [selectedRegion, setSelectedRegion] = useState({ code: 'US', name: 'United States', dialCode: '+1' });
+  const profileMenuRef = useRef(null);
+  const notificationsRef = useRef(null);
+  const regionMenuRef = useRef(null);
+
+  const countries = [
+    { code: 'US', name: 'United States', dialCode: '+1' },
+    { code: 'GB', name: 'United Kingdom', dialCode: '+44' },
+    { code: 'CA', name: 'Canada', dialCode: '+1' },
+    { code: 'AU', name: 'Australia', dialCode: '+61' },
+    { code: 'IN', name: 'India', dialCode: '+91' },
+    { code: 'DE', name: 'Germany', dialCode: '+49' },
+    { code: 'FR', name: 'France', dialCode: '+33' },
+    { code: 'JP', name: 'Japan', dialCode: '+81' },
+    { code: 'CN', name: 'China', dialCode: '+86' },
+    { code: 'BR', name: 'Brazil', dialCode: '+55' },
+  ];
 
   // Handle scroll effect
   useEffect(() => {
@@ -21,6 +41,23 @@ export default function Navbar({ profile }) {
       window.addEventListener('scroll', handleScroll);
       return () => window.removeEventListener('scroll', handleScroll);
     }
+  }, []);
+
+  // Click outside handler
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (profileMenuRef.current && !profileMenuRef.current.contains(e.target)) {
+        setProfileMenuOpen(false);
+      }
+      if (notificationsRef.current && !notificationsRef.current.contains(e.target)) {
+        setNotificationsOpen(false);
+      }
+      if (regionMenuRef.current && !regionMenuRef.current.contains(e.target)) {
+        setRegionMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   const handleLogout = async () => {
@@ -169,9 +206,212 @@ export default function Navbar({ profile }) {
 
           {/* Right Section */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            {/* Region Selector */}
+            <div style={{ position: 'relative' }} ref={regionMenuRef}>
+              <button
+                onClick={() => setRegionMenuOpen(!regionMenuOpen)}
+                aria-label="Select Region"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '6px 12px',
+                  borderRadius: '8px',
+                  border: '1px solid rgba(0, 0, 0, 0.08)',
+                  background: regionMenuOpen ? 'rgba(124, 109, 242, 0.1)' : 'transparent',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                  color: '#374151',
+                  fontSize: '14px',
+                  fontWeight: '500'
+                }}
+              >
+                <img 
+                  src={`https://flagcdn.com/24x18/${selectedRegion.code.toLowerCase()}.png`}
+                  alt={selectedRegion.name}
+                  style={{ width: '24px', height: '18px', borderRadius: '2px' }}
+                  onError={(e) => {
+                    e.target.style.display = 'none';
+                    e.target.nextSibling.style.display = 'inline';
+                  }}
+                />
+                <span style={{ display: 'none', fontSize: '16px' }}>{selectedRegion.code}</span>
+                <span className="hidden sm:inline">{selectedRegion.dialCode}</span>
+                <svg
+                  style={{
+                    width: '12px',
+                    height: '12px',
+                    transform: regionMenuOpen ? 'rotate(180deg)' : 'none',
+                    transition: 'transform 0.2s ease'
+                  }}
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+
+              {/* Region Dropdown */}
+              {regionMenuOpen && (
+                <div style={{
+                  position: 'absolute',
+                  top: '100%',
+                  right: 0,
+                  marginTop: '8px',
+                  width: '280px',
+                  maxHeight: '400px',
+                  overflowY: 'auto',
+                  background: 'rgba(255, 255, 255, 0.95)',
+                  backdropFilter: 'blur(24px)',
+                  borderRadius: '16px',
+                  border: '1px solid rgba(0, 0, 0, 0.08)',
+                  boxShadow: '0 20px 40px rgba(0, 0, 0, 0.1)',
+                  padding: '8px',
+                  zIndex: 50
+                }}>
+                  <div style={{ padding: '12px 8px', borderBottom: '1px solid #e5e7eb', marginBottom: '4px' }}>
+                    <h3 style={{ fontSize: 14, fontWeight: 600, margin: 0, color: '#374151' }}>Select Region</h3>
+                  </div>
+                  {countries.map((country) => (
+                    <button
+                      key={country.code}
+                      onClick={() => {
+                        setSelectedRegion(country);
+                        setRegionMenuOpen(false);
+                      }}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '12px',
+                        width: '100%',
+                        padding: '10px 12px',
+                        borderRadius: '8px',
+                        border: 'none',
+                        background: selectedRegion.code === country.code ? 'rgba(124, 109, 242, 0.1)' : 'transparent',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s',
+                        textAlign: 'left',
+                        fontSize: '14px',
+                        color: '#374151'
+                      }}
+                      onMouseEnter={(e) => {
+                        if (selectedRegion.code !== country.code) {
+                          e.currentTarget.style.background = 'rgba(0, 0, 0, 0.04)';
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (selectedRegion.code !== country.code) {
+                          e.currentTarget.style.background = 'transparent';
+                        }
+                      }}
+                    >
+                      <img 
+                        src={`https://flagcdn.com/24x18/${country.code.toLowerCase()}.png`}
+                        alt={country.name}
+                        style={{ width: '24px', height: '18px', borderRadius: '2px', flexShrink: 0 }}
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                          e.target.nextSibling.style.display = 'flex';
+                        }}
+                      />
+                      <div style={{ width: '24px', height: '18px', display: 'none', alignItems: 'center', justifyContent: 'center', background: '#e5e7eb', borderRadius: '2px', fontSize: '10px', fontWeight: 600, color: '#6b7280' }}>
+                        {country.code}
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {country.name}
+                        </div>
+                      </div>
+                      <div style={{ fontSize: '13px', color: '#6b7280', fontWeight: 500 }}>
+                        {country.dialCode}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Notifications */}
+            <div style={{ position: 'relative' }} ref={notificationsRef}>
+              <button
+                onClick={() => setNotificationsOpen(!notificationsOpen)}
+                aria-label="Notifications"
+                style={{
+                  position: 'relative',
+                  padding: '8px',
+                  borderRadius: '8px',
+                  border: 'none',
+                  background: notificationsOpen ? 'rgba(124, 109, 242, 0.1)' : 'transparent',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                  color: '#6b7280'
+                }}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2zm-2 1H8v-6c0-2.48 1.51-4.5 4-4.5s4 2.02 4 4.5v6z"/>
+                </svg>
+                <div style={{
+                  position: 'absolute',
+                  top: '6px',
+                  right: '6px',
+                  width: '8px',
+                  height: '8px',
+                  background: '#ef4444',
+                  borderRadius: '50%',
+                  border: '2px solid white'
+                }} />
+              </button>
+
+              {/* Notifications Dropdown */}
+              {notificationsOpen && (
+                <div style={{
+                  position: 'absolute',
+                  top: '100%',
+                  right: 0,
+                  marginTop: '8px',
+                  width: '320px',
+                  background: 'rgba(255, 255, 255, 0.95)',
+                  backdropFilter: 'blur(24px)',
+                  borderRadius: '16px',
+                  border: '1px solid rgba(0, 0, 0, 0.08)',
+                  boxShadow: '0 20px 40px rgba(0, 0, 0, 0.1)',
+                  padding: '12px',
+                  zIndex: 50
+                }}>
+                  <div style={{ padding: '12px 8px', borderBottom: '1px solid #e5e7eb', marginBottom: '8px' }}>
+                    <h3 style={{ fontSize: 16, fontWeight: 600, margin: 0 }}>Notifications</h3>
+                  </div>
+                  <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
+                    <div style={{ padding: '12px', textAlign: 'center', color: '#6b7280', fontSize: 14 }}>
+                      No new notifications
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Mobile Menu Button */}
+            <button
+              className="lg:hidden"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label="Menu"
+              style={{
+                padding: '8px',
+                borderRadius: '8px',
+                border: 'none',
+                background: 'transparent',
+                cursor: 'pointer',
+                color: '#6b7280'
+              }}
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
 
             {/* Profile Menu */}
-            <div style={{ position: 'relative' }}>
+            <div style={{ position: 'relative' }} ref={profileMenuRef}>
               <button
                 onClick={() => setProfileMenuOpen(!profileMenuOpen)}
                 style={{
@@ -414,7 +654,48 @@ export default function Navbar({ profile }) {
           </div>
         </div>
 
-
+        {/* Mobile Menu */}
+        {mobileMenuOpen && (
+          <div className="lg:hidden" style={{
+            position: 'absolute',
+            top: '100%',
+            left: 0,
+            right: 0,
+            background: 'rgba(255, 255, 255, 0.95)',
+            backdropFilter: 'blur(24px)',
+            borderTop: '1px solid rgba(0, 0, 0, 0.08)',
+            boxShadow: '0 8px 16px rgba(0, 0, 0, 0.1)',
+            padding: '16px',
+            zIndex: 40
+          }}>
+            {visibleMenuItems.map((item) => (
+              <Link
+                key={item.id}
+                href={item.href}
+                onClick={() => setMobileMenuOpen(false)}
+                style={{
+                  display: 'block',
+                  padding: '12px 16px',
+                  borderRadius: '8px',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  color: '#374151',
+                  textDecoration: 'none',
+                  marginBottom: '4px',
+                  transition: 'all 0.2s'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'rgba(124, 109, 242, 0.1)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'transparent';
+                }}
+              >
+                {item.label}
+              </Link>
+            ))}
+          </div>
+        )}
       </nav>
 
       <style jsx>{`

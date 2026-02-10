@@ -9,6 +9,8 @@ export default function ProfileClient({ profile, usage }) {
   const [editing, setEditing] = useState(false);
   const [avatarPreview, setAvatarPreview] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState('profile');
+  const [passwordData, setPasswordData] = useState({ current: '', new: '', confirm: '' });
 
   const handleAvatarChange = (e) => {
     const file = e.target.files[0];
@@ -42,48 +44,131 @@ export default function ProfileClient({ profile, usage }) {
   };
 
   return (
-    <div style={{ maxWidth: 800, margin: "0 auto" }}>
-      <h1 style={{ fontSize: 24, fontWeight: 600, marginBottom: 24 }}>My Profile</h1>
-
-      <div style={{ background: "white", borderRadius: 8, padding: 24, border: "1px solid #e5e7eb" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 20 }}>
-          <Avatar src={avatarPreview || profile?.avatar_url} size={80} />
-          <div>
-            <h2 style={{ fontSize: 20, fontWeight: 600, marginBottom: 4 }}>{profile?.full_name}</h2>
-            <p style={{ color: "#6b7280", marginBottom: 4 }}>{profile?.email}</p>
-            <span style={{ 
-              background: profile?.role === "developer" ? "#f3e8ff" : profile?.role === "admin" ? "#dbeafe" : "#f3f4f6",
-              color: profile?.role === "developer" ? "#6b21a8" : profile?.role === "admin" ? "#1e40af" : "#374151",
-              padding: "3px 8px", 
-              borderRadius: 4, 
-              fontSize: 12,
-              fontWeight: 600,
-              textTransform: "uppercase"
-            }}>
-              {profile?.role}
-            </span>
+    <div style={{ maxWidth: 900, margin: "0 auto", padding: "32px 20px" }}>
+      {/* Hero Header */}
+      <div style={{
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        borderRadius: 16,
+        padding: 40,
+        marginBottom: 32,
+        color: 'white',
+        position: 'relative',
+        overflow: 'hidden'
+      }}>
+        <div style={{ position: 'relative', zIndex: 1 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 24, flexWrap: 'wrap' }}>
+            <Avatar src={avatarPreview || profile?.avatar_url} size={120} />
+            <div>
+              <h1 style={{ fontSize: 32, fontWeight: 700, marginBottom: 8, margin: 0 }}>
+                {profile?.full_name}
+              </h1>
+              <p style={{ fontSize: 16, opacity: 0.9, marginBottom: 12, margin: 0 }}>
+                {profile?.email}
+              </p>
+              <span style={{
+                background: 'rgba(255,255,255,0.2)',
+                backdropFilter: 'blur(10px)',
+                padding: '6px 12px',
+                borderRadius: 8,
+                fontSize: 12,
+                fontWeight: 600,
+                textTransform: 'uppercase',
+                display: 'inline-block'
+              }}>
+                {profile?.role}
+              </span>
+            </div>
           </div>
         </div>
+      </div>
 
-        {!editing && (
-          <button 
-            onClick={() => setEditing(true)}
-            style={{
-              background: "#3b82f6",
-              color: "white",
-              border: "none",
-              borderRadius: 6,
-              padding: "8px 16px",
-              cursor: "pointer",
-              fontWeight: 500
-            }}
-          >
-            Edit Profile
-          </button>
-        )}
+      {/* Tabs */}
+      <div style={{
+        display: 'flex',
+        gap: 8,
+        marginBottom: 32,
+        borderBottom: '2px solid #e5e7eb',
+        overflowX: 'auto'
+      }}>
+        <button
+          onClick={() => setActiveTab('profile')}
+          style={{
+            padding: '12px 24px',
+            border: 'none',
+            background: 'transparent',
+            borderBottom: activeTab === 'profile' ? '2px solid #667eea' : '2px solid transparent',
+            color: activeTab === 'profile' ? '#667eea' : '#6b7280',
+            fontWeight: 600,
+            cursor: 'pointer',
+            fontSize: 14,
+            marginBottom: -2,
+            transition: 'all 0.2s'
+          }}
+        >
+          Profile
+        </button>
+        <button
+          onClick={() => setActiveTab('usage')}
+          style={{
+            padding: '12px 24px',
+            border: 'none',
+            background: 'transparent',
+            borderBottom: activeTab === 'usage' ? '2px solid #667eea' : '2px solid transparent',
+            color: activeTab === 'usage' ? '#667eea' : '#6b7280',
+            fontWeight: 600,
+            cursor: 'pointer',
+            fontSize: 14,
+            marginBottom: -2,
+            transition: 'all 0.2s'
+          }}
+        >
+          Usage & Billing
+        </button>
+        <button
+          onClick={() => setActiveTab('security')}
+          style={{
+            padding: '12px 24px',
+            border: 'none',
+            background: 'transparent',
+            borderBottom: activeTab === 'security' ? '2px solid #667eea' : '2px solid transparent',
+            color: activeTab === 'security' ? '#667eea' : '#6b7280',
+            fontWeight: 600,
+            cursor: 'pointer',
+            fontSize: 14,
+            marginBottom: -2,
+            transition: 'all 0.2s'
+          }}
+        >
+          Security
+        </button>
+      </div>
 
-        {editing && (
-          <form onSubmit={handleSubmit} style={{ marginTop: 20 }}>
+      {/* Profile Tab */}
+      {activeTab === 'profile' && (
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 24 }}>
+          <div style={{ background: "white", borderRadius: 16, padding: 24, border: "1px solid #e5e7eb" }}>
+            <h3 style={{ fontSize: 18, fontWeight: 600, marginBottom: 16 }}>Personal Information</h3>
+
+            {!editing && (
+              <button 
+                onClick={() => setEditing(true)}
+                style={{
+                  background: "linear-gradient(135deg, #667eea, #764ba2)",
+                  color: "white",
+                  border: "none",
+                  borderRadius: 8,
+                  padding: "10px 20px",
+                  cursor: "pointer",
+                  fontWeight: 600,
+                  fontSize: 14
+                }}
+              >
+                Edit Profile
+              </button>
+            )}
+
+            {editing && (
+              <form onSubmit={handleSubmit} style={{ marginTop: 20 }}>
             <div style={{ marginBottom: 16 }}>
               <label style={{ display: "block", fontSize: 14, fontWeight: 500, marginBottom: 8 }}>
                 Profile Picture
@@ -123,49 +208,160 @@ export default function ProfileClient({ profile, usage }) {
               />
             </div>
 
-            <div style={{ display: "flex", gap: 8 }}>
+                <div style={{ display: "flex", gap: 8 }}>
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    style={{
+                      background: loading ? "#9ca3af" : "linear-gradient(135deg, #10b981, #059669)",
+                      color: "white",
+                      border: "none",
+                      borderRadius: 8,
+                      padding: "10px 20px",
+                      cursor: loading ? "not-allowed" : "pointer",
+                      fontWeight: 600,
+                      fontSize: 14
+                    }}
+                  >
+                    {loading ? "Saving..." : "Save Changes"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setEditing(false);
+                      setAvatarPreview(null);
+                    }}
+                    style={{
+                      background: "#f3f4f6",
+                      color: "#374151",
+                      border: "1px solid #e5e7eb",
+                      borderRadius: 8,
+                      padding: "10px 20px",
+                      cursor: "pointer",
+                      fontWeight: 600,
+                      fontSize: 14
+                    }}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Usage & Billing Tab */}
+      {activeTab === 'usage' && (
+        <div>
+          <UsageDashboard usage={usage} plan={profile?.plan || 'free'} />
+        </div>
+      )}
+
+      {/* Security Tab */}
+      {activeTab === 'security' && (
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 24 }}>
+          {/* Change Password */}
+          <div style={{ background: "white", borderRadius: 16, padding: 24, border: "1px solid #e5e7eb" }}>
+            <h3 style={{ fontSize: 18, fontWeight: 600, marginBottom: 16 }}>Change Password</h3>
+            <form onSubmit={(e) => { e.preventDefault(); alert('Password change coming soon!'); }}>
+              <div style={{ marginBottom: 16 }}>
+                <label style={{ display: "block", fontSize: 14, fontWeight: 500, marginBottom: 8 }}>Current Password</label>
+                <input
+                  type="password"
+                  value={passwordData.current}
+                  onChange={(e) => setPasswordData({...passwordData, current: e.target.value})}
+                  style={{
+                    width: "100%",
+                    padding: "10px 12px",
+                    border: "1px solid #d1d5db",
+                    borderRadius: 8,
+                    fontSize: 14
+                  }}
+                />
+              </div>
+              <div style={{ marginBottom: 16 }}>
+                <label style={{ display: "block", fontSize: 14, fontWeight: 500, marginBottom: 8 }}>New Password</label>
+                <input
+                  type="password"
+                  value={passwordData.new}
+                  onChange={(e) => setPasswordData({...passwordData, new: e.target.value})}
+                  style={{
+                    width: "100%",
+                    padding: "10px 12px",
+                    border: "1px solid #d1d5db",
+                    borderRadius: 8,
+                    fontSize: 14
+                  }}
+                />
+              </div>
+              <div style={{ marginBottom: 16 }}>
+                <label style={{ display: "block", fontSize: 14, fontWeight: 500, marginBottom: 8 }}>Confirm New Password</label>
+                <input
+                  type="password"
+                  value={passwordData.confirm}
+                  onChange={(e) => setPasswordData({...passwordData, confirm: e.target.value})}
+                  style={{
+                    width: "100%",
+                    padding: "10px 12px",
+                    border: "1px solid #d1d5db",
+                    borderRadius: 8,
+                    fontSize: 14
+                  }}
+                />
+              </div>
               <button
                 type="submit"
-                disabled={loading}
                 style={{
-                  background: loading ? "#9ca3af" : "#10b981",
+                  background: "linear-gradient(135deg, #667eea, #764ba2)",
                   color: "white",
                   border: "none",
-                  borderRadius: 6,
-                  padding: "8px 16px",
-                  cursor: loading ? "not-allowed" : "pointer",
-                  fontWeight: 500
-                }}
-              >
-                {loading ? "Saving..." : "Save Changes"}
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setEditing(false);
-                  setAvatarPreview(null);
-                }}
-                style={{
-                  background: "#6b7280",
-                  color: "white",
-                  border: "none",
-                  borderRadius: 6,
-                  padding: "8px 16px",
+                  borderRadius: 8,
+                  padding: "10px 20px",
                   cursor: "pointer",
-                  fontWeight: 500
+                  fontWeight: 600,
+                  fontSize: 14
                 }}
               >
-                Cancel
+                Update Password
               </button>
-            </div>
-          </form>
-        )}
-      </div>
+            </form>
+          </div>
 
-      {/* Usage Dashboard */}
-      <div style={{ marginTop: 24 }}>
-        <UsageDashboard usage={usage} plan={profile?.plan || 'free'} />
-      </div>
+          {/* Two-Factor Authentication */}
+          <div style={{ background: "white", borderRadius: 16, padding: 24, border: "1px solid #e5e7eb" }}>
+            <h3 style={{ fontSize: 18, fontWeight: 600, marginBottom: 8 }}>Two-Factor Authentication</h3>
+            <p style={{ fontSize: 14, color: "#6b7280", marginBottom: 16 }}>Add an extra layer of security to your account</p>
+            <button
+              onClick={() => alert('2FA setup coming soon!')}
+              style={{
+                background: "#f3f4f6",
+                color: "#374151",
+                border: "1px solid #e5e7eb",
+                borderRadius: 8,
+                padding: "10px 20px",
+                cursor: "pointer",
+                fontWeight: 600,
+                fontSize: 14
+              }}
+            >
+              Enable 2FA
+            </button>
+          </div>
+
+          {/* Active Sessions */}
+          <div style={{ background: "white", borderRadius: 16, padding: 24, border: "1px solid #e5e7eb" }}>
+            <h3 style={{ fontSize: 18, fontWeight: 600, marginBottom: 16 }}>Active Sessions</h3>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px', background: '#f9fafb', borderRadius: 8 }}>
+              <div>
+                <p style={{ fontSize: 14, fontWeight: 600, marginBottom: 4 }}>Current Session</p>
+                <p style={{ fontSize: 12, color: '#6b7280' }}>Windows • Chrome • {new Date().toLocaleDateString()}</p>
+              </div>
+              <span style={{ fontSize: 12, color: '#10b981', fontWeight: 600 }}>Active</span>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

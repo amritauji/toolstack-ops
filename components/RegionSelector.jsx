@@ -30,32 +30,24 @@ export default function RegionSelector() {
     window.dispatchEvent(new CustomEvent('regionChanged', { detail: regionCode }));
   };
 
-  const currentRegion = REGIONS[selectedRegion];
+  const currentRegion = REGIONS[selectedRegion] || REGIONS.US;
+
+  if (!currentRegion) return null;
 
   return (
     <div style={styles.container}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        style={styles.button}
+        style={{
+          ...styles.button,
+          backgroundImage: currentRegion.gradient,
+          color: currentRegion.code === 'IN' ? '#1e3a8a' : (['US', 'GB', 'CA', 'AU', 'MX'].includes(currentRegion.code) ? 'black' : 'white'),
+          fontWeight: 700,
+          border: 'none'
+        }}
         aria-label="Select region"
       >
-        <span style={styles.flag}>{currentRegion.flag}</span>
-        <span style={styles.currency}>{currentRegion.currency}</span>
-        <svg
-          style={{ ...styles.icon, transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
-          width="16"
-          height="16"
-          viewBox="0 0 16 16"
-          fill="none"
-        >
-          <path
-            d="M4 6L8 10L12 6"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
+        {currentRegion.code}
       </button>
 
       {isOpen && (
@@ -75,12 +67,17 @@ export default function RegionSelector() {
                     ...(selectedRegion === region.code ? styles.regionItemActive : {})
                   }}
                 >
-                  <span style={styles.regionFlag}>{region.flag}</span>
+                  <span style={{
+                    backgroundImage: region.gradient,
+                    padding: '4px 8px',
+                    borderRadius: '4px',
+                    color: region.code === 'IN' ? '#1e3a8a' : (['US', 'GB', 'CA', 'AU', 'MX'].includes(region.code) ? 'black' : 'white'),
+                    fontWeight: 700,
+                    fontSize: '12px',
+                    marginRight: '12px'
+                  }}>{region.code}</span>
                   <div style={styles.regionInfo}>
-                    <span style={styles.regionName}>{region.name}</span>
-                    <span style={styles.regionCurrency}>
-                      {region.currency} ({region.symbol})
-                    </span>
+                    <span style={styles.regionNameItem}>{region.name}</span>
                   </div>
                   {selectedRegion === region.code && (
                     <svg
@@ -114,11 +111,11 @@ const styles = {
     position: 'relative',
   },
   button: {
-    display: 'flex',
+    display: 'inline-flex',
     alignItems: 'center',
-    gap: 6,
+    gap: 8,
     padding: '8px 12px',
-    background: '#f9fafb',
+    background: 'rgba(0,0,0,0.05)',
     border: '1px solid #e5e7eb',
     borderRadius: 8,
     cursor: 'pointer',
@@ -126,13 +123,16 @@ const styles = {
     fontWeight: 500,
     color: '#374151',
     transition: 'all 0.2s',
+    whiteSpace: 'nowrap',
   },
   flag: {
     fontSize: 18,
+    fontFamily: 'system-ui, -apple-system, "Segoe UI", "Noto Color Emoji", sans-serif',
+    lineHeight: 1,
   },
-  currency: {
+  regionCode: {
     fontSize: 14,
-    fontWeight: 500,
+    fontWeight: 600,
   },
   icon: {
     transition: 'transform 0.2s',
@@ -192,6 +192,8 @@ const styles = {
   },
   regionFlag: {
     fontSize: 24,
+    fontFamily: 'system-ui, -apple-system, "Segoe UI", "Noto Color Emoji", sans-serif',
+    lineHeight: 1,
   },
   regionInfo: {
     flex: 1,
@@ -199,14 +201,10 @@ const styles = {
     flexDirection: 'column',
     gap: 2,
   },
-  regionName: {
+  regionNameItem: {
     fontSize: 14,
     fontWeight: 500,
     color: '#111827',
-  },
-  regionCurrency: {
-    fontSize: 12,
-    color: '#6b7280',
   },
   checkIcon: {
     color: '#3b82f6',

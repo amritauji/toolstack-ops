@@ -9,7 +9,7 @@ const columnStyles = {
   done: { border: "#bbf7d0", bg: "#f0fff4" }
 };
 
-export default function KanbanColumn({ title, tasks, users, status, selectedTasks, onSelectionChange, onTaskClick }) {
+export default function KanbanColumn({ title, tasks, users, status, selectedTasks, onSelectionChange, onTaskClick, emptyState }) {
   const styles = columnStyles[status] || columnStyles.todo;
 
   return (
@@ -56,14 +56,16 @@ export default function KanbanColumn({ title, tasks, users, status, selectedTask
       {/* Tasks */}
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
         {tasks.length === 0 ? (
-          <div style={{
-            textAlign: "center",
-            padding: 32,
-            color: "#a0aec0",
-            fontSize: 14
-          }}>
-            No tasks
-          </div>
+          emptyState || (
+            <div style={{
+              textAlign: "center",
+              padding: 32,
+              color: "#a0aec0",
+              fontSize: 14
+            }}>
+              No tasks
+            </div>
+          )
         ) : (
           tasks.map(task => (
             <TaskCard

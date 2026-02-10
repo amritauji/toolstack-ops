@@ -1,34 +1,29 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { createBrowserClient } from "@supabase/ssr";
 import Link from "next/link";
 import { ROUTES } from "@/lib/routes";
 
-export default function LoginPage() {
-  const router = useRouter();
+export default function ForgotPasswordPage() {
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
   );
 
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
 
-  const handleLogin = async (e) => {
+  const handleResetPassword = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError("");
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
       });
 
       if (error) {
@@ -37,16 +32,14 @@ export default function LoginPage() {
         return;
       }
 
-      setShowSuccess(true);
-      // Redirect immediately to dashboard
-      router.push(ROUTES.DASHBOARD);
+      setSuccess(true);
     } catch (err) {
-      setError(err.message || 'Login failed. Please check your Supabase configuration.');
+      setError(err.message || 'Failed to send reset email');
       setLoading(false);
     }
   };
 
-  if (showSuccess) {
+  if (success) {
     return (
       <div style={styles.container}>
         <div style={styles.card}>
@@ -57,8 +50,13 @@ export default function LoginPage() {
                 <path d="M8 12l3 3 5-5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
             </div>
-            <h3 style={styles.successTitle}>Welcome back!</h3>
-            <p style={styles.successText}>Redirecting to your dashboard...</p>
+            <h3 style={styles.successTitle}>Check your email</h3>
+            <p style={styles.successText}>
+              We've sent a password reset link to {email}
+            </p>
+            <Link href={ROUTES.LOGIN} style={styles.backLink}>
+              Back to Sign In
+            </Link>
           </div>
         </div>
       </div>
@@ -75,11 +73,11 @@ export default function LoginPage() {
               <path d="M8 12h16v2H8v-2zm0 4h16v2H8v-2zm0 4h10v2H8v-2z" fill="white"/>
             </svg>
           </div>
-          <h1 style={styles.title}>Sign in to Dashboard</h1>
-          <p style={styles.subtitle}>Welcome back! Please sign in to continue</p>
+          <h1 style={styles.title}>Reset your password</h1>
+          <p style={styles.subtitle}>Enter your email to receive a reset link</p>
         </div>
 
-        <form onSubmit={handleLogin} style={styles.form}>
+        <form onSubmit={handleResetPassword} style={styles.form}>
           <div style={styles.inputGroup}>
             <input
               type="email"
@@ -95,43 +93,6 @@ export default function LoginPage() {
             }}>Email address</label>
             <span style={styles.inputBorder}></span>
           </div>
-
-          <div style={styles.inputGroup}>
-            <input
-              type={showPassword ? "text" : "password"}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              style={{...styles.input, paddingRight: 42}}
-              placeholder=" "
-              required
-            />
-            <label style={{
-              ...styles.label,
-              ...(password ? styles.labelActive : {})
-            }}>Password</label>
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              style={styles.passwordToggle}
-            >
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <path d="M8 3C4.5 3 1.6 5.6 1 8c.6 2.4 3.5 5 7 5s6.4-2.6 7-5c-.6-2.4-3.5-5-7-5zm0 8.5A3.5 3.5 0 118 4.5a3.5 3.5 0 010 7zm0-5.5a2 2 0 100 4 2 2 0 000-4z" fill="currentColor"/>
-              </svg>
-            </button>
-            <span style={styles.inputBorder}></span>
-          </div>
-
-          <Link href="/forgot-password" style={{
-            fontSize: '14px',
-            color: '#635BFF',
-            textDecoration: 'none',
-            display: 'block',
-            textAlign: 'right',
-            marginBottom: '16px',
-            fontWeight: 500
-          }}>
-            Forgot password?
-          </Link>
 
           {error && (
             <div style={styles.errorMessage}>
@@ -150,7 +111,7 @@ export default function LoginPage() {
             <span style={{
               ...styles.btnText,
               opacity: loading ? 0 : 1
-            }}>Sign in</span>
+            }}>Send reset link</span>
             {loading && (
               <div style={styles.btnLoader}>
                 <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
@@ -165,8 +126,7 @@ export default function LoginPage() {
         </form>
 
         <div style={styles.signupLink}>
-          <span>Don't have an account? </span>
-          <Link href={ROUTES.SIGNUP} style={styles.link}>Start your free trial</Link>
+          <Link href={ROUTES.LOGIN} style={styles.link}>Back to Sign In</Link>
         </div>
       </div>
     </div>
@@ -265,22 +225,6 @@ const styles = {
     background: "#635BFF",
     transition: "width 0.3s ease",
   },
-  passwordToggle: {
-    position: "absolute",
-    right: 12,
-    top: "50%",
-    transform: "translateY(-50%)",
-    background: "none",
-    border: "none",
-    cursor: "pointer",
-    color: "#8792a2",
-    padding: 6,
-    borderRadius: 4,
-    transition: "color 0.2s ease",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-  },
   submitBtn: {
     width: "100%",
     background: "#635BFF",
@@ -344,12 +288,21 @@ const styles = {
     color: "#1a1f36",
     fontSize: "1.25rem",
     fontWeight: 600,
-    marginBottom: 4,
+    marginBottom: 8,
     margin: 0,
   },
   successText: {
     color: "#8792a2",
     fontSize: 14,
+    marginBottom: 24,
     margin: 0,
+  },
+  backLink: {
+    display: "inline-block",
+    color: "#635BFF",
+    textDecoration: "none",
+    fontWeight: 500,
+    fontSize: 14,
+    marginTop: 16,
   },
 };

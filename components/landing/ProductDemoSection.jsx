@@ -2,11 +2,13 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import { useTheme } from '@/contexts/ThemeContext';
 
 export default function ProductDemoSection() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [visibleFeatures, setVisibleFeatures] = useState(new Set());
   const sectionRef = useRef(null);
+  const { isDark } = useTheme();
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -72,24 +74,24 @@ export default function ProductDemoSection() {
   ];
 
   return (
-    <section ref={sectionRef} className="py-24 bg-gradient-to-b from-slate-50 to-white relative overflow-hidden">
+    <section id="demo" ref={sectionRef} className={`py-24 ${isDark ? 'bg-gradient-to-b from-slate-800 to-slate-900' : 'bg-gradient-to-b from-slate-50 to-white'} relative overflow-hidden`}>
       {/* Background Elements */}
       <div className="absolute inset-0">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-r from-indigo-400/10 to-purple-400/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-gradient-to-r from-emerald-400/10 to-teal-400/10 rounded-full blur-3xl" />
+        <div className={`absolute top-1/4 left-1/4 w-96 h-96 ${isDark ? 'bg-gradient-to-r from-indigo-600/10 to-purple-600/10' : 'bg-gradient-to-r from-indigo-400/10 to-purple-400/10'} rounded-full blur-3xl`} />
+        <div className={`absolute bottom-1/4 right-1/4 w-96 h-96 ${isDark ? 'bg-gradient-to-r from-emerald-600/10 to-teal-600/10' : 'bg-gradient-to-r from-emerald-400/10 to-teal-400/10'} rounded-full blur-3xl`} />
       </div>
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center mb-16">
-          <div className="inline-flex items-center px-4 py-2 rounded-full bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-200/50 mb-6">
+          <div className={`inline-flex items-center px-4 py-2 rounded-full ${isDark ? 'bg-gradient-to-r from-indigo-900/50 to-purple-900/50 border-indigo-700/50' : 'bg-gradient-to-r from-indigo-50 to-purple-50 border-indigo-200/50'} border mb-6`}>
             <span className="w-2 h-2 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full mr-2 animate-pulse" />
-            <span className="text-sm font-medium text-indigo-700">
+            <span className={`text-sm font-medium ${isDark ? 'text-indigo-300' : 'text-indigo-700'}`}>
               See It In Action
             </span>
           </div>
           <h2 className="text-4xl lg:text-5xl font-bold mb-6">
-            <span className="bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
+            <span className={`bg-gradient-to-r ${isDark ? 'from-slate-100 to-slate-300' : 'from-slate-900 to-slate-700'} bg-clip-text text-transparent`}>
               See ToolStack Ops
             </span>
             <br />
@@ -97,7 +99,7 @@ export default function ProductDemoSection() {
               in action
             </span>
           </h2>
-          <p className="text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed">
+          <p className={`text-xl ${isDark ? 'text-slate-300' : 'text-slate-600'} max-w-3xl mx-auto leading-relaxed`}>
             Watch how teams transform their workflow and boost productivity by 40% on average.
           </p>
         </div>
@@ -106,15 +108,15 @@ export default function ProductDemoSection() {
           {/* Video Player */}
           <div className="relative">
             <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/20 to-purple-500/20 rounded-3xl blur-3xl transform rotate-1" />
-            <div className="relative bg-white rounded-3xl shadow-2xl border border-slate-200/50 overflow-hidden">
-              <div className="bg-gradient-to-r from-slate-50 to-slate-100 px-6 py-4 border-b border-slate-200/50">
+            <div className={`relative ${isDark ? 'bg-slate-800' : 'bg-white'} rounded-3xl shadow-2xl ${isDark ? 'border-slate-700/50' : 'border-slate-200/50'} border overflow-hidden`}>
+              <div className={`${isDark ? 'bg-gradient-to-r from-slate-800 to-slate-700' : 'bg-gradient-to-r from-slate-50 to-slate-100'} px-6 py-4 ${isDark ? 'border-slate-700/50' : 'border-slate-200/50'} border-b`}>
                 <div className="flex items-center space-x-2">
                   <div className="w-3 h-3 bg-red-400 rounded-full" />
                   <div className="w-3 h-3 bg-yellow-400 rounded-full" />
                   <div className="w-3 h-3 bg-green-400 rounded-full" />
                 </div>
               </div>
-              <div className="relative aspect-video bg-gradient-to-br from-slate-100 to-slate-200">
+              <div className={`relative aspect-video ${isDark ? 'bg-gradient-to-br from-slate-800 to-slate-900' : 'bg-gradient-to-br from-slate-100 to-slate-200'}`}>
                 {!isPlaying ? (
                   <div 
                     className="absolute inset-0 flex items-center justify-center cursor-pointer group"
@@ -142,7 +144,7 @@ export default function ProductDemoSection() {
 
           {/* Features List */}
           <div>
-            <h3 className="text-3xl font-bold text-slate-900 mb-8">
+            <h3 className={`text-3xl font-bold ${isDark ? 'text-slate-100' : 'text-slate-900'} mb-8`}>
               Everything you need to
               <br />
               <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
@@ -155,7 +157,7 @@ export default function ProductDemoSection() {
                 <div
                   key={index}
                   data-index={index}
-                  className={`group bg-white rounded-2xl p-6 border border-slate-200/50 hover:border-slate-300/50 hover:shadow-xl transition-all duration-500 ${visibleFeatures.has(index) ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
+                  className={`group ${isDark ? 'bg-slate-800 border-slate-700/50 hover:border-slate-600/50' : 'bg-white border-slate-200/50 hover:border-slate-300/50'} rounded-2xl p-6 border hover:shadow-xl transition-all duration-500 ${visibleFeatures.has(index) ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
                   style={{ transitionDelay: `${index * 100}ms` }}
                 >
                   <div className="flex items-start space-x-4">
@@ -163,10 +165,10 @@ export default function ProductDemoSection() {
                       {feature.icon}
                     </div>
                     <div className="flex-1">
-                      <h4 className="text-lg font-semibold text-slate-900 mb-2">
+                      <h4 className={`text-lg font-semibold ${isDark ? 'text-slate-100' : 'text-slate-900'} mb-2`}>
                         {feature.title}
                       </h4>
-                      <p className="text-slate-600 leading-relaxed">
+                      <p className={`${isDark ? 'text-slate-300' : 'text-slate-600'} leading-relaxed`}>
                         {feature.description}
                       </p>
                     </div>
@@ -183,12 +185,12 @@ export default function ProductDemoSection() {
               >
                 Start Free Trial
               </Link>
-              <Link 
-                href="#demo" 
-                className="bg-white text-slate-700 px-8 py-4 rounded-xl font-semibold border border-slate-200 hover:border-slate-300 hover:shadow-md transition-all duration-200 text-center"
+              <a 
+                href="#testimonials" 
+                className={`${isDark ? 'bg-slate-800 text-slate-200 border-slate-700 hover:border-slate-600' : 'bg-white text-slate-700 border-slate-200 hover:border-slate-300'} px-8 py-4 rounded-xl font-semibold border hover:shadow-md transition-all duration-200 text-center`}
               >
-                Book a Demo
-              </Link>
+                See Reviews
+              </a>
             </div>
           </div>
         </div>

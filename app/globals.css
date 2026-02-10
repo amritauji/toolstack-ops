@@ -160,6 +160,15 @@
   }
 }
 
+/* Dark mode styles */
+.dark {
+  background: linear-gradient(to bottom, #0f172a, #1e293b);
+}
+
+.dark body {
+  background: linear-gradient(to bottom, #0f172a, #1e293b);
+}
+
 @layer base {
   * {
     border-color: hsl(var(--border));

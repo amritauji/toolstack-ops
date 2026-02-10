@@ -2,9 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useTheme } from '@/contexts/ThemeContext';
 
 export default function ModernHero() {
   const [isVisible, setIsVisible] = useState(false);
+  const { isDark } = useTheme();
 
   useEffect(() => {
     setIsVisible(true);
@@ -17,6 +19,7 @@ export default function ModernHero() {
       paddingBottom: '80px',
       overflow: 'hidden'
     }}>
+
       <div style={{
         maxWidth: '1280px',
         margin: '0 auto',
@@ -29,8 +32,8 @@ export default function ModernHero() {
           alignItems: 'center',
           padding: '8px 16px',
           borderRadius: '9999px',
-          background: '#eef2ff',
-          border: '1px solid #c7d2fe',
+          background: isDark ? '#1e293b' : '#eef2ff',
+          border: isDark ? '1px solid #475569' : '1px solid #c7d2fe',
           marginBottom: '32px',
           opacity: isVisible ? 1 : 0,
           transform: isVisible ? 'translateY(0)' : 'translateY(-16px)',
@@ -44,7 +47,7 @@ export default function ModernHero() {
             marginRight: '10px',
             animation: 'pulse 2s infinite'
           }} />
-          <span style={{ fontSize: '14px', fontWeight: 500, color: '#4338ca' }}>
+          <span style={{ fontSize: '14px', fontWeight: 500, color: isDark ? '#a5b4fc' : '#4338ca' }}>
             Trusted by 10,000+ teams worldwide
           </span>
         </div>
@@ -60,19 +63,19 @@ export default function ModernHero() {
           transform: isVisible ? 'translateY(0)' : 'translateY(16px)',
           transition: 'all 0.7s ease 0.1s'
         }}>
-          <span style={{ color: '#0f172a', display: 'block' }}>Project Management</span>
+          <span style={{ color: isDark ? '#f1f5f9' : '#0f172a', display: 'block' }}>Your workflow,</span>
           <span style={{
-            background: 'linear-gradient(135deg, #4f46e5, #7c3aed)',
+            backgroundImage: 'linear-gradient(135deg, #4f46e5, #7c3aed)',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
             backgroundClip: 'text'
-          }}>Reimagined</span>
+          }}>amplified by AI</span>
         </h1>
 
         {/* Subtitle */}
         <p style={{
           fontSize: 'clamp(16px, 2.5vw, 20px)',
-          color: '#475569',
+          color: isDark ? '#94a3b8' : '#475569',
           marginBottom: '40px',
           maxWidth: '640px',
           margin: '0 auto 40px',
@@ -81,8 +84,7 @@ export default function ModernHero() {
           transform: isVisible ? 'translateY(0)' : 'translateY(16px)',
           transition: 'all 0.7s ease 0.2s'
         }}>
-          The most intuitive project management platform that adapts to your team's workflow. 
-          Built for modern teams who demand excellence.
+          Plan smarter. Execute faster. Ship with confidence. The most intuitive project management platform built for modern teams.
         </p>
 
         {/* CTA Buttons */}
@@ -110,20 +112,21 @@ export default function ModernHero() {
           }}>
             Start Free Trial
           </Link>
-          <Link href="#demo" style={{
-            background: 'white',
-            color: '#374151',
+          <a href="#demo" style={{
+            background: isDark ? '#1e293b' : 'white',
+            color: isDark ? '#cbd5e1' : '#374151',
             padding: '16px 32px',
             borderRadius: '12px',
             fontSize: '16px',
             fontWeight: 600,
             textDecoration: 'none',
-            border: '1px solid #e2e8f0',
+            border: isDark ? '1px solid #475569' : '1px solid #e2e8f0',
             boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)',
-            transition: 'all 0.2s'
+            transition: 'all 0.2s',
+            display: 'inline-block'
           }}>
             Watch Demo
-          </Link>
+          </a>
         </div>
 
         {/* Trust Indicators */}
@@ -135,7 +138,7 @@ export default function ModernHero() {
         }}>
           <p style={{
             fontSize: '12px',
-            color: '#64748b',
+            color: isDark ? '#94a3b8' : '#64748b',
             marginBottom: '24px',
             textTransform: 'uppercase',
             letterSpacing: '0.1em',
@@ -149,13 +152,18 @@ export default function ModernHero() {
             alignItems: 'center',
             justifyContent: 'center',
             gap: '32px',
-            opacity: 0.5
+            opacity: 0.5,
+            overflow: 'hidden'
           }}>
-            {['Microsoft', 'Google', 'Spotify', 'Airbnb', 'Stripe'].map((company) => (
+            {['TechFlow', 'BuildSpace', 'DevCorp', 'StartupLab', 'CodeBase', 'FlowTech', 'NextGen', 'ProTeam', 'AgileWorks', 'TaskForce'].map((company, index) => (
               <span key={company} style={{
                 fontSize: '18px',
                 fontWeight: 600,
-                color: '#94a3b8'
+                color: isDark ? '#64748b' : '#94a3b8',
+                animation: 'fadeInUp 0.8s ease-out',
+                animationDelay: `${index * 0.1}s`,
+                animationFillMode: 'backwards',
+                whiteSpace: 'nowrap'
               }}>{company}</span>
             ))}
           </div>
@@ -182,17 +190,17 @@ export default function ModernHero() {
           
           <div style={{
             position: 'relative',
-            background: 'white',
+            background: isDark ? '#1e293b' : 'white',
             borderRadius: '16px',
             boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.15)',
-            border: '1px solid rgba(226, 232, 240, 0.8)',
+            border: isDark ? '1px solid #334155' : '1px solid rgba(226, 232, 240, 0.8)',
             overflow: 'hidden'
           }}>
             {/* Window chrome */}
             <div style={{
-              background: '#f8fafc',
+              background: isDark ? '#0f172a' : '#f8fafc',
               padding: '12px 16px',
-              borderBottom: '1px solid #e2e8f0',
+              borderBottom: isDark ? '1px solid #334155' : '1px solid #e2e8f0',
               display: 'flex',
               alignItems: 'center',
               gap: '8px'
@@ -204,12 +212,12 @@ export default function ModernHero() {
               </div>
               <div style={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
                 <div style={{
-                  background: 'white',
+                  background: isDark ? '#1e293b' : 'white',
                   borderRadius: '6px',
                   padding: '6px 16px',
                   fontSize: '12px',
                   color: '#94a3b8',
-                  border: '1px solid #e2e8f0'
+                  border: isDark ? '1px solid #334155' : '1px solid #e2e8f0'
                 }}>
                   app.toolstack.io/dashboard
                 </div>
@@ -229,10 +237,17 @@ export default function ModernHero() {
                   { title: 'Completion Rate', value: '94%', change: 'Above industry average', color: '#f59e0b', bg: '#fffbeb' }
                 ].map((stat) => (
                   <div key={stat.title} style={{
-                    background: `linear-gradient(135deg, ${stat.bg}, ${stat.bg}80)`,
+                    background: isDark 
+                      ? `linear-gradient(135deg, ${stat.color}20, ${stat.color}10)` 
+                      : `linear-gradient(135deg, ${stat.bg}, ${stat.bg}80)`,
                     padding: '24px',
                     borderRadius: '16px',
-                    border: `1px solid ${stat.color}20`
+                    border: isDark 
+                      ? `1px solid ${stat.color}40` 
+                      : `1px solid ${stat.color}20`,
+                    boxShadow: isDark 
+                      ? `0 8px 32px ${stat.color}15` 
+                      : '0 2px 8px rgba(0, 0, 0, 0.05)'
                   }}>
                     <div style={{
                       display: 'flex',
@@ -240,7 +255,7 @@ export default function ModernHero() {
                       justifyContent: 'space-between',
                       marginBottom: '12px'
                     }}>
-                      <span style={{ fontSize: '14px', fontWeight: 500, color: '#475569' }}>{stat.title}</span>
+                      <span style={{ fontSize: '14px', fontWeight: 500, color: isDark ? '#94a3b8' : '#475569' }}>{stat.title}</span>
                       <div style={{
                         width: '32px',
                         height: '32px',
@@ -255,8 +270,8 @@ export default function ModernHero() {
                         </svg>
                       </div>
                     </div>
-                    <div style={{ fontSize: '32px', fontWeight: 700, color: '#0f172a', marginBottom: '4px' }}>{stat.value}</div>
-                    <div style={{ fontSize: '13px', color: stat.title === 'Active Projects' ? '#10b981' : '#64748b', fontWeight: 500 }}>{stat.change}</div>
+                    <div style={{ fontSize: '32px', fontWeight: 700, color: isDark ? '#f1f5f9' : '#0f172a', marginBottom: '4px' }}>{stat.value}</div>
+                    <div style={{ fontSize: '13px', color: stat.title === 'Active Projects' ? '#10b981' : (isDark ? '#94a3b8' : '#64748b'), fontWeight: 500 }}>{stat.change}</div>
                   </div>
                 ))}
               </div>

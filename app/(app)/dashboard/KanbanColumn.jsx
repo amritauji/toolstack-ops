@@ -2,6 +2,7 @@ import { changeTaskStatus } from "./actions";
 import Avatar from "@/components/Avatar";
 import PriorityBadge from "@/components/PriorityBadge";
 import DueDate from "@/components/DueDate";
+import TaskPreview from "@/components/TaskPreview";
 
 const columnStyles = {
   todo: { border: "#e2e8f0", bg: "#f7fafc" },
@@ -68,14 +69,15 @@ export default function KanbanColumn({ title, tasks, users, status, selectedTask
           )
         ) : (
           tasks.map(task => (
-            <TaskCard
-              key={task.id}
-              task={task}
-              users={users}
-              selectedTasks={selectedTasks}
-              onSelectionChange={onSelectionChange}
-              onTaskClick={onTaskClick}
-            />
+            <TaskPreview key={task.id} task={task}>
+              <TaskCard
+                task={task}
+                users={users}
+                selectedTasks={selectedTasks}
+                onSelectionChange={onSelectionChange}
+                onTaskClick={onTaskClick}
+              />
+            </TaskPreview>
           ))
         )}
       </div>

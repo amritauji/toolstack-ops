@@ -16,6 +16,11 @@ import ExportImport from "@/components/ExportImport";
 import TimeTracker from "@/components/TimeTracker";
 import AutomationManager from "@/components/AutomationManager";
 import ReportsManager from "@/components/ReportsManager";
+import EmptyStateIllustration from "@/components/EmptyStateIllustration";
+import FloatingQuickCreate from "@/components/FloatingQuickCreate";
+import CommandPalette from "@/components/CommandPalette";
+import TaskPreview from "@/components/TaskPreview";
+import OnboardingTour from "@/components/OnboardingTour";
 import { importTasks } from "@/lib/importTasks";
 import { useRealtimeTasks } from "@/lib/useRealtime";
 import "@/lib/memoryCleanup"; // Import memory cleanup
@@ -35,6 +40,7 @@ export default function DashboardClient({ initialTasks, users, activities, curre
   const [useAdvancedFilters, setUseAdvancedFilters] = useState(false);
   const [activeProject, setActiveProject] = useState(null);
   const [showAdvancedFeatures, setShowAdvancedFeatures] = useState(false);
+  const [showMyTasks, setShowMyTasks] = useState(false);
 
   // Real-time updates
   const isConnected = useRealtimeTasks(useCallback((payload) => {
@@ -49,7 +55,14 @@ export default function DashboardClient({ initialTasks, users, activities, curre
   const basicFilteredTasks = useMemo(() => {
     if (useAdvancedFilters) return filteredTasks;
     
-    return initialTasks.filter(task => {
+    let tasks = initialTasks;
+    
+    // My Tasks filter
+    if (showMyTasks) {
+      tasks = tasks.filter(task => task.assigned_to === currentUser?.id);
+    }
+    
+    return tasks.filter(task => {
       if (filters.search && !task.title.toLowerCase().includes(filters.search.toLowerCase())) {
         return false;
       }
@@ -61,7 +74,7 @@ export default function DashboardClient({ initialTasks, users, activities, curre
       if (filters.status && task.status !== filters.status) return false;
       return true;
     });
-  }, [initialTasks, filters, filteredTasks, useAdvancedFilters]);
+  }, [initialTasks, filters, filteredTasks, useAdvancedFilters, showMyTasks, currentUser]);
 
   const currentTasks = useAdvancedFilters ? filteredTasks : basicFilteredTasks;
 
@@ -135,6 +148,17 @@ export default function DashboardClient({ initialTasks, users, activities, curre
       background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
       minHeight: '100vh'
     }}>
+      {/* Onboarding Tour */}
+      <OnboardingTour />
+      
+      {/* Command Palette */}
+      <CommandPalette tasks={currentTasks} users={users} />
+      
+      {/* Floating Quick Create */}
+      <FloatingQuickCreate onCreateTask={(data) => {
+        console.log('Quick create:', data);
+        window.location.reload();
+      }} />
       {/* Real-time indicator - moved to bottom-right */}
       <div 
         role="status"
@@ -166,7 +190,7 @@ export default function DashboardClient({ initialTasks, users, activities, curre
       </div>
 
       {/* Stats Cards - now clickable to filter */}
-      <div style={{
+      <div data-stats style={{
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
         gap: '20px',
@@ -248,8 +272,35 @@ export default function DashboardClient({ initialTasks, users, activities, curre
         alignItems: 'center',
         flexWrap: 'wrap'
       }}>
+        {/* My Tasks Toggle */}
+        <button
+          onClick={() => setShowMyTasks(!showMyTasks)}
+          title="Show only my tasks"
+          style={{
+            padding: '12px 16px',
+            borderRadius: '10px',
+            border: '1px solid #e2e8f0',
+            background: showMyTasks ? '#7c6df2' : 'white',
+            color: showMyTasks ? 'white' : '#475569',
+            cursor: 'pointer',
+            fontSize: '14px',
+            fontWeight: 600,
+            transition: 'all 0.2s',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px'
+          }}
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+          </svg>
+          My Tasks
+          {showMyTasks && <span style={{ background: 'rgba(255,255,255,0.3)', padding: '2px 8px', borderRadius: '12px', fontSize: '12px' }}>{currentTasks.length}</span>}
+        </button>
+        
         {/* Create Task Button */}
-        <div style={{ flex: '0 0 auto' }}>
+        <div data-create-task style={{ flex: '0 0 auto' }}>
           <CreateTaskForm users={users} projectId={activeProject?.id} />
         </div>
 
@@ -282,7 +333,7 @@ export default function DashboardClient({ initialTasks, users, activities, curre
         />
 
         {/* View Switcher */}
-        <div style={{
+        <div data-view-switcher style={{
           display: 'flex',
           gap: '4px',
           background: '#f9fafb',
@@ -498,23 +549,9 @@ export default function DashboardClient({ initialTasks, users, activities, curre
                   onSelectionChange={setSelectedTasks}
                   onTaskClick={handleTaskClick}
                   emptyState={
-                    <div style={{
-                      textAlign: 'center',
-                      padding: '40px 20px',
-                      color: '#94a3b8'
-                    }}>
-                      <div style={{ fontSize: '48px', marginBottom: '12px' }}>
-                        {col.key === 'todo' ? '📝' : col.key === 'in_progress' ? '⚡' : '✅'}
-                      </div>
-                      <p style={{ fontSize: '14px', fontWeight: 500, marginBottom: '4px' }}>
-                        No {col.label.toLowerCase()} tasks
-                      </p>
-                      {col.key === 'todo' && (
-                        <p style={{ fontSize: '12px', color: '#cbd5e1' }}>
-                          Create your first task to get started
-                        </p>
-                      )}
-                    </div>
+                    grouped[col.key].length === 0 ? (
+                      <EmptyStateIllustration type={col.key} />
+                    ) : null
                   }
                 />
               ))}

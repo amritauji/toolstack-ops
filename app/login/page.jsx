@@ -67,6 +67,12 @@ export default function LoginPage() {
 
   return (
     <div style={styles.container}>
+      <Link href="/" style={styles.backButton}>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M19 12H5M12 19l-7-7 7-7" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+        Back to Home
+      </Link>
       <div style={styles.card}>
         <div style={styles.header}>
           <div style={styles.logo}>
@@ -326,6 +332,23 @@ const styles = {
     textAlign: "center",
     fontSize: 14,
     color: "#8792a2",
+  },
+  backButton: {
+    position: "absolute",
+    top: 24,
+    left: 24,
+    display: "flex",
+    alignItems: "center",
+    gap: 8,
+    color: "#635BFF",
+    textDecoration: "none",
+    fontSize: 14,
+    fontWeight: 500,
+    padding: "8px 16px",
+    borderRadius: 6,
+    transition: "all 0.2s ease",
+    background: "white",
+    border: "1px solid #e3e8ee",
   },
   link: {
     color: "#635BFF",

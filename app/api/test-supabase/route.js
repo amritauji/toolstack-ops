@@ -10,10 +10,9 @@ export async function GET() {
     )
 
     // Simple test query
-    const { data, error } = await supabase
+    const { data, error, count } = await supabase
       .from('profiles')
-      .select('count')
-      .limit(1)
+      .select('*', { count: 'exact', head: true })
 
     if (error) {
       return NextResponse.json({

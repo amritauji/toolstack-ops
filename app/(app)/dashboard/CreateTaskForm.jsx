@@ -11,17 +11,22 @@ export default function CreateTaskForm({ users, currentPlan = 'free' }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Check if user can create task
-    const check = await checkActionAllowed('add_task');
-    if (!check.allowed) {
-      setUpgradeModal({ isOpen: true, reason: 'task_limit' });
-      return;
-    }
+    try {
+      // Check if user can create task
+      const check = await checkActionAllowed('add_task');
+      if (!check.allowed) {
+        setUpgradeModal({ isOpen: true, reason: 'task_limit' });
+        return;
+      }
 
-    // Proceed with task creation
-    const formData = new FormData(e.target);
-    await createTask(formData);
-    e.target.reset();
+      // Proceed with task creation
+      const formData = new FormData(e.target);
+      await createTask(formData);
+      e.target.reset();
+    } catch (error) {
+      const toast = (await import('react-hot-toast')).default;
+      toast.error('Failed to create task: ' + error.message);
+    }
   };
   return (
     <>
@@ -75,7 +80,7 @@ export default function CreateTaskForm({ users, currentPlan = 'free' }) {
               }}
             >
               <option value="">Unassigned</option>
-              {users.map(user => (
+              {users?.map(user => (
                 <option key={user.id} value={user.id}>
                   {user.full_name}
                 </option>

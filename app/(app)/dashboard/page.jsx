@@ -17,9 +17,11 @@ export default async function DashboardPage() {
     .eq('id', user.id)
     .single();
 
-  const tasks = await getTasks();
-  const users = await getAssignableUsers();
-  const activities = await getActivityFeed();
+  const [tasks, users, activities] = await Promise.all([
+    getTasks(),
+    getAssignableUsers(),
+    getActivityFeed()
+  ]);
 
   return (
     <div style={{ padding: '24px' }}>

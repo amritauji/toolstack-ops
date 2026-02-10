@@ -41,33 +41,18 @@ export default function DashboardClient({ initialTasks, users, activities, curre
   const [activeProject, setActiveProject] = useState(null);
   const [showAdvancedFeatures, setShowAdvancedFeatures] = useState(false);
   const [showMyTasks, setShowMyTasks] = useState(false);
-  const [isDark, setIsDark] = useState(false);
 
-  useEffect(() => {
-    setIsDark(document.documentElement.classList.contains('dark'));
-    const observer = new MutationObserver(() => {
-      setIsDark(document.documentElement.classList.contains('dark'));
-    });
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
-    return () => observer.disconnect();
-  }, []);
-
-  // Real-time updates
   const isConnected = useRealtimeTasks(useCallback((payload) => {
-    console.log('Real-time task update:', payload);
-    // Don't reload entire page, just invalidate cache
     if (typeof window !== 'undefined') {
       window.location.reload();
     }
   }, []));
 
-  // Filter tasks (for basic filters)
   const basicFilteredTasks = useMemo(() => {
     if (useAdvancedFilters) return filteredTasks;
     
     let tasks = initialTasks;
     
-    // My Tasks filter
     if (showMyTasks) {
       tasks = tasks.filter(task => task.assigned_to === currentUser?.id);
     }
@@ -123,25 +108,21 @@ export default function DashboardClient({ initialTasks, users, activities, curre
     }
   }, []);
 
-  // Keyboard shortcuts
   useEffect(() => {
     const handleKeyPress = (e) => {
       const activeElement = document.activeElement;
       const isInputFocused = activeElement?.tagName === 'INPUT' || activeElement?.tagName === 'TEXTAREA';
       
-      // / = Focus search
       if (e.key === '/' && !isInputFocused) {
         e.preventDefault();
         document.querySelector('[data-search-input]')?.focus();
       }
       
-      // Escape = Close modal/menu
       if (e.key === 'Escape') {
         if (isModalOpen) setIsModalOpen(false);
         if (showAdvancedFeatures) setShowAdvancedFeatures(false);
       }
       
-      // 1, 2, 3 = Switch views (only when not typing)
       if (!isInputFocused) {
         if (e.key === '1') setViewMode('kanban');
         if (e.key === '2') setViewMode('table');
@@ -155,27 +136,22 @@ export default function DashboardClient({ initialTasks, users, activities, curre
 
   return (
     <div style={{
-      background: isDark ? '#0f172a' : 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
+      background: '#f5f7fa',
       minHeight: '100vh',
-      padding: '24px',
       transition: 'background 0.3s'
     }}>
-      {/* Onboarding Tour */}
+      <div style={{
+        maxWidth: '1400px',
+        margin: '0 auto',
+        padding: '0 24px',
+        paddingTop: '24px'
+      }}>
       <OnboardingTour />
-      
-      {/* Command Palette */}
       <CommandPalette tasks={currentTasks} users={users} />
       
-      {/* Floating Quick Create */}
-      <FloatingQuickCreate onCreateTask={(data) => {
-        console.log('Quick create:', data);
-        window.location.reload();
-      }} />
-      {/* Real-time indicator - moved to bottom-right */}
       <div 
         role="status"
         aria-live="polite"
-        aria-label={isConnected ? 'Real-time connection active' : 'Reconnecting to server'}
         style={{
           position: 'fixed',
           bottom: '24px',
@@ -201,7 +177,6 @@ export default function DashboardClient({ initialTasks, users, activities, curre
         {isConnected ? 'Live' : 'Reconnecting...'}
       </div>
 
-      {/* Stats Cards - now clickable to filter */}
       <div data-stats style={{
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
@@ -212,61 +187,54 @@ export default function DashboardClient({ initialTasks, users, activities, curre
             title="Total Tasks" 
             value={stats.total} 
             icon={(
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={isDark ? "white" : "#7c6df2"} strokeWidth="2">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#667eea" strokeWidth="2">
                 <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
               </svg>
             )}
-            color="#7c6df2"
-            bgColor={isDark ? 'linear-gradient(135deg, #4f46e5, #7c3aed)' : '#f0f4ff'}
+            bgColor="#f0f4ff"
             onClick={() => setFilters({ search: '', assignee: '', priority: '', status: '' })}
-            isDark={isDark}
           />
           <StatCard 
             title="In Progress" 
             value={stats.inProgress} 
             icon={(
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={isDark ? "white" : "#f59e0b"} strokeWidth="2">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2">
                 <circle cx="12" cy="12" r="10"/>
                 <path d="M12 6v6l4 2" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
             )}
-            color="#f59e0b"
-            bgColor={isDark ? 'linear-gradient(135deg, #f59e0b, #fb923c)' : '#fffbeb'}
+            bgColor="#fffbeb"
             onClick={() => setFilters({ ...filters, status: 'in_progress' })}
-            isDark={isDark}
           />
           <StatCard 
             title="Completed" 
             value={stats.completed} 
             icon={(
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={isDark ? "white" : "#10b981"} strokeWidth="2">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2">
                 <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
             )}
-            color="#10b981"
-            bgColor={isDark ? 'linear-gradient(135deg, #059669, #10b981)' : '#ecfdf5'}
+            bgColor="#ecfdf5"
             onClick={() => setFilters({ ...filters, status: 'done' })}
-            isDark={isDark}
           />
           <div style={{
-            background: isDark ? 'linear-gradient(135deg, #ec4899, #f43f5e)' : 'white',
+            background: 'white',
             borderRadius: '16px',
             padding: '24px',
-            boxShadow: isDark ? '0 8px 24px rgba(236,72,153,0.3)' : '0 1px 3px rgba(0,0,0,0.05)',
-            border: isDark ? 'none' : '1px solid #e2e8f0',
-            transition: 'all 0.3s'
+            boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+            border: '1px solid #e5e7eb'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
               <p style={{
                 fontSize: '14px',
-                color: isDark ? 'white' : '#64748b',
+                color: '#64748b',
                 fontWeight: '600'
               }}>
                 Completion Rate
               </p>
               <span style={{
-                background: isDark ? 'rgba(255,255,255,0.2)' : '#f0f4ff',
-                color: isDark ? 'white' : '#7c6df2',
+                background: '#f0f4ff',
+                color: '#667eea',
                 padding: '4px 8px',
                 borderRadius: '12px',
                 fontSize: '12px',
@@ -278,46 +246,47 @@ export default function DashboardClient({ initialTasks, users, activities, curre
             <div style={{
               width: '100%',
               height: '8px',
-              background: isDark ? 'rgba(255,255,255,0.2)' : '#f1f5f9',
+              background: '#f1f5f9',
               borderRadius: '4px',
               overflow: 'hidden'
             }}>
               <div style={{
                 width: `${completionRate}%`,
                 height: '100%',
-                background: isDark ? 'white' : 'linear-gradient(90deg, #7c6df2, #a855f7)',
+                background: 'linear-gradient(90deg, #667eea, #764ba2)',
                 transition: 'width 0.5s ease'
               }} />
             </div>
           </div>
         </div>
 
-      {/* Quick Actions Bar */}
       <div style={{
         display: 'flex',
         gap: '12px',
         marginBottom: '24px',
         alignItems: 'center',
-        flexWrap: 'wrap'
+        flexWrap: 'wrap',
+        background: 'white',
+        padding: '16px',
+        borderRadius: '16px',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+        border: '1px solid #e5e7eb'
       }}>
-        {/* My Tasks Toggle */}
         <button
           onClick={() => setShowMyTasks(!showMyTasks)}
-          title="Show only my tasks"
           style={{
             padding: '12px 16px',
             borderRadius: '10px',
             border: 'none',
-            background: showMyTasks ? 'linear-gradient(135deg, #6366f1, #8b5cf6)' : (isDark ? '#1e293b' : 'white'),
-            color: showMyTasks ? 'white' : (isDark ? '#cbd5e1' : '#475569'),
+            background: showMyTasks ? 'linear-gradient(135deg, #667eea, #764ba2)' : '#f5f7fa',
+            color: showMyTasks ? 'white' : '#4b5563',
             cursor: 'pointer',
             fontSize: '14px',
             fontWeight: 600,
             transition: 'all 0.2s',
             display: 'flex',
             alignItems: 'center',
-            gap: '6px',
-            boxShadow: showMyTasks && isDark ? '0 4px 12px rgba(99,102,241,0.4)' : 'none'
+            gap: '6px'
           }}
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -328,53 +297,47 @@ export default function DashboardClient({ initialTasks, users, activities, curre
           {showMyTasks && <span style={{ background: 'rgba(255,255,255,0.3)', padding: '2px 8px', borderRadius: '12px', fontSize: '12px' }}>{currentTasks.length}</span>}
         </button>
         
-        {/* Create Task Button */}
         <div data-create-task style={{ flex: '0 0 auto' }}>
           <CreateTaskForm users={users} projectId={activeProject?.id} />
         </div>
 
-        {/* Search */}
         <input 
           data-search-input
           type="text"
           placeholder="Search tasks..."
-          aria-label="Search tasks by title"
           value={filters.search}
           onChange={(e) => setFilters({ ...filters, search: e.target.value })}
           style={{
             flex: '1 1 300px',
             padding: '12px 16px',
             borderRadius: '12px',
-            border: isDark ? '1px solid #334155' : '1px solid #e2e8f0',
-            background: isDark ? '#1e293b' : 'white',
-            color: isDark ? '#f1f5f9' : '#0f172a',
+            border: '1px solid #e5e7eb',
+            background: 'white',
+            color: '#0f172a',
             fontSize: '14px',
             outline: 'none',
             transition: 'all 0.2s'
           }}
           onFocus={(e) => {
-            e.target.style.borderColor = '#7c6df2';
-            e.target.style.boxShadow = '0 0 0 3px rgba(124,109,242,0.1)';
+            e.target.style.borderColor = '#667eea';
+            e.target.style.boxShadow = '0 0 0 3px rgba(102,126,234,0.1)';
           }}
           onBlur={(e) => {
-            e.target.style.borderColor = isDark ? '#334155' : '#e2e8f0';
+            e.target.style.borderColor = '#e5e7eb';
             e.target.style.boxShadow = 'none';
           }}
         />
 
-        {/* View Switcher */}
         <div data-view-switcher style={{
           display: 'flex',
           gap: '4px',
-          background: '#f9fafb',
+          background: '#f5f7fa',
           padding: '4px',
-          borderRadius: '10px'
+          borderRadius: '10px',
+          border: '1px solid #e5e7eb'
         }}>
           <button 
             onClick={() => setViewMode('kanban')}
-            aria-label="Switch to board view (Press 1)"
-            aria-pressed={viewMode === 'kanban'}
-            title="Switch to board view (Press 1)"
             style={{
               padding: '8px 16px',
               borderRadius: '8px',
@@ -385,25 +348,13 @@ export default function DashboardClient({ initialTasks, users, activities, curre
               fontWeight: 600,
               cursor: 'pointer',
               boxShadow: viewMode === 'kanban' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
-              transition: 'all 0.2s',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              outline: 'none'
+              transition: 'all 0.2s'
             }}
-            onFocus={(e) => {
-              e.target.style.outline = '2px solid #7c6df2';
-              e.target.style.outlineOffset = '2px';
-            }}
-            onBlur={(e) => e.target.style.outline = 'none'}
           >
             📋 Board
           </button>
           <button 
             onClick={() => setViewMode('table')}
-            aria-label="Switch to table view (Press 2)"
-            aria-pressed={viewMode === 'table'}
-            title="Switch to table view (Press 2)"
             style={{
               padding: '8px 16px',
               borderRadius: '8px',
@@ -414,25 +365,13 @@ export default function DashboardClient({ initialTasks, users, activities, curre
               fontWeight: 600,
               cursor: 'pointer',
               boxShadow: viewMode === 'table' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
-              transition: 'all 0.2s',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              outline: 'none'
+              transition: 'all 0.2s'
             }}
-            onFocus={(e) => {
-              e.target.style.outline = '2px solid #7c6df2';
-              e.target.style.outlineOffset = '2px';
-            }}
-            onBlur={(e) => e.target.style.outline = 'none'}
           >
             📊 Table
           </button>
           <button 
             onClick={() => setViewMode('calendar')}
-            aria-label="Switch to calendar view (Press 3)"
-            aria-pressed={viewMode === 'calendar'}
-            title="Switch to calendar view (Press 3)"
             style={{
               padding: '8px 16px',
               borderRadius: '8px',
@@ -443,61 +382,41 @@ export default function DashboardClient({ initialTasks, users, activities, curre
               fontWeight: 600,
               cursor: 'pointer',
               boxShadow: viewMode === 'calendar' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
-              transition: 'all 0.2s',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              outline: 'none'
+              transition: 'all 0.2s'
             }}
-            onFocus={(e) => {
-              e.target.style.outline = '2px solid #7c6df2';
-              e.target.style.outlineOffset = '2px';
-            }}
-            onBlur={(e) => e.target.style.outline = 'none'}
           >
             📅 Calendar
           </button>
         </div>
 
-        {/* More Menu */}
         <button 
           onClick={() => setShowAdvancedFeatures(!showAdvancedFeatures)}
-          aria-label={showAdvancedFeatures ? 'Close advanced features' : 'Show more options'}
-          aria-expanded={showAdvancedFeatures}
           style={{
             padding: '12px 16px',
             borderRadius: '10px',
-            border: '1px solid #e2e8f0',
-            background: showAdvancedFeatures ? '#7c6df2' : 'white',
+            border: '1px solid #e5e7eb',
+            background: showAdvancedFeatures ? '#667eea' : 'white',
             color: showAdvancedFeatures ? 'white' : '#475569',
             cursor: 'pointer',
             fontSize: '14px',
             fontWeight: 600,
-            transition: 'all 0.2s',
-            outline: 'none'
+            transition: 'all 0.2s'
           }}
-          onFocus={(e) => {
-            e.target.style.outline = '2px solid #7c6df2';
-            e.target.style.outlineOffset = '2px';
-          }}
-          onBlur={(e) => e.target.style.outline = 'none'}
         >
           {showAdvancedFeatures ? '✕ Close' : '••• More'}
         </button>
       </div>
 
-      {/* Advanced Features (collapsible) */}
       {showAdvancedFeatures && (
         <div style={{
-          background: isDark ? '#1e293b' : 'white',
+          background: 'white',
           borderRadius: '12px',
           padding: '20px',
           marginBottom: '24px',
-          border: isDark ? '1px solid #334155' : '1px solid #e2e8f0',
-          boxShadow: isDark ? '0 4px 12px rgba(0,0,0,0.3)' : '0 1px 3px rgba(0,0,0,0.05)',
-          transition: 'all 0.3s'
+          border: '1px solid #e5e7eb',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
         }}>
-          <h3 style={{ fontSize: '16px', fontWeight: 600, marginBottom: '16px', color: isDark ? '#f1f5f9' : '#0f172a' }}>Advanced Features</h3>
+          <h3 style={{ fontSize: '16px', fontWeight: 600, marginBottom: '16px', color: '#0f172a' }}>Advanced Features</h3>
           
           <ProjectsManager 
             currentUser={currentUser} 
@@ -510,8 +429,8 @@ export default function DashboardClient({ initialTasks, users, activities, curre
               style={{
                 padding: '8px 16px',
                 borderRadius: '8px',
-                border: '1px solid #e2e8f0',
-                background: useAdvancedFilters ? '#7c6df2' : 'white',
+                border: '1px solid #e5e7eb',
+                background: useAdvancedFilters ? '#667eea' : 'white',
                 color: useAdvancedFilters ? 'white' : '#64748b',
                 fontSize: '14px',
                 fontWeight: '500',
@@ -546,23 +465,20 @@ export default function DashboardClient({ initialTasks, users, activities, curre
         </div>
       )}
 
-      {/* Simple Filters (always visible) */}
       {!showAdvancedFeatures && (
         <div style={{ marginBottom: '24px' }}>
           <TaskFilters users={users} onFilter={setFilters} />
         </div>
       )}
 
-      {/* Main Content */}
       <div>
         {viewMode === 'kanban' && (
           <div style={{
-            background: isDark ? '#1e293b' : 'white',
+            background: 'white',
             borderRadius: '16px',
             padding: '24px',
-            boxShadow: isDark ? '0 8px 24px rgba(0,0,0,0.4)' : '0 1px 3px rgba(0,0,0,0.05)',
-            border: isDark ? '1px solid #334155' : '1px solid #e2e8f0',
-            transition: 'all 0.3s'
+            boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+            border: '1px solid #e5e7eb'
           }}>
             <div style={{
               display: 'grid',
@@ -609,7 +525,6 @@ export default function DashboardClient({ initialTasks, users, activities, curre
         )}
       </div>
 
-      {/* Task Modal */}
       <TaskModalEnhanced 
         task={selectedTask}
         users={users}
@@ -617,108 +532,47 @@ export default function DashboardClient({ initialTasks, users, activities, curre
         onClose={() => setIsModalOpen(false)}
         currentUser={currentUser}
       />
-
-      {/* Keyboard Shortcuts Hint */}
-      <div style={{
-        position: 'fixed',
-        bottom: '24px',
-        left: '24px',
-        background: 'white',
-        padding: '12px 16px',
-        borderRadius: '8px',
-        border: '1px solid #e2e8f0',
-        fontSize: '12px',
-        color: '#475569',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-        zIndex: 40,
-        display: 'flex',
-        gap: '12px',
-        alignItems: 'center'
-      }}>
-        <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-          <kbd style={{
-            background: '#f1f5f9',
-            padding: '2px 6px',
-            borderRadius: '4px',
-            fontFamily: 'monospace',
-            fontSize: '11px',
-            border: '1px solid #cbd5e1'
-          }}>/</kbd>
-          <span>Search</span>
-        </span>
-        <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-          <kbd style={{
-            background: '#f1f5f9',
-            padding: '2px 6px',
-            borderRadius: '4px',
-            fontFamily: 'monospace',
-            fontSize: '11px',
-            border: '1px solid #cbd5e1'
-          }}>1-3</kbd>
-          <span>Views</span>
-        </span>
-        <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-          <kbd style={{
-            background: '#f1f5f9',
-            padding: '2px 6px',
-            borderRadius: '4px',
-            fontFamily: 'monospace',
-            fontSize: '11px',
-            border: '1px solid #cbd5e1'
-          }}>Esc</kbd>
-          <span>Close</span>
-        </span>
-      </div>
+    </div>
     </div>
   );
 }
 
-function StatCard({ title, value, icon, color, bgColor, onClick, isDark }) {
+function StatCard({ title, value, icon, bgColor, onClick }) {
   const Component = onClick ? 'button' : 'div';
-  const isGradient = typeof bgColor === 'string' && bgColor.includes('gradient');
   
   return (
     <Component
-      role={onClick ? 'button' : undefined}
-      tabIndex={onClick ? 0 : undefined}
-      aria-label={onClick ? `Filter by ${title.toLowerCase()}. Currently showing ${value} tasks` : undefined}
       onClick={onClick}
-      onKeyPress={(e) => {
-        if (onClick && (e.key === 'Enter' || e.key === ' ')) {
-          e.preventDefault();
-          onClick();
-        }
-      }}
-      onMouseEnter={(e) => {
-        if (onClick) {
-          e.currentTarget.style.transform = 'translateY(-2px)';
-          e.currentTarget.style.boxShadow = isDark && isGradient ? '0 12px 32px rgba(0,0,0,0.5)' : '0 8px 25px rgba(0,0,0,0.15)';
-        }
-      }}
-      onMouseLeave={(e) => {
-        if (onClick) {
-          e.currentTarget.style.transform = 'translateY(0)';
-          e.currentTarget.style.boxShadow = isDark && isGradient ? '0 8px 24px rgba(0,0,0,0.3)' : '0 1px 3px rgba(0,0,0,0.05)';
-        }
-      }}
       style={{
-        background: isGradient ? bgColor : (isDark ? '#1e293b' : 'white'),
+        background: bgColor,
         borderRadius: '16px',
         padding: '24px',
-        boxShadow: isDark && isGradient ? '0 8px 24px rgba(0,0,0,0.3)' : '0 1px 3px rgba(0,0,0,0.05)',
-        border: isDark && !isGradient ? '1px solid #334155' : (isDark ? 'none' : '1px solid #e2e8f0'),
+        boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+        border: '1px solid #e5e7eb',
         transition: 'all 0.2s ease',
         cursor: onClick ? 'pointer' : 'default',
         textAlign: 'left',
         width: '100%',
         outline: 'none'
       }}
+      onMouseEnter={(e) => {
+        if (onClick) {
+          e.currentTarget.style.transform = 'translateY(-2px)';
+          e.currentTarget.style.boxShadow = '0 8px 25px rgba(0,0,0,0.15)';
+        }
+      }}
+      onMouseLeave={(e) => {
+        if (onClick) {
+          e.currentTarget.style.transform = 'translateY(0)';
+          e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.08)';
+        }
+      }}
     >
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div>
           <p style={{
             fontSize: '14px',
-            color: isGradient && isDark ? 'rgba(255,255,255,0.9)' : (isDark ? '#94a3b8' : '#475569'),
+            color: '#475569',
             marginBottom: '4px',
             fontWeight: '600'
           }}>
@@ -727,7 +581,7 @@ function StatCard({ title, value, icon, color, bgColor, onClick, isDark }) {
           <p style={{
             fontSize: '30px',
             fontWeight: '700',
-            color: isGradient && isDark ? 'white' : (isDark ? '#f1f5f9' : '#0f172a')
+            color: '#0f172a'
           }}>
             {value}
           </p>
@@ -736,7 +590,7 @@ function StatCard({ title, value, icon, color, bgColor, onClick, isDark }) {
           width: '48px',
           height: '48px',
           borderRadius: '12px',
-          background: isGradient && isDark ? 'rgba(255,255,255,0.2)' : bgColor,
+          background: bgColor,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',

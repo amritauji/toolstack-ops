@@ -15,12 +15,12 @@ const inter = Inter({
 
 export const metadata = {
   title: {
-    default: 'ToolStack Ops - Modern Project Management',
-    template: '%s | ToolStack Ops'
+    default: 'Nexboard - Modern Project Management',
+    template: '%s | Nexboard'
   },
   description: 'Advanced project management platform with real-time collaboration, built for modern teams.',
   keywords: ['project management', 'collaboration', 'productivity', 'teams'],
-  authors: [{ name: 'ToolStack Ops' }],
+  authors: [{ name: 'Nexboard' }],
   icons: {
     icon: '/icon.svg',
     shortcut: '/icon.svg',

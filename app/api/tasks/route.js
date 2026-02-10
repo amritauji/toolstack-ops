@@ -1,27 +1,20 @@
-import { getUser } from "@/lib/getUser";
-import { supabase } from "@/lib/supabaseClient";
+import { createServerClient } from '@supabase/ssr';
+import { cookies } from 'next/headers';
 import { apiRateLimit } from '@/lib/rateLimit';
 import { withPerformanceTracking } from '@/lib/performance';
-import { withCache, cacheKeys } from '@/lib/cache';
 
-const cachedGetTasks = withCache(
-  (userId) => `${cacheKeys.tasks(userId)}`,
-  async (userId) => {
-    const { data, error } = await supabase
-      .from("tasks")
-      .select("*")
-      .order("created_at", { ascending: false });
-    
-    if (error) throw error;
-    return data;
-  },
-  2 * 60 * 1000 // 2 minutes
-);
-
-const trackedGetTasks = withPerformanceTracking('/api/tasks', cachedGetTasks);
+const trackedGetTasks = withPerformanceTracking('/api/tasks', async (supabase, userId) => {
+  const { data, error } = await supabase
+    .from("tasks")
+    .select("*")
+    .eq("created_by", userId)
+    .order("created_at", { ascending: false });
+  
+  if (error) throw error;
+  return data;
+});
 
 export async function GET(request) {
-  // Rate limiting
   const rateLimitResult = apiRateLimit(request);
   if (!rateLimitResult.success) {
     return Response.json(
@@ -37,19 +30,32 @@ export async function GET(request) {
     );
   }
 
-  const user = await getUser();
+  const cookieStore = await cookies();
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    {
+      cookies: {
+        get(name) {
+          return cookieStore.get(name)?.value;
+        },
+      },
+    }
+  );
+
+  const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   try {
-    const data = await trackedGetTasks(user.id);
+    const data = await trackedGetTasks(supabase, user.id);
     
     return Response.json(data, {
       headers: {
         'X-RateLimit-Limit': rateLimitResult.limit.toString(),
         'X-RateLimit-Remaining': rateLimitResult.remaining.toString(),
-        'Cache-Control': 'public, max-age=120'
+        'Cache-Control': 'private, max-age=60'
       }
     });
   } catch (error) {
@@ -58,7 +64,6 @@ export async function GET(request) {
 }
 
 export async function POST(request) {
-  // Rate limiting
   const rateLimitResult = apiRateLimit(request);
   if (!rateLimitResult.success) {
     return Response.json(
@@ -67,7 +72,20 @@ export async function POST(request) {
     );
   }
 
-  const user = await getUser();
+  const cookieStore = await cookies();
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    {
+      cookies: {
+        get(name) {
+          return cookieStore.get(name)?.value;
+        },
+      },
+    }
+  );
+
+  const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
@@ -84,10 +102,6 @@ export async function POST(request) {
   if (error) {
     return Response.json({ error: error.message }, { status: 500 });
   }
-
-  // Invalidate cache
-  const { invalidateCache } = await import('@/lib/cache');
-  invalidateCache('tasks:');
 
   return Response.json({ success: true });
 }

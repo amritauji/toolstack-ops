@@ -138,7 +138,7 @@ export default function Navbar({ profile }) {
                   letterSpacing: '-0.02em',
                   lineHeight: '1.2'
                 }}>
-                  ToolStack
+                  Nexboard
                 </div>
                 <div style={{
                   fontSize: '11px',
@@ -187,29 +187,6 @@ export default function Navbar({ profile }) {
 
           {/* Right Section */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            {/* Dark Mode Toggle */}
-            <button
-              onClick={() => {
-                const html = document.documentElement;
-                html.classList.toggle('dark');
-                localStorage.setItem('theme', html.classList.contains('dark') ? 'dark' : 'light');
-              }}
-              aria-label="Toggle dark mode"
-              style={{
-                padding: '8px',
-                borderRadius: '8px',
-                border: 'none',
-                background: 'transparent',
-                cursor: 'pointer',
-                transition: 'all 0.2s',
-                color: '#6b7280'
-              }}
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-              </svg>
-            </button>
-
             {/* Notifications */}
             <div style={{ position: 'relative' }} ref={notificationsRef}>
               <button

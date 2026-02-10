@@ -23,7 +23,7 @@ import TaskPreview from "@/components/TaskPreview";
 import OnboardingTour from "@/components/OnboardingTour";
 import { importTasks } from "@/lib/importTasks";
 import { useRealtimeTasks } from "@/lib/useRealtime";
-import "@/lib/memoryCleanup"; // Import memory cleanup
+import "@/lib/memoryCleanup";
 
 export default function DashboardClient({ initialTasks, users, activities, currentUser }) {
   const [filters, setFilters] = useState({
@@ -41,6 +41,16 @@ export default function DashboardClient({ initialTasks, users, activities, curre
   const [activeProject, setActiveProject] = useState(null);
   const [showAdvancedFeatures, setShowAdvancedFeatures] = useState(false);
   const [showMyTasks, setShowMyTasks] = useState(false);
+  const [isDark, setIsDark] = useState(false);
+
+  useEffect(() => {
+    setIsDark(document.documentElement.classList.contains('dark'));
+    const observer = new MutationObserver(() => {
+      setIsDark(document.documentElement.classList.contains('dark'));
+    });
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+    return () => observer.disconnect();
+  }, []);
 
   // Real-time updates
   const isConnected = useRealtimeTasks(useCallback((payload) => {
@@ -144,7 +154,12 @@ export default function DashboardClient({ initialTasks, users, activities, curre
   }, [isModalOpen, showAdvancedFeatures]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-slate-900 dark:to-slate-800 transition-colors duration-300 p-6">
+    <div style={{
+      background: isDark ? '#0f172a' : 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
+      minHeight: '100vh',
+      padding: '24px',
+      transition: 'background 0.3s'
+    }}>
       {/* Onboarding Tour */}
       <OnboardingTour />
       
@@ -196,41 +211,81 @@ export default function DashboardClient({ initialTasks, users, activities, curre
           <StatCard 
             title="Total Tasks" 
             value={stats.total} 
-            icon="📋" 
+            icon={(
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={isDark ? "white" : "#7c6df2"} strokeWidth="2">
+                <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+              </svg>
+            )}
             color="#7c6df2"
-            bgColor="#f0f4ff"
+            bgColor={isDark ? 'linear-gradient(135deg, #4f46e5, #7c3aed)' : '#f0f4ff'}
             onClick={() => setFilters({ search: '', assignee: '', priority: '', status: '' })}
+            isDark={isDark}
           />
           <StatCard 
             title="In Progress" 
             value={stats.inProgress} 
-            icon="⚡" 
+            icon={(
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={isDark ? "white" : "#f59e0b"} strokeWidth="2">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M12 6v6l4 2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            )}
             color="#f59e0b"
-            bgColor="#fffbeb"
+            bgColor={isDark ? 'linear-gradient(135deg, #f59e0b, #fb923c)' : '#fffbeb'}
             onClick={() => setFilters({ ...filters, status: 'in_progress' })}
+            isDark={isDark}
           />
           <StatCard 
             title="Completed" 
             value={stats.completed} 
-            icon="✅" 
+            icon={(
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={isDark ? "white" : "#10b981"} strokeWidth="2">
+                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            )}
             color="#10b981"
-            bgColor="#ecfdf5"
+            bgColor={isDark ? 'linear-gradient(135deg, #059669, #10b981)' : '#ecfdf5'}
             onClick={() => setFilters({ ...filters, status: 'done' })}
+            isDark={isDark}
           />
-          <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm border border-gray-200 dark:border-slate-700 transition-colors">
+          <div style={{
+            background: isDark ? 'linear-gradient(135deg, #ec4899, #f43f5e)' : 'white',
+            borderRadius: '16px',
+            padding: '24px',
+            boxShadow: isDark ? '0 8px 24px rgba(236,72,153,0.3)' : '0 1px 3px rgba(0,0,0,0.05)',
+            border: isDark ? 'none' : '1px solid #e2e8f0',
+            transition: 'all 0.3s'
+          }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
-              <p className="text-sm text-gray-600 dark:text-gray-400 font-medium">
+              <p style={{
+                fontSize: '14px',
+                color: isDark ? 'white' : '#64748b',
+                fontWeight: '600'
+              }}>
                 Completion Rate
               </p>
-              <span className="bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 px-2 py-1 rounded-xl text-xs font-semibold">
+              <span style={{
+                background: isDark ? 'rgba(255,255,255,0.2)' : '#f0f4ff',
+                color: isDark ? 'white' : '#7c6df2',
+                padding: '4px 8px',
+                borderRadius: '12px',
+                fontSize: '12px',
+                fontWeight: '600'
+              }}>
                 {Math.round(completionRate)}%
               </span>
             </div>
-            <div className="w-full h-2 bg-gray-100 dark:bg-slate-700 rounded-full overflow-hidden">
+            <div style={{
+              width: '100%',
+              height: '8px',
+              background: isDark ? 'rgba(255,255,255,0.2)' : '#f1f5f9',
+              borderRadius: '4px',
+              overflow: 'hidden'
+            }}>
               <div style={{
                 width: `${completionRate}%`,
                 height: '100%',
-                background: 'linear-gradient(90deg, #7c6df2, #a855f7)',
+                background: isDark ? 'white' : 'linear-gradient(90deg, #7c6df2, #a855f7)',
                 transition: 'width 0.5s ease'
               }} />
             </div>
@@ -249,11 +304,20 @@ export default function DashboardClient({ initialTasks, users, activities, curre
         <button
           onClick={() => setShowMyTasks(!showMyTasks)}
           title="Show only my tasks"
-          className="px-4 py-3 rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-300 hover:bg-purple-50 dark:hover:bg-purple-900/20 font-semibold text-sm transition-all flex items-center gap-2"
           style={{
-            background: showMyTasks ? '#7c6df2' : undefined,
-            color: showMyTasks ? 'white' : undefined,
-            borderColor: showMyTasks ? '#7c6df2' : undefined
+            padding: '12px 16px',
+            borderRadius: '10px',
+            border: 'none',
+            background: showMyTasks ? 'linear-gradient(135deg, #6366f1, #8b5cf6)' : (isDark ? '#1e293b' : 'white'),
+            color: showMyTasks ? 'white' : (isDark ? '#cbd5e1' : '#475569'),
+            cursor: 'pointer',
+            fontSize: '14px',
+            fontWeight: 600,
+            transition: 'all 0.2s',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            boxShadow: showMyTasks && isDark ? '0 4px 12px rgba(99,102,241,0.4)' : 'none'
           }}
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -277,7 +341,25 @@ export default function DashboardClient({ initialTasks, users, activities, curre
           aria-label="Search tasks by title"
           value={filters.search}
           onChange={(e) => setFilters({ ...filters, search: e.target.value })}
-          className="flex-1 min-w-[300px] px-4 py-3 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
+          style={{
+            flex: '1 1 300px',
+            padding: '12px 16px',
+            borderRadius: '12px',
+            border: isDark ? '1px solid #334155' : '1px solid #e2e8f0',
+            background: isDark ? '#1e293b' : 'white',
+            color: isDark ? '#f1f5f9' : '#0f172a',
+            fontSize: '14px',
+            outline: 'none',
+            transition: 'all 0.2s'
+          }}
+          onFocus={(e) => {
+            e.target.style.borderColor = '#7c6df2';
+            e.target.style.boxShadow = '0 0 0 3px rgba(124,109,242,0.1)';
+          }}
+          onBlur={(e) => {
+            e.target.style.borderColor = isDark ? '#334155' : '#e2e8f0';
+            e.target.style.boxShadow = 'none';
+          }}
         />
 
         {/* View Switcher */}
@@ -406,8 +488,16 @@ export default function DashboardClient({ initialTasks, users, activities, curre
 
       {/* Advanced Features (collapsible) */}
       {showAdvancedFeatures && (
-        <div className="bg-white dark:bg-slate-800 rounded-xl p-5 mb-6 border border-gray-200 dark:border-slate-700 shadow-sm transition-colors">
-          <h3 className="text-base font-semibold mb-4 text-gray-900 dark:text-white">Advanced Features</h3>
+        <div style={{
+          background: isDark ? '#1e293b' : 'white',
+          borderRadius: '12px',
+          padding: '20px',
+          marginBottom: '24px',
+          border: isDark ? '1px solid #334155' : '1px solid #e2e8f0',
+          boxShadow: isDark ? '0 4px 12px rgba(0,0,0,0.3)' : '0 1px 3px rgba(0,0,0,0.05)',
+          transition: 'all 0.3s'
+        }}>
+          <h3 style={{ fontSize: '16px', fontWeight: 600, marginBottom: '16px', color: isDark ? '#f1f5f9' : '#0f172a' }}>Advanced Features</h3>
           
           <ProjectsManager 
             currentUser={currentUser} 
@@ -466,7 +556,14 @@ export default function DashboardClient({ initialTasks, users, activities, curre
       {/* Main Content */}
       <div>
         {viewMode === 'kanban' && (
-          <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm border border-gray-200 dark:border-slate-700 transition-colors">
+          <div style={{
+            background: isDark ? '#1e293b' : 'white',
+            borderRadius: '16px',
+            padding: '24px',
+            boxShadow: isDark ? '0 8px 24px rgba(0,0,0,0.4)' : '0 1px 3px rgba(0,0,0,0.05)',
+            border: isDark ? '1px solid #334155' : '1px solid #e2e8f0',
+            transition: 'all 0.3s'
+          }}>
             <div style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(3, 1fr)',
@@ -576,8 +673,9 @@ export default function DashboardClient({ initialTasks, users, activities, curre
   );
 }
 
-function StatCard({ title, value, icon, color, bgColor, onClick }) {
+function StatCard({ title, value, icon, color, bgColor, onClick, isDark }) {
   const Component = onClick ? 'button' : 'div';
+  const isGradient = typeof bgColor === 'string' && bgColor.includes('gradient');
   
   return (
     <Component
@@ -594,22 +692,43 @@ function StatCard({ title, value, icon, color, bgColor, onClick }) {
       onMouseEnter={(e) => {
         if (onClick) {
           e.currentTarget.style.transform = 'translateY(-2px)';
+          e.currentTarget.style.boxShadow = isDark && isGradient ? '0 12px 32px rgba(0,0,0,0.5)' : '0 8px 25px rgba(0,0,0,0.15)';
         }
       }}
       onMouseLeave={(e) => {
         if (onClick) {
           e.currentTarget.style.transform = 'translateY(0)';
+          e.currentTarget.style.boxShadow = isDark && isGradient ? '0 8px 24px rgba(0,0,0,0.3)' : '0 1px 3px rgba(0,0,0,0.05)';
         }
       }}
-      className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm border border-gray-200 dark:border-slate-700 transition-all hover:shadow-lg cursor-pointer"
-      style={{ outline: 'none', width: '100%', textAlign: 'left' }}
+      style={{
+        background: isGradient ? bgColor : (isDark ? '#1e293b' : 'white'),
+        borderRadius: '16px',
+        padding: '24px',
+        boxShadow: isDark && isGradient ? '0 8px 24px rgba(0,0,0,0.3)' : '0 1px 3px rgba(0,0,0,0.05)',
+        border: isDark && !isGradient ? '1px solid #334155' : (isDark ? 'none' : '1px solid #e2e8f0'),
+        transition: 'all 0.2s ease',
+        cursor: onClick ? 'pointer' : 'default',
+        textAlign: 'left',
+        width: '100%',
+        outline: 'none'
+      }}
     >
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div>
-          <p className="text-sm text-gray-600 dark:text-gray-400 mb-1 font-medium">
+          <p style={{
+            fontSize: '14px',
+            color: isGradient && isDark ? 'rgba(255,255,255,0.9)' : (isDark ? '#94a3b8' : '#475569'),
+            marginBottom: '4px',
+            fontWeight: '600'
+          }}>
             {title}
           </p>
-          <p className="text-3xl font-bold text-gray-900 dark:text-white">
+          <p style={{
+            fontSize: '30px',
+            fontWeight: '700',
+            color: isGradient && isDark ? 'white' : (isDark ? '#f1f5f9' : '#0f172a')
+          }}>
             {value}
           </p>
         </div>
@@ -617,7 +736,7 @@ function StatCard({ title, value, icon, color, bgColor, onClick }) {
           width: '48px',
           height: '48px',
           borderRadius: '12px',
-          background: bgColor,
+          background: isGradient && isDark ? 'rgba(255,255,255,0.2)' : bgColor,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',

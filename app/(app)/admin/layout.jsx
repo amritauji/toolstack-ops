@@ -2,23 +2,29 @@ import { redirect } from "next/navigation";
 import { createSupabaseServer } from "@/lib/supabaseServer";
 
 export default async function AdminLayout({ children }) {
-  const supabase = await createSupabaseServer();
-  const { data } = await supabase.auth.getUser();
+  try {
+    const supabase = await createSupabaseServer();
+    const { data, error: authError } = await supabase.auth.getUser();
 
-  if (!data.user) {
+    if (authError || !data.user) {
+      redirect("/login");
+    }
+
+    // Check user role
+    const { data: profile, error: profileError } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", data.user.id)
+      .single();
+
+    // Security: Explicitly check for null/undefined profile
+    if (!profile || profileError || profile.role !== "admin") {
+      redirect("/dashboard");
+    }
+
+    return <>{children}</>;
+  } catch (error) {
+    console.error('Admin layout error:', error);
     redirect("/login");
   }
-
-  // Check user role
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", data.user.id)
-    .single();
-
-  if (profile?.role !== "admin") {
-    redirect("/dashboard"); // Redirect non-admins to dashboard
-  }
-
-  return <>{children}</>;
 }

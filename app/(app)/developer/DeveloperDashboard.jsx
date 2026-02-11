@@ -18,6 +18,7 @@ export default function DeveloperDashboard({ users }) {
       toast.success(`${userName} deleted successfully`);
       window.location.reload();
     } catch (error) {
+      console.error('Delete error:', error);
       toast.error("Failed to delete user: " + error.message);
     }
   };
@@ -29,6 +30,7 @@ export default function DeveloperDashboard({ users }) {
       setShowRoleChange(null);
       window.location.reload();
     } catch (error) {
+      console.error('Role change error:', error);
       toast.error("Failed to update role: " + error.message);
     }
   };

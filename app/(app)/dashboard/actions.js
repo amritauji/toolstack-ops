@@ -14,6 +14,7 @@ export async function changeTaskStatus(formData) {
     revalidatePath("/dashboard");
     return { success: true };
   } catch (error) {
+    console.error('Change task status error:', error);
     return { error: error.message };
   }
 }
@@ -34,6 +35,7 @@ export async function assignTaskAction(formData) {
     revalidatePath("/dashboard");
     return { success: true };
   } catch (error) {
+    console.error('Assign task error:', error);
     return { error: error.message };
   }
 }

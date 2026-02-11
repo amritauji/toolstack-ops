@@ -11,40 +11,50 @@ export const metadata = {
 };
 
 export default async function AnalyticsPage() {
-  const supabase = await createSupabaseServer();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect('/login');
+  try {
+    const supabase = await createSupabaseServer();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) redirect('/login');
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', user.id)
-    .single();
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', user.id)
+      .single();
 
-  // Check if user is admin or developer
-  if (profile?.role !== 'admin' && profile?.role !== 'developer') {
-    redirect('/dashboard');
+    // Check if user is admin or developer
+    if (profile?.role !== 'admin' && profile?.role !== 'developer') {
+      redirect('/dashboard');
+    }
+
+    const [taskMetrics, teamMetrics, timeline, recentActivity, users] = await Promise.all([
+      getTaskMetrics(),
+      getTeamMetrics(),
+      getActivityTimeline(),
+      getRecentActivity(10),
+      getAssignableUsers()
+    ]);
+
+    return (
+      <div style={{ padding: '24px' }}>
+        <DashboardHeader profile={profile} />
+        <AdminDashboard
+          taskMetrics={taskMetrics}
+          teamMetrics={teamMetrics}
+          timeline={timeline}
+          recentActivity={recentActivity}
+          users={users}
+          currentUserRole={profile?.role}
+        />
+      </div>
+    );
+  } catch (error) {
+    console.error('Analytics page error:', error);
+    return (
+      <div style={{ padding: '24px', textAlign: 'center' }}>
+        <h2>Failed to load analytics</h2>
+        <p>{error.message}</p>
+      </div>
+    );
   }
-
-  const [taskMetrics, teamMetrics, timeline, recentActivity, users] = await Promise.all([
-    getTaskMetrics(),
-    getTeamMetrics(),
-    getActivityTimeline(),
-    getRecentActivity(10),
-    getAssignableUsers()
-  ]);
-
-  return (
-    <div style={{ padding: '24px' }}>
-      <DashboardHeader profile={profile} />
-      <AdminDashboard
-        taskMetrics={taskMetrics}
-        teamMetrics={teamMetrics}
-        timeline={timeline}
-        recentActivity={recentActivity}
-        users={users}
-        currentUserRole={profile?.role}
-      />
-    </div>
-  );
 }

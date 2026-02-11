@@ -19,6 +19,7 @@ export default async function DashboardPage() {
       />
     );
   } catch (error) {
+    console.error('Dashboard load error:', error);
     return (
       <div style={{ padding: '24px', textAlign: 'center' }}>
         <h2>Failed to load dashboard</h2>

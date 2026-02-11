@@ -4,7 +4,9 @@ import { useEffect } from 'react';
 
 export default function Error({ error, reset }) {
   useEffect(() => {
-    console.error('Application error:', error);
+    if (error) {
+      console.error('Application error:', error);
+    }
   }, [error]);
 
   return (

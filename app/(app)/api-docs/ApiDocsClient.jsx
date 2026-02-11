@@ -10,12 +10,24 @@ export default function ApiDocsClient({ profile }) {
   const [activeTab, setActiveTab] = useState('overview');
 
   useEffect(() => {
-    loadApiKey();
+    const loadKey = async () => {
+      try {
+        const data = await getApiKey();
+        setApiKey(data?.api_key);
+      } catch (error) {
+        console.error('Load API key error:', error);
+      }
+    };
+    loadKey();
   }, []);
 
   const loadApiKey = async () => {
-    const data = await getApiKey();
-    setApiKey(data?.api_key);
+    try {
+      const data = await getApiKey();
+      setApiKey(data?.api_key);
+    } catch (error) {
+      console.error('Load API key error:', error);
+    }
   };
 
   const handleGenerate = async () => {
@@ -24,6 +36,7 @@ export default function ApiDocsClient({ profile }) {
       const key = await generateApiKey();
       setApiKey(key);
     } catch (error) {
+      console.error('Generate API key error:', error);
       alert(error.message);
     } finally {
       setLoading(false);

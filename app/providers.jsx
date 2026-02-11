@@ -13,23 +13,28 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     const load = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
 
-      if (!session) {
+        if (!session) {
+          setLoading(false);
+          return;
+        }
+
+        setUser(session.user);
+
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("id, full_name, username, email, avatar_url, role, last_login")
+          .eq("id", session.user.id)
+          .single();
+
+        setProfile(profile);
+      } catch (error) {
+        console.error('Auth load error:', error);
+      } finally {
         setLoading(false);
-        return;
       }
-
-      setUser(session.user);
-
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("id, full_name, username, email, avatar_url, role, last_login")
-        .eq("id", session.user.id)
-        .single();
-
-      setProfile(profile);
-      setLoading(false);
     };
 
     load();

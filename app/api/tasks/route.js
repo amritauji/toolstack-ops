@@ -15,40 +15,40 @@ const trackedGetTasks = withPerformanceTracking('/api/tasks', async (supabase, u
 });
 
 export async function GET(request) {
-  const rateLimitResult = apiRateLimit(request);
-  if (!rateLimitResult.success) {
-    return Response.json(
-      { error: 'Too many requests' },
-      { 
-        status: 429,
-        headers: {
-          'X-RateLimit-Limit': rateLimitResult.limit.toString(),
-          'X-RateLimit-Remaining': rateLimitResult.remaining.toString(),
-          'X-RateLimit-Reset': rateLimitResult.resetTime.toISOString()
+  try {
+    const rateLimitResult = apiRateLimit(request);
+    if (!rateLimitResult.success) {
+      return Response.json(
+        { error: 'Too many requests' },
+        { 
+          status: 429,
+          headers: {
+            'X-RateLimit-Limit': rateLimitResult.limit.toString(),
+            'X-RateLimit-Remaining': rateLimitResult.remaining.toString(),
+            'X-RateLimit-Reset': rateLimitResult.resetTime.toISOString()
+          }
         }
+      );
+    }
+
+    const cookieStore = await cookies();
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+      {
+        cookies: {
+          get(name) {
+            return cookieStore.get(name)?.value;
+          },
+        },
       }
     );
-  }
 
-  const cookieStore = await cookies();
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-    {
-      cookies: {
-        get(name) {
-          return cookieStore.get(name)?.value;
-        },
-      },
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      return Response.json({ error: "Unauthorized" }, { status: 401 });
     }
-  );
 
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) {
-    return Response.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  try {
     const data = await trackedGetTasks(supabase, user.id);
     
     return Response.json(data, {
@@ -59,49 +59,55 @@ export async function GET(request) {
       }
     });
   } catch (error) {
+    console.error('GET /api/tasks error:', error);
     return Response.json({ error: error.message }, { status: 500 });
   }
 }
 
 export async function POST(request) {
-  const rateLimitResult = apiRateLimit(request);
-  if (!rateLimitResult.success) {
-    return Response.json(
-      { error: 'Too many requests' },
-      { status: 429 }
-    );
-  }
-
-  const cookieStore = await cookies();
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-    {
-      cookies: {
-        get(name) {
-          return cookieStore.get(name)?.value;
-        },
-      },
+  try {
+    const rateLimitResult = apiRateLimit(request);
+    if (!rateLimitResult.success) {
+      return Response.json(
+        { error: 'Too many requests' },
+        { status: 429 }
+      );
     }
-  );
 
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) {
-    return Response.json({ error: "Unauthorized" }, { status: 401 });
-  }
+    const cookieStore = await cookies();
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+      {
+        cookies: {
+          get(name) {
+            return cookieStore.get(name)?.value;
+          },
+        },
+      }
+    );
 
-  const body = await request.json();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      return Response.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
-  const { error } = await supabase.from("tasks").insert({
-    title: body.title,
-    assigned_to: body.assigned_to || null,
-    status: "todo",
-    created_by: user.id,
-  });
+    const body = await request.json();
 
-  if (error) {
+    const { error } = await supabase.from("tasks").insert({
+      title: body.title,
+      assigned_to: body.assigned_to || null,
+      status: "todo",
+      created_by: user.id,
+    });
+
+    if (error) {
+      return Response.json({ error: error.message }, { status: 500 });
+    }
+
+    return Response.json({ success: true });
+  } catch (error) {
+    console.error('POST /api/tasks error:', error);
     return Response.json({ error: error.message }, { status: 500 });
   }
-
-  return Response.json({ success: true });
 }

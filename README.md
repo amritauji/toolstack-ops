@@ -1,4 +1,4 @@
-# ToolStack Ops
+# Nexboard
 
 <<<<<<< HEAD
 A production-ready, full-stack task management and project operations platform built with Next.js 16, React 19, and Supabase. Enterprise-grade security, real-time collaboration, developer tools, and comprehensive monitoring for professional teams.
@@ -70,8 +70,8 @@ A modern, full-stack task management and project operations platform built with 
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/YOUR_USERNAME/toolstack-ops.git
-   cd toolstack-ops
+   git clone https://github.com/YOUR_USERNAME/nexboard.git
+   cd nexboard
    ```
 
 2. **Install dependencies**
@@ -129,7 +129,7 @@ Visit [http://localhost:3000](http://localhost:3000) to see the application.
 ## 📁 Project Structure
 
 ```
-toolstack-ops/
+nexboard/
 ├── app/                    # Next.js App Router
 │   ├── (app)/             # Protected app routes
 <<<<<<< HEAD

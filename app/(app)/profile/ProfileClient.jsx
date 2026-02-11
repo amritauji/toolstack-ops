@@ -22,7 +22,12 @@ export default function ProfileClient({ profile, usage }) {
     }
 
     const reader = new FileReader();
-    reader.onload = (e) => setAvatarPreview(e.target.result);
+    reader.onload = (e) => {
+      const result = e.target?.result;
+      if (result && typeof result === 'string' && result.startsWith('data:image/')) {
+        setAvatarPreview(result);
+      }
+    };
     reader.readAsDataURL(file);
   };
 

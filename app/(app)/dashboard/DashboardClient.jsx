@@ -43,32 +43,41 @@ export default function DashboardClient({ initialTasks, users, activities, curre
   const [showMyTasks, setShowMyTasks] = useState(false);
 
   const isConnected = useRealtimeTasks(useCallback((payload) => {
-    if (typeof window !== 'undefined') {
-      window.location.reload();
+    try {
+      if (typeof window !== 'undefined') {
+        window.location.reload();
+      }
+    } catch (error) {
+      console.error('Reload failed:', error);
     }
   }, []));
 
   const basicFilteredTasks = useMemo(() => {
-    if (useAdvancedFilters) return filteredTasks;
-    
-    let tasks = initialTasks;
-    
-    if (showMyTasks) {
-      tasks = tasks.filter(task => task.assigned_to === currentUser?.id);
+    try {
+      if (useAdvancedFilters) return filteredTasks;
+      
+      let tasks = initialTasks;
+      
+      if (showMyTasks) {
+        tasks = tasks.filter(task => task.assigned_to === currentUser?.id);
+      }
+      
+      return tasks.filter(task => {
+        if (filters.search && !task.title.toLowerCase().includes(filters.search.toLowerCase())) {
+          return false;
+        }
+        if (filters.assignee) {
+          if (filters.assignee === "unassigned" && task.assigned_to) return false;
+          if (filters.assignee !== "unassigned" && task.assigned_to !== filters.assignee) return false;
+        }
+        if (filters.priority && task.priority !== filters.priority) return false;
+        if (filters.status && task.status !== filters.status) return false;
+        return true;
+      });
+    } catch (error) {
+      console.error('Filter error:', error);
+      return initialTasks;
     }
-    
-    return tasks.filter(task => {
-      if (filters.search && !task.title.toLowerCase().includes(filters.search.toLowerCase())) {
-        return false;
-      }
-      if (filters.assignee) {
-        if (filters.assignee === "unassigned" && task.assigned_to) return false;
-        if (filters.assignee !== "unassigned" && task.assigned_to !== filters.assignee) return false;
-      }
-      if (filters.priority && task.priority !== filters.priority) return false;
-      if (filters.status && task.status !== filters.status) return false;
-      return true;
-    });
   }, [initialTasks, filters, filteredTasks, useAdvancedFilters, showMyTasks, currentUser]);
 
   const currentTasks = useAdvancedFilters ? filteredTasks : basicFilteredTasks;

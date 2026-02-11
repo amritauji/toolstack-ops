@@ -1,0 +1,12 @@
+# Allow all search engines
+User-agent: *
+Allow: /
+
+# Disallow admin and API routes
+Disallow: /api/
+Disallow: /admin/
+Disallow: /developer/
+Disallow: /dashboard/
+
+# Sitemap
+Sitemap: https://nexboard.me/sitemap.xml

@@ -27,6 +27,9 @@ sql/secure_api_keys.sql
 
 -- 2.2 Fix security warnings
 sql/fix_security_warnings.sql
+
+-- 2.3 Fix function search_path (Supabase Advisor warnings)
+sql/fix_function_search_path.sql
 ```
 
 ## 3. Multi-Tenancy (Run Third)

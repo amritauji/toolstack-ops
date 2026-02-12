@@ -74,8 +74,13 @@ END $$;
 -- Add org_id to task_comments
 ALTER TABLE task_comments ADD COLUMN IF NOT EXISTS org_id UUID REFERENCES organizations(id);
 
--- Add org_id to attachments
-ALTER TABLE attachments ADD COLUMN IF NOT EXISTS org_id UUID REFERENCES organizations(id);
+-- Add org_id to attachments (if exists)
+DO $$ 
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'attachments') THEN
+    ALTER TABLE attachments ADD COLUMN IF NOT EXISTS org_id UUID REFERENCES organizations(id);
+  END IF;
+END $$;
 
 -- Add org_id to api_keys
 ALTER TABLE api_keys ADD COLUMN IF NOT EXISTS org_id UUID REFERENCES organizations(id);
@@ -90,7 +95,14 @@ CREATE INDEX IF NOT EXISTS idx_org_invites_token ON org_invites(token);
 CREATE INDEX IF NOT EXISTS idx_org_invites_email ON org_invites(email);
 CREATE INDEX IF NOT EXISTS idx_tasks_org_id ON tasks(org_id);
 CREATE INDEX IF NOT EXISTS idx_task_comments_org_id ON task_comments(org_id);
-CREATE INDEX IF NOT EXISTS idx_attachments_org_id ON attachments(org_id);
+
+-- Conditional index for attachments
+DO $$ 
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'attachments') THEN
+    CREATE INDEX IF NOT EXISTS idx_attachments_org_id ON attachments(org_id);
+  END IF;
+END $$;
 
 -- ============================================
 -- 6. ROW LEVEL SECURITY

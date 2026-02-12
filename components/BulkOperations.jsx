@@ -41,7 +41,7 @@ export default function BulkOperations({ tasks, users, selectedTasks, onSelectio
     }}>
       <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
         {/* Select All */}
-        <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 14 }}>
+        <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 14, color: '#0f172a' }}>
           <input
             type="checkbox"
             checked={selectedTasks.length === tasks.length && tasks.length > 0}

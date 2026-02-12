@@ -6,7 +6,6 @@ export default function ExportImport({ tasks, onImport }) {
   const [importing, setImporting] = useState(false);
 
   const exportToCSV = () => {
-    const headers = ["Title", "Status", "Priority", "Assigned To", "Due Date", "Created"];
     const rows = tasks.map(task => [
       task.title,
       task.status,
@@ -16,7 +15,10 @@ export default function ExportImport({ tasks, onImport }) {
       new Date(task.created_at).toLocaleDateString()
     ]);
 
-    const csv = [headers, ...rows]
+    const csv = [
+      ["Title", "Status", "Priority", "Assigned To", "Due Date", "Created"],
+      ...rows
+    ]
       .map(row => row.map(field => `"${field}"`).join(","))
       .join("\n");
 
@@ -193,7 +195,7 @@ const styles = {
   title: {
     fontSize: 14,
     fontWeight: 600,
-    color: '#374151',
+    color: '#0f172a',
     marginBottom: 8,
   },
   buttons: {
@@ -209,6 +211,7 @@ const styles = {
     fontSize: 13,
     cursor: 'pointer',
     transition: 'all 0.2s ease',
+    color: '#0f172a',
   },
   fileLabel: {
     display: 'inline-block',
@@ -219,6 +222,7 @@ const styles = {
     fontSize: 13,
     cursor: 'pointer',
     transition: 'all 0.2s ease',
+    color: '#0f172a',
   },
   fileInput: {
     display: 'none',

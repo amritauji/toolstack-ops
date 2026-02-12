@@ -5,68 +5,25 @@ import { Button, Badge } from "@/components/ui/ModernComponents";
 import { supabase } from "@/lib/supabaseClient";
 
 export default function ProjectsManager({ currentUser, onProjectChange }) {
-  const [projects, setProjects] = useState([]);
-  const [activeProject, setActiveProject] = useState(null);
+  const [projects, setProjects] = useState([{
+    id: 'default',
+    name: 'Default Project',
+    description: 'Default workspace',
+    color: '#7c6df2'
+  }]);
+  const [activeProject, setActiveProject] = useState({
+    id: 'default',
+    name: 'Default Project',
+    description: 'Default workspace',
+    color: '#7c6df2'
+  });
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [newProject, setNewProject] = useState({ name: "", description: "", color: "#7c6df2" });
 
   useEffect(() => {
-    // Use default project without trying to fetch from database
-    const defaultProject = {
-      id: 'default',
-      name: 'Default Project',
-      description: 'Default workspace',
-      color: '#7c6df2',
-      created_by: currentUser?.id
-    };
-    setProjects([defaultProject]);
-    setActiveProject(defaultProject);
-    onProjectChange?.(defaultProject);
-  }, [currentUser?.id, onProjectChange]);
+    onProjectChange?.(activeProject);
+  }, []);
 
-  const loadProjects = async () => {
-    try {
-      // First check if projects table exists, if not create a default project
-      const { data, error } = await supabase
-        .from('projects')
-        .select('*')
-        .order('created_at', { ascending: false });
-      
-      if (error) {
-        console.log('Projects table not found, using default project');
-        const defaultProject = {
-          id: 'default',
-          name: 'Default Project',
-          description: 'Default workspace',
-          color: '#7c6df2',
-          created_by: currentUser?.id
-        };
-        setProjects([defaultProject]);
-        setActiveProject(defaultProject);
-        onProjectChange?.(defaultProject);
-        return;
-      }
-      
-      setProjects(data || []);
-      
-      if (data?.length > 0 && !activeProject) {
-        setActiveProject(data[0]);
-        onProjectChange?.(data[0]);
-      }
-    } catch (error) {
-      console.log('Using default project due to error:', error);
-      const defaultProject = {
-        id: 'default',
-        name: 'Default Project',
-        description: 'Default workspace',
-        color: '#7c6df2',
-        created_by: currentUser?.id
-      };
-      setProjects([defaultProject]);
-      setActiveProject(defaultProject);
-      onProjectChange?.(defaultProject);
-    }
-  };
 
   const createProject = async () => {
     if (!newProject.name.trim()) return;
@@ -166,7 +123,7 @@ export default function ProjectsManager({ currentUser, onProjectChange }) {
               borderRadius: '50%',
               background: activeProject.color
             }} />
-            <span style={{ fontWeight: '600', color: '#111827' }}>
+            <span style={{ fontWeight: '600', color: '#0f172a' }}>
               {activeProject.name}
             </span>
             <Badge variant="secondary" size="sm">Active</Badge>
@@ -198,7 +155,9 @@ export default function ProjectsManager({ currentUser, onProjectChange }) {
                 padding: '8px 12px',
                 border: '1px solid #d1d5db',
                 borderRadius: '6px',
-                fontSize: '14px'
+                fontSize: '14px',
+                color: '#0f172a',
+                background: 'white'
               }}
             />
             <textarea
@@ -211,11 +170,13 @@ export default function ProjectsManager({ currentUser, onProjectChange }) {
                 borderRadius: '6px',
                 fontSize: '14px',
                 minHeight: '60px',
-                resize: 'vertical'
+                resize: 'vertical',
+                color: '#0f172a',
+                background: 'white'
               }}
             />
             <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-              <label style={{ fontSize: '14px', fontWeight: '500' }}>Color:</label>
+              <label style={{ fontSize: '14px', fontWeight: '500', color: '#0f172a' }}>Color:</label>
               <input
                 type="color"
                 value={newProject.color}
@@ -251,7 +212,8 @@ export default function ProjectsManager({ currentUser, onProjectChange }) {
               background: activeProject?.id === project.id ? `${project.color}10` : 'white',
               cursor: 'pointer',
               fontSize: '14px',
-              transition: 'all 0.2s ease'
+              transition: 'all 0.2s ease',
+              color: '#0f172a'
             }}
           >
             <div style={{

@@ -77,7 +77,6 @@ export default function DashboardClient({ initialTasks, users, activities, curre
         toast.error('Failed to update task');
       } else {
         toast.success('Task updated!');
-        window.location.reload();
       }
     }
   };

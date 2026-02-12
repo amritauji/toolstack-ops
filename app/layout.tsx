@@ -4,6 +4,7 @@ import { UIProvider } from '@/components/UIProvider';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/next';
+import '@/lib/suppressErrors';
 import './globals.css'
 import './mobile.css'
 

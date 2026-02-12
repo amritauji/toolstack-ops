@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { createSupabaseServer } from "@/lib/supabaseServer";
 import AppLayoutClient from "./AppLayoutClient";
 import Navbar from "@/components/Navbar";
+import ErrorBoundary from "@/components/ErrorBoundary";
 
 export default async function AppLayout({ children }) {
   try {
@@ -47,10 +48,12 @@ export default async function AppLayout({ children }) {
     }
 
     return (
-      <div data-barba-namespace="dashboard">
-        <Navbar profile={profile} />
-        <AppLayoutClient>{children}</AppLayoutClient>
-      </div>
+      <ErrorBoundary>
+        <div data-barba-namespace="dashboard">
+          <Navbar profile={profile} />
+          <AppLayoutClient>{children}</AppLayoutClient>
+        </div>
+      </ErrorBoundary>
     );
   } catch (error) {
     console.error('Layout error:', error);

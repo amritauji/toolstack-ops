@@ -16,6 +16,7 @@ export default function Navbar({ profile }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const profileMenuRef = useRef(null);
+  const notificationsRef = useRef(null);
 
   // Handle scroll effect
   useEffect(() => {
@@ -33,9 +34,6 @@ export default function Navbar({ profile }) {
     const handleClickOutside = (e) => {
       if (profileMenuRef.current && !profileMenuRef.current.contains(e.target)) {
         setProfileMenuOpen(false);
-      }
-      if (notificationsRef.current && !notificationsRef.current.contains(e.target)) {
-        setNotificationsOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);

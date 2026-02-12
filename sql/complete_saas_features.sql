@@ -117,13 +117,15 @@ CREATE TABLE IF NOT EXISTS projects (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE INDEX idx_projects_org ON projects(org_id);
+CREATE INDEX IF NOT EXISTS idx_projects_org ON projects(org_id);
 
 ALTER TABLE projects ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Org members can view projects" ON projects;
 CREATE POLICY "Org members can view projects" ON projects
   FOR SELECT USING (is_org_member(org_id, auth.uid()));
 
+DROP POLICY IF EXISTS "Org admins can manage projects" ON projects;
 CREATE POLICY "Org admins can manage projects" ON projects
   FOR ALL USING (is_org_admin(org_id, auth.uid()));
 
@@ -132,12 +134,24 @@ DO $$
 BEGIN
   IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
                  WHERE table_name='tasks' AND column_name='project_id') THEN
-    ALTER TABLE tasks ADD COLUMN project_id UUID REFERENCES projects(id) ON DELETE SET NULL;
+    ALTER TABLE tasks ADD COLUMN project_id UUID;
     CREATE INDEX idx_tasks_project ON tasks(project_id);
   END IF;
 END $$;
 
--- 7. Function to create notification
+-- 7. Add foreign key constraint separately (after both tables exist)
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.table_constraints 
+    WHERE constraint_name = 'tasks_project_id_fkey'
+  ) THEN
+    ALTER TABLE tasks ADD CONSTRAINT tasks_project_id_fkey 
+      FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE SET NULL;
+  END IF;
+END $$;
+
+-- 8. Function to create notification
 CREATE OR REPLACE FUNCTION create_notification(
   p_user_id UUID,
   p_org_id UUID,
@@ -158,7 +172,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- 8. Function to process automations
+-- 9. Function to process automations
 CREATE OR REPLACE FUNCTION process_automation_triggers(
   p_trigger_type TEXT,
   p_task_id UUID,

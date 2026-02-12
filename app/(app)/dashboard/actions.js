@@ -1,7 +1,6 @@
 "use server";
 
 import { updateTaskStatus, updateTask } from "@/lib/tasks";
-import { revalidatePath } from "next/cache";
 
 export async function changeTaskStatus(formData) {
   try {
@@ -11,7 +10,6 @@ export async function changeTaskStatus(formData) {
     if (!taskId || !status) return { error: 'Missing required fields' };
 
     await updateTaskStatus(taskId, status);
-    revalidatePath("/dashboard");
     return { success: true };
   } catch (error) {
     console.error('Change task status error:', error);
@@ -32,7 +30,6 @@ export async function assignTaskAction(formData) {
     updateFormData.set("assigned_to", userId);
 
     await updateTask(updateFormData);
-    revalidatePath("/dashboard");
     return { success: true };
   } catch (error) {
     console.error('Assign task error:', error);

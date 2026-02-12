@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { generateApiKey, revokeApiKey, getApiKey } from '@/lib/apiKeys';
+import { generateApiKey, revokeApiKey, getApiKeys } from '@/lib/apiKeys';
 
 export default function ApiDocsClient({ profile }) {
   const [apiKey, setApiKey] = useState(null);
@@ -12,8 +12,10 @@ export default function ApiDocsClient({ profile }) {
   useEffect(() => {
     const loadKey = async () => {
       try {
-        const data = await getApiKey();
-        setApiKey(data?.api_key);
+        const keys = await getApiKeys();
+        if (keys && keys.length > 0) {
+          setApiKey(keys[0].key_prefix + '...');
+        }
       } catch (error) {
         console.error('Load API key error:', error);
       }
@@ -23,8 +25,10 @@ export default function ApiDocsClient({ profile }) {
 
   const loadApiKey = async () => {
     try {
-      const data = await getApiKey();
-      setApiKey(data?.api_key);
+      const keys = await getApiKeys();
+      if (keys && keys.length > 0) {
+        setApiKey(keys[0].key_prefix + '...');
+      }
     } catch (error) {
       console.error('Load API key error:', error);
     }
@@ -33,8 +37,8 @@ export default function ApiDocsClient({ profile }) {
   const handleGenerate = async () => {
     setLoading(true);
     try {
-      const key = await generateApiKey();
-      setApiKey(key);
+      const result = await generateApiKey('API Key');
+      setApiKey(result.key);
     } catch (error) {
       console.error('Generate API key error:', error);
       alert(error.message);
@@ -47,7 +51,10 @@ export default function ApiDocsClient({ profile }) {
     if (!confirm('Are you sure? This will invalidate your current API key.')) return;
     setLoading(true);
     try {
-      await revokeApiKey();
+      const keys = await getApiKeys();
+      if (keys && keys.length > 0) {
+        await revokeApiKey(keys[0].id);
+      }
       setApiKey(null);
     } catch (error) {
       alert(error.message);

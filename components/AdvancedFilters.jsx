@@ -169,7 +169,9 @@ export default function AdvancedFilters({ users, onFilter, tasks = [] }) {
               borderRadius: '8px',
               fontSize: '14px',
               outline: 'none',
-              transition: 'border-color 0.2s ease'
+              transition: 'border-color 0.2s ease',
+              color: '#0f172a',
+              background: 'white'
             }}
             onFocus={(e) => e.target.style.borderColor = '#7c6df2'}
             onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
@@ -197,7 +199,8 @@ export default function AdvancedFilters({ users, onFilter, tasks = [] }) {
               borderRadius: '8px',
               fontSize: '14px',
               outline: 'none',
-              background: 'white'
+              background: 'white',
+              color: '#0f172a'
             }}
           >
             <option value="">All Status</option>
@@ -228,7 +231,8 @@ export default function AdvancedFilters({ users, onFilter, tasks = [] }) {
               borderRadius: '8px',
               fontSize: '14px',
               outline: 'none',
-              background: 'white'
+              background: 'white',
+              color: '#0f172a'
             }}
           >
             <option value="">All Priorities</option>
@@ -259,7 +263,8 @@ export default function AdvancedFilters({ users, onFilter, tasks = [] }) {
               borderRadius: '8px',
               fontSize: '14px',
               outline: 'none',
-              background: 'white'
+              background: 'white',
+              color: '#0f172a'
             }}
           >
             <option value="">All Assignees</option>
@@ -305,7 +310,8 @@ export default function AdvancedFilters({ users, onFilter, tasks = [] }) {
                   borderRadius: '8px',
                   fontSize: '14px',
                   outline: 'none',
-                  background: 'white'
+                  background: 'white',
+                  color: '#0f172a'
                 }}
               >
                 <option value="">All Time</option>
@@ -337,7 +343,9 @@ export default function AdvancedFilters({ users, onFilter, tasks = [] }) {
                   border: '1px solid #d1d5db',
                   borderRadius: '8px',
                   fontSize: '14px',
-                  outline: 'none'
+                  outline: 'none',
+                  color: '#0f172a',
+                  background: 'white'
                 }}
               />
             </div>
@@ -363,7 +371,9 @@ export default function AdvancedFilters({ users, onFilter, tasks = [] }) {
                   border: '1px solid #d1d5db',
                   borderRadius: '8px',
                   fontSize: '14px',
-                  outline: 'none'
+                  outline: 'none',
+                  color: '#0f172a',
+                  background: 'white'
                 }}
               />
             </div>
@@ -444,7 +454,9 @@ export default function AdvancedFilters({ users, onFilter, tasks = [] }) {
                 borderRadius: '6px',
                 fontSize: '14px',
                 outline: 'none',
-                width: '200px'
+                width: '200px',
+                color: '#0f172a',
+                background: 'white'
               }}
             />
             <Button

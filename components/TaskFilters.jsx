@@ -35,7 +35,9 @@ export default function TaskFilters({ users, onFilter }) {
             padding: "8px 12px",
             border: "1px solid #e2e8f0",
             borderRadius: 6,
-            fontSize: 14
+            fontSize: 14,
+            color: "#0f172a",
+            background: "white"
           }}
         />
 
@@ -47,7 +49,9 @@ export default function TaskFilters({ users, onFilter }) {
             padding: "8px 12px",
             border: "1px solid #e2e8f0",
             borderRadius: 6,
-            fontSize: 14
+            fontSize: 14,
+            color: "#0f172a",
+            background: "white"
           }}
         >
           <option value="">All Assignees</option>
@@ -65,7 +69,9 @@ export default function TaskFilters({ users, onFilter }) {
             padding: "8px 12px",
             border: "1px solid #e2e8f0",
             borderRadius: 6,
-            fontSize: 14
+            fontSize: 14,
+            color: "#0f172a",
+            background: "white"
           }}
         >
           <option value="">All Priorities</option>
@@ -82,7 +88,9 @@ export default function TaskFilters({ users, onFilter }) {
             padding: "8px 12px",
             border: "1px solid #e2e8f0",
             borderRadius: 6,
-            fontSize: 14
+            fontSize: 14,
+            color: "#0f172a",
+            background: "white"
           }}
         >
           <option value="">All Statuses</option>

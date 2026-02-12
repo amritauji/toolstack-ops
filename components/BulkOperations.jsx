@@ -60,7 +60,9 @@ export default function BulkOperations({ tasks, users, selectedTasks, onSelectio
                 padding: "6px 10px",
                 border: "1px solid #e2e8f0",
                 borderRadius: 4,
-                fontSize: 14
+                fontSize: 14,
+                color: "#0f172a",
+                background: "white"
               }}
             >
               <option value="">Choose Action</option>
@@ -78,7 +80,9 @@ export default function BulkOperations({ tasks, users, selectedTasks, onSelectio
                   padding: "6px 10px",
                   border: "1px solid #e2e8f0",
                   borderRadius: 4,
-                  fontSize: 14
+                  fontSize: 14,
+                  color: "#0f172a",
+                  background: "white"
                 }}
               >
                 <option value="">Select Status</option>
@@ -96,7 +100,9 @@ export default function BulkOperations({ tasks, users, selectedTasks, onSelectio
                   padding: "6px 10px",
                   border: "1px solid #e2e8f0",
                   borderRadius: 4,
-                  fontSize: 14
+                  fontSize: 14,
+                  color: "#0f172a",
+                  background: "white"
                 }}
               >
                 <option value="">Select Priority</option>
@@ -114,7 +120,9 @@ export default function BulkOperations({ tasks, users, selectedTasks, onSelectio
                   padding: "6px 10px",
                   border: "1px solid #e2e8f0",
                   borderRadius: 4,
-                  fontSize: 14
+                  fontSize: 14,
+                  color: "#0f172a",
+                  background: "white"
                 }}
               >
                 <option value="">Select Assignee</option>

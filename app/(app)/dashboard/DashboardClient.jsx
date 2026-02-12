@@ -35,6 +35,7 @@ export default function DashboardClient({ initialTasks, users, activities, curre
     priority: "",
     status: ""
   });
+  const [tasks, setTasks] = useState(initialTasks);
   const [filteredTasks, setFilteredTasks] = useState(initialTasks);
   const [selectedTasks, setSelectedTasks] = useState([]);
   const [selectedTask, setSelectedTask] = useState(null);
@@ -82,26 +83,27 @@ export default function DashboardClient({ initialTasks, users, activities, curre
   };
 
   const isConnected = useRealtimeTasks(useCallback((payload) => {
-    try {
-      if (typeof window !== 'undefined') {
-        window.location.reload();
-      }
-    } catch (error) {
-      console.error('Reload failed:', error);
-    }
+    const { eventType, new: newRecord, old: oldRecord } = payload;
+    
+    setTasks(prev => {
+      if (eventType === 'INSERT') return [...prev, newRecord];
+      if (eventType === 'UPDATE') return prev.map(t => t.id === newRecord.id ? newRecord : t);
+      if (eventType === 'DELETE') return prev.filter(t => t.id !== oldRecord.id);
+      return prev;
+    });
   }, []));
 
   const basicFilteredTasks = useMemo(() => {
     try {
       if (useAdvancedFilters) return filteredTasks;
       
-      let tasks = initialTasks;
+      let taskList = tasks;
       
       if (showMyTasks) {
-        tasks = tasks.filter(task => task.assigned_to === currentUser?.id);
+        taskList = taskList.filter(task => task.assigned_to === currentUser?.id);
       }
       
-      return tasks.filter(task => {
+      return taskList.filter(task => {
         if (filters.search && !task.title.toLowerCase().includes(filters.search.toLowerCase())) {
           return false;
         }
@@ -115,9 +117,9 @@ export default function DashboardClient({ initialTasks, users, activities, curre
       });
     } catch (error) {
       console.error('Filter error:', error);
-      return initialTasks;
+      return tasks;
     }
-  }, [initialTasks, filters, filteredTasks, useAdvancedFilters, showMyTasks, currentUser]);
+  }, [tasks, filters, filteredTasks, useAdvancedFilters, showMyTasks, currentUser]);
 
   const currentTasks = useAdvancedFilters ? filteredTasks : basicFilteredTasks;
 
@@ -494,7 +496,7 @@ export default function DashboardClient({ initialTasks, users, activities, curre
             <AdvancedFilters 
               users={users} 
               onFilter={setFilteredTasks}
-              tasks={initialTasks}
+              tasks={tasks}
             />
           ) : (
             <TaskFilters users={users} onFilter={setFilters} />

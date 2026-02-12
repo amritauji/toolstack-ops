@@ -2,18 +2,18 @@
 
 import { useState, useEffect } from "react";
 import { Button, Badge } from "@/components/ui/ModernComponents";
-import { supabase } from "@/lib/supabaseClient";
+import { getAutomations, createAutomation, toggleAutomation as toggleAuto, deleteAutomation as deleteAuto } from "@/lib/automations";
+import toast from 'react-hot-toast';
 
-export default function AutomationManager({ currentUser }) {
+export default function AutomationManager() {
   const [automations, setAutomations] = useState([]);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [newAutomation, setNewAutomation] = useState({
     name: "",
-    trigger: "status_change",
-    condition: "",
-    action: "assign_user",
-    value: "",
-    enabled: true
+    trigger_type: "status_change",
+    trigger_config: {},
+    action_type: "assign_user",
+    action_config: {}
   });
 
   const triggers = [
@@ -21,96 +21,79 @@ export default function AutomationManager({ currentUser }) {
     { value: "priority_change", label: "Priority Changes" },
     { value: "due_date_approaching", label: "Due Date Approaching" },
     { value: "task_created", label: "Task Created" },
-    { value: "task_overdue", label: "Task Overdue" }
+    { value: "overdue", label: "Task Overdue" }
   ];
 
   const actions = [
     { value: "assign_user", label: "Assign to User" },
     { value: "change_priority", label: "Change Priority" },
     { value: "send_notification", label: "Send Notification" },
-    { value: "move_status", label: "Move to Status" },
-    { value: "add_comment", label: "Add Comment" }
+    { value: "change_status", label: "Change Status" }
   ];
 
   useEffect(() => {
-    loadAutomations();
+    const load = async () => {
+      try {
+        const data = await getAutomations();
+        setAutomations(data);
+      } catch {
+        // Silent fail
+      }
+    };
+    load();
   }, []);
 
-  const loadAutomations = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('automations')
-        .select('*')
-        .order('created_at', { ascending: false });
-      
-      if (error) throw error;
-      setAutomations(data || []);
-    } catch (error) {
-      console.error('Error loading automations:', error);
-    }
-  };
-
-  const createAutomation = async () => {
+  const handleCreate = async () => {
     if (!newAutomation.name.trim()) return;
     
     try {
-      const { data, error } = await supabase
-        .from('automations')
-        .insert([{
-          ...newAutomation,
-          created_by: currentUser.id
-        }])
-        .select()
-        .single();
+      const formData = new FormData();
+      formData.set('name', newAutomation.name);
+      formData.set('trigger_type', newAutomation.trigger_type);
+      formData.set('trigger_config', JSON.stringify(newAutomation.trigger_config));
+      formData.set('action_type', newAutomation.action_type);
+      formData.set('action_config', JSON.stringify(newAutomation.action_config));
       
-      if (error) throw error;
+      await createAutomation(formData);
+      toast.success('Automation created!');
       
-      setAutomations(prev => [data, ...prev]);
+      const updated = await getAutomations();
+      setAutomations(updated);
+      
       setNewAutomation({
         name: "",
-        trigger: "status_change",
-        condition: "",
-        action: "assign_user",
-        value: "",
-        enabled: true
+        trigger_type: "status_change",
+        trigger_config: {},
+        action_type: "assign_user",
+        action_config: {}
       });
       setShowCreateForm(false);
-    } catch (error) {
-      console.error('Error creating automation:', error);
+    } catch {
+      toast.error('Failed to create automation');
     }
   };
 
-  const toggleAutomation = async (id, enabled) => {
+  const handleToggle = async (id, isActive) => {
     try {
-      const { error } = await supabase
-        .from('automations')
-        .update({ enabled })
-        .eq('id', id);
-      
-      if (error) throw error;
-      
+      await toggleAuto(id, !isActive);
       setAutomations(prev => 
         prev.map(auto => 
-          auto.id === id ? { ...auto, enabled } : auto
+          auto.id === id ? { ...auto, is_active: !isActive } : auto
         )
       );
-    } catch (error) {
-      console.error('Error toggling automation:', error);
+      toast.success(isActive ? 'Automation disabled' : 'Automation enabled');
+    } catch {
+      toast.error('Failed to toggle automation');
     }
   };
 
-  const deleteAutomation = async (id) => {
+  const handleDelete = async (id) => {
     try {
-      const { error } = await supabase
-        .from('automations')
-        .delete()
-        .eq('id', id);
-      
-      if (error) throw error;
-      
+      await deleteAuto(id);
       setAutomations(prev => prev.filter(auto => auto.id !== id));
-    } catch (error) {
-      console.error('Error deleting automation:', error);
+      toast.success('Automation deleted');
+    } catch {
+      toast.error('Failed to delete automation');
     }
   };
 
@@ -195,8 +178,8 @@ export default function AutomationManager({ currentUser }) {
                   Trigger
                 </label>
                 <select
-                  value={newAutomation.trigger}
-                  onChange={(e) => setNewAutomation(prev => ({ ...prev, trigger: e.target.value }))}
+                  value={newAutomation.trigger_type}
+                  onChange={(e) => setNewAutomation(prev => ({ ...prev, trigger_type: e.target.value }))}
                   style={{
                     width: '100%',
                     padding: '8px 12px',
@@ -225,8 +208,8 @@ export default function AutomationManager({ currentUser }) {
                   Action
                 </label>
                 <select
-                  value={newAutomation.action}
-                  onChange={(e) => setNewAutomation(prev => ({ ...prev, action: e.target.value }))}
+                  value={newAutomation.action_type}
+                  onChange={(e) => setNewAutomation(prev => ({ ...prev, action_type: e.target.value }))}
                   style={{
                     width: '100%',
                     padding: '8px 12px',
@@ -245,58 +228,8 @@ export default function AutomationManager({ currentUser }) {
               </div>
             </div>
 
-            <div>
-              <label style={{
-                display: 'block',
-                fontSize: '14px',
-                fontWeight: '500',
-                color: '#374151',
-                marginBottom: '6px'
-              }}>
-                Condition
-              </label>
-              <input
-                type="text"
-                placeholder="e.g., priority = high"
-                value={newAutomation.condition}
-                onChange={(e) => setNewAutomation(prev => ({ ...prev, condition: e.target.value }))}
-                style={{
-                  width: '100%',
-                  padding: '8px 12px',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '8px',
-                  fontSize: '14px'
-                }}
-              />
-            </div>
-
-            <div>
-              <label style={{
-                display: 'block',
-                fontSize: '14px',
-                fontWeight: '500',
-                color: '#374151',
-                marginBottom: '6px'
-              }}>
-                Action Value
-              </label>
-              <input
-                type="text"
-                placeholder="e.g., user_id or status value"
-                value={newAutomation.value}
-                onChange={(e) => setNewAutomation(prev => ({ ...prev, value: e.target.value }))}
-                style={{
-                  width: '100%',
-                  padding: '8px 12px',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '8px',
-                  fontSize: '14px'
-                }}
-              />
-            </div>
-
             <div style={{ display: 'flex', gap: '12px' }}>
-              <Button variant="primary" onClick={createAutomation}>
+              <Button variant="primary" onClick={handleCreate}>
                 Create Automation
               </Button>
               <Button variant="ghost" onClick={() => setShowCreateForm(false)}>
@@ -316,7 +249,7 @@ export default function AutomationManager({ currentUser }) {
               padding: '16px',
               borderRadius: '12px',
               border: '1px solid #e2e8f0',
-              background: automation.enabled ? 'white' : '#f9fafb'
+              background: automation.is_active ? 'white' : '#f9fafb'
             }}
           >
             <div style={{
@@ -335,8 +268,8 @@ export default function AutomationManager({ currentUser }) {
                   {automation.name}
                 </h4>
                 <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                  <Badge variant={automation.enabled ? "success" : "secondary"} size="sm">
-                    {automation.enabled ? 'Active' : 'Disabled'}
+                  <Badge variant={automation.is_active ? "success" : "secondary"} size="sm">
+                    {automation.is_active ? 'Active' : 'Disabled'}
                   </Badge>
                   <span style={{ fontSize: '12px', color: '#6b7280' }}>
                     Created {new Date(automation.created_at).toLocaleDateString()}
@@ -346,7 +279,7 @@ export default function AutomationManager({ currentUser }) {
               
               <div style={{ display: 'flex', gap: '8px' }}>
                 <button
-                  onClick={() => toggleAutomation(automation.id, !automation.enabled)}
+                  onClick={() => handleToggle(automation.id, automation.is_active)}
                   style={{
                     padding: '4px 8px',
                     borderRadius: '6px',
@@ -356,10 +289,10 @@ export default function AutomationManager({ currentUser }) {
                     fontSize: '12px'
                   }}
                 >
-                  {automation.enabled ? 'Disable' : 'Enable'}
+                  {automation.is_active ? 'Disable' : 'Enable'}
                 </button>
                 <button
-                  onClick={() => deleteAutomation(automation.id)}
+                  onClick={() => handleDelete(automation.id)}
                   style={{
                     padding: '4px 8px',
                     borderRadius: '6px',
@@ -388,16 +321,16 @@ export default function AutomationManager({ currentUser }) {
                   Trigger:
                 </span>
                 <div style={{ fontSize: '14px', color: '#374151' }}>
-                  {triggers.find(t => t.value === automation.trigger)?.label}
+                  {triggers.find(t => t.value === automation.trigger_type)?.label}
                 </div>
               </div>
               
               <div>
                 <span style={{ fontSize: '12px', color: '#6b7280', fontWeight: '500' }}>
-                  Condition:
+                  Trigger Config:
                 </span>
                 <div style={{ fontSize: '14px', color: '#374151' }}>
-                  {automation.condition || 'Always'}
+                  {JSON.stringify(automation.trigger_config)}
                 </div>
               </div>
               
@@ -406,16 +339,16 @@ export default function AutomationManager({ currentUser }) {
                   Action:
                 </span>
                 <div style={{ fontSize: '14px', color: '#374151' }}>
-                  {actions.find(a => a.value === automation.action)?.label}
+                  {actions.find(a => a.value === automation.action_type)?.label}
                 </div>
               </div>
               
               <div>
                 <span style={{ fontSize: '12px', color: '#6b7280', fontWeight: '500' }}>
-                  Value:
+                  Action Config:
                 </span>
                 <div style={{ fontSize: '14px', color: '#374151' }}>
-                  {automation.value || 'N/A'}
+                  {JSON.stringify(automation.action_config)}
                 </div>
               </div>
             </div>

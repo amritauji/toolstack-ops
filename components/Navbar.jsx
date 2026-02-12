@@ -3,20 +3,19 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
-import { Avatar, Button, Badge } from "@/components/ui/ModernComponents";
+import { Avatar } from "@/components/ui/ModernComponents";
 import Link from "next/link";
 import { ROUTES } from "@/lib/routes";
 
 import OrgSwitcher from "@/components/OrgSwitcher";
+import NotificationsPanel from "@/components/NotificationsPanel";
 
 export default function Navbar({ profile }) {
   const router = useRouter();
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const profileMenuRef = useRef(null);
-  const notificationsRef = useRef(null);
 
   // Handle scroll effect
   useEffect(() => {
@@ -193,63 +192,7 @@ export default function Navbar({ profile }) {
             <OrgSwitcher currentOrgId={profile?.current_org_id} />
             
             {/* Notifications */}
-            <div style={{ position: 'relative' }} ref={notificationsRef}>
-              <button
-                onClick={() => setNotificationsOpen(!notificationsOpen)}
-                aria-label="Notifications"
-                style={{
-                  position: 'relative',
-                  padding: '8px',
-                  borderRadius: '8px',
-                  border: 'none',
-                  background: notificationsOpen ? 'rgba(124, 109, 242, 0.1)' : 'transparent',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s',
-                  color: '#6b7280'
-                }}
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2zm-2 1H8v-6c0-2.48 1.51-4.5 4-4.5s4 2.02 4 4.5v6z"/>
-                </svg>
-                <div style={{
-                  position: 'absolute',
-                  top: '6px',
-                  right: '6px',
-                  width: '8px',
-                  height: '8px',
-                  background: '#ef4444',
-                  borderRadius: '50%',
-                  border: '2px solid white'
-                }} />
-              </button>
-
-              {/* Notifications Dropdown */}
-              {notificationsOpen && (
-                <div style={{
-                  position: 'absolute',
-                  top: '100%',
-                  right: 0,
-                  marginTop: '8px',
-                  width: '320px',
-                  background: 'rgba(255, 255, 255, 0.95)',
-                  backdropFilter: 'blur(24px)',
-                  borderRadius: '16px',
-                  border: '1px solid rgba(0, 0, 0, 0.08)',
-                  boxShadow: '0 20px 40px rgba(0, 0, 0, 0.1)',
-                  padding: '12px',
-                  zIndex: 50
-                }}>
-                  <div style={{ padding: '12px 8px', borderBottom: '1px solid #e5e7eb', marginBottom: '8px' }}>
-                    <h3 style={{ fontSize: 16, fontWeight: 600, margin: 0 }}>Notifications</h3>
-                  </div>
-                  <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
-                    <div style={{ padding: '12px', textAlign: 'center', color: '#6b7280', fontSize: 14 }}>
-                      No new notifications
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
+            <NotificationsPanel />
 
             {/* Mobile Menu Button */}
             <button
@@ -393,16 +336,9 @@ export default function Navbar({ profile }) {
                         </div>
                       </div>
                     </div>
-                    <Badge 
-                      variant="primary" 
-                      size="sm"
-                      style={{
-                        background: 'linear-gradient(135deg, #667eea, #764ba2)',
-                        border: 'none'
-                      }}
-                    >
+                    <span style={{ background: 'linear-gradient(135deg, #667eea, #764ba2)', color: 'white', padding: '4px 12px', borderRadius: '12px', fontSize: '12px', fontWeight: '600' }}>
                       {profile?.role}
-                    </Badge>
+                    </span>
                   </div>
                   
                   {/* Menu Items */}

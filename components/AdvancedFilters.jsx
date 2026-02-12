@@ -2,98 +2,44 @@
 
 import { useState, useEffect } from "react";
 import { Button, Badge } from "@/components/ui/ModernComponents";
+import { getSavedFilters, createSavedFilter, deleteSavedFilter as deleteSavedFilterDB } from "@/lib/savedFilters";
+import toast from 'react-hot-toast';
 
-export default function AdvancedFilters({ 
-  users, 
-  onFilter, 
-  tasks = [] 
-}) {
+export default function AdvancedFilters({ users, onFilter, tasks = [] }) {
   const [filters, setFilters] = useState({
-    search: "",
-    assignee: "",
-    priority: "",
-    status: "",
-    dateRange: "",
-    customDateStart: "",
-    customDateEnd: "",
-    tags: [],
-    overdue: false,
-    unassigned: false
+    search: "", assignee: "", priority: "", status: "", dateRange: "",
+    customDateStart: "", customDateEnd: "", tags: [], overdue: false, unassigned: false
   });
-  
   const [isExpanded, setIsExpanded] = useState(false);
   const [savedFilters, setSavedFilters] = useState([]);
   const [filterName, setFilterName] = useState("");
 
-  // Load saved filters from localStorage
   useEffect(() => {
-    const saved = localStorage.getItem('taskFilters');
-    if (saved) {
-      setSavedFilters(JSON.parse(saved));
-    }
+    const load = async () => {
+      try {
+        const filters = await getSavedFilters();
+        setSavedFilters(filters);
+      } catch {  
+        // Silent fail
+      }
+    };
+    load();
   }, []);
 
-  // Apply filters whenever they change
   useEffect(() => {
     const filteredTasks = tasks.filter(task => {
-      // Search filter
       if (filters.search && !task.title.toLowerCase().includes(filters.search.toLowerCase()) &&
-          !task.description?.toLowerCase().includes(filters.search.toLowerCase())) {
-        return false;
-      }
-      
-      // Assignee filter
+          !task.description?.toLowerCase().includes(filters.search.toLowerCase())) return false;
       if (filters.assignee && task.assigned_to !== filters.assignee) return false;
       if (filters.unassigned && task.assigned_to) return false;
-      
-      // Priority filter
       if (filters.priority && task.priority !== filters.priority) return false;
-      
-      // Status filter
       if (filters.status && task.status !== filters.status) return false;
-      
-      // Date range filter
-      if (filters.dateRange || (filters.customDateStart && filters.customDateEnd)) {
-        const taskDate = new Date(task.created_at);
-        let startDate, endDate;
-        
-        if (filters.dateRange) {
-          const now = new Date();
-          switch (filters.dateRange) {
-            case 'today':
-              startDate = new Date(now.setHours(0, 0, 0, 0));
-              endDate = new Date(now.setHours(23, 59, 59, 999));
-              break;
-            case 'week':
-              startDate = new Date(now.setDate(now.getDate() - 7));
-              endDate = new Date();
-              break;
-            case 'month':
-              startDate = new Date(now.setMonth(now.getMonth() - 1));
-              endDate = new Date();
-              break;
-            case 'quarter':
-              startDate = new Date(now.setMonth(now.getMonth() - 3));
-              endDate = new Date();
-              break;
-          }
-        } else {
-          startDate = new Date(filters.customDateStart);
-          endDate = new Date(filters.customDateEnd);
-        }
-        
-        if (taskDate < startDate || taskDate > endDate) return false;
-      }
-      
-      // Overdue filter
       if (filters.overdue) {
         const isOverdue = task.due_date && new Date(task.due_date) < new Date() && task.status !== 'done';
         if (!isOverdue) return false;
       }
-      
       return true;
     });
-    
     onFilter(filteredTasks);
   }, [filters, tasks, onFilter]);
 
@@ -102,43 +48,36 @@ export default function AdvancedFilters({
   };
 
   const clearAllFilters = () => {
-    setFilters({
-      search: "",
-      assignee: "",
-      priority: "",
-      status: "",
-      dateRange: "",
-      customDateStart: "",
-      customDateEnd: "",
-      tags: [],
-      overdue: false,
-      unassigned: false
-    });
+    setFilters({ search: "", assignee: "", priority: "", status: "", dateRange: "",
+      customDateStart: "", customDateEnd: "", tags: [], overdue: false, unassigned: false });
   };
 
-  const saveCurrentFilter = () => {
+  const saveCurrentFilter = async () => {
     if (!filterName.trim()) return;
-    
-    const newFilter = {
-      id: Date.now(),
-      name: filterName,
-      filters: { ...filters }
-    };
-    
-    const updated = [...savedFilters, newFilter];
-    setSavedFilters(updated);
-    localStorage.setItem('taskFilters', JSON.stringify(updated));
-    setFilterName("");
+    try {
+      await createSavedFilter(filterName, filters);
+      toast.success('Filter saved!');
+      setFilterName("");
+      const updated = await getSavedFilters();
+      setSavedFilters(updated);
+    } catch {
+      toast.error('Failed to save filter');
+    }
   };
 
   const loadSavedFilter = (savedFilter) => {
-    setFilters(savedFilter.filters);
+    setFilters(savedFilter.filter_config);
   };
 
-  const deleteSavedFilter = (filterId) => {
-    const updated = savedFilters.filter(f => f.id !== filterId);
-    setSavedFilters(updated);
-    localStorage.setItem('taskFilters', JSON.stringify(updated));
+  const deleteSavedFilterHandler = async (filterId) => {
+    try {
+      await deleteSavedFilterDB(filterId);
+      toast.success('Filter deleted');
+      const updated = await getSavedFilters();
+      setSavedFilters(updated);
+    } catch {
+      toast.error('Failed to delete filter');
+    }
   };
 
   const getActiveFilterCount = () => {
@@ -558,7 +497,7 @@ export default function AdvancedFilters({
                       {savedFilter.name}
                     </button>
                     <button
-                      onClick={() => deleteSavedFilter(savedFilter.id)}
+                      onClick={() => deleteSavedFilterHandler(savedFilter.id)}
                       style={{
                         background: 'none',
                         border: 'none',

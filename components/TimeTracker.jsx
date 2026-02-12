@@ -1,21 +1,28 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Card, CardBody, Button, Chip, Progress, Avatar } from "@nextui-org/react";
+import { startTimeEntry, stopTimeEntry, getUserActiveTimeEntry } from "@/lib/timeTracking";
+import toast from 'react-hot-toast';
 
 const TimeTracker = ({ tasks = [] }) => {
   const [activeTimer, setActiveTimer] = useState(null);
-  const [timeEntries, setTimeEntries] = useState([]);
   const [elapsedTime, setElapsedTime] = useState(0);
 
-  // Mock time entries
-  const mockEntries = [
-    { id: 1, taskTitle: "Design homepage", duration: 120, date: "2024-01-20", user: "John Doe" },
-    { id: 2, taskTitle: "Setup CI/CD", duration: 180, date: "2024-01-20", user: "Jane Smith" },
-    { id: 3, taskTitle: "Content review", duration: 60, date: "2024-01-19", user: "Mike Johnson" }
-  ];
-
-  const entries = timeEntries.length > 0 ? timeEntries : mockEntries;
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const active = await getUserActiveTimeEntry();
+        if (active) {
+          setActiveTimer(active);
+          const elapsed = Math.floor((Date.now() - new Date(active.start_time)) / 1000);
+          setElapsedTime(elapsed);
+        }
+      } catch {
+        // Silent fail
+      }
+    };
+    load();
+  }, []);
 
   useEffect(() => {
     let interval;
@@ -34,145 +41,80 @@ const TimeTracker = ({ tasks = [] }) => {
     return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const formatDuration = (minutes) => {
-    const hours = Math.floor(minutes / 60);
-    const mins = minutes % 60;
-    return hours > 0 ? `${hours}h ${mins}m` : `${mins}m`;
-  };
-
-  const startTimer = (taskId, taskTitle) => {
-    if (activeTimer) {
-      stopTimer();
+  const startTimer = async (taskId, taskTitle) => {
+    try {
+      const entry = await startTimeEntry(taskId);
+      setActiveTimer({ ...entry, tasks: { title: taskTitle } });
+      setElapsedTime(0);
+      toast.success('Timer started');
+    } catch {
+      toast.error('Failed to start timer');
     }
-    setActiveTimer({ taskId, taskTitle, startTime: Date.now() });
-    setElapsedTime(0);
   };
 
-  const stopTimer = () => {
-    if (activeTimer) {
-      const duration = Math.floor(elapsedTime / 60); // Convert to minutes
-      const newEntry = {
-        id: Date.now(),
-        taskTitle: activeTimer.taskTitle,
-        duration,
-        date: new Date().toISOString().split('T')[0],
-        user: "Current User"
-      };
-      setTimeEntries(prev => [newEntry, ...prev]);
+  const stopTimer = async () => {
+    if (!activeTimer) return;
+    try {
+      await stopTimeEntry(activeTimer.id);
+      setActiveTimer(null);
+      setElapsedTime(0);
+      toast.success('Timer stopped');
+    } catch {
+      toast.error('Failed to stop timer');
     }
-    setActiveTimer(null);
-    setElapsedTime(0);
   };
-
-  const getTotalTimeToday = () => {
-    const today = new Date().toISOString().split('T')[0];
-    return entries
-      .filter(entry => entry.date === today)
-      .reduce((total, entry) => total + entry.duration, 0);
-  };
-
-  const mockTasks = [
-    { id: 1, title: "Design homepage mockup", project: "Website" },
-    { id: 2, title: "Setup CI/CD pipeline", project: "DevOps" },
-    { id: 3, title: "Content review", project: "Marketing" }
-  ];
-
-  const availableTasks = tasks.length > 0 ? tasks : mockTasks;
 
   return (
-    <div className="space-y-6">
-      {/* Active Timer */}
-      <Card>
-        <CardBody className="p-6">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="text-xl font-semibold">Time Tracker</h3>
-            <Chip color="primary" variant="flat">
-              Today: {formatDuration(getTotalTimeToday())}
-            </Chip>
+    <div style={{ padding: '24px' }}>
+      <div style={{ background: 'white', borderRadius: '16px', padding: '24px', marginBottom: '24px' }}>
+        <h3 style={{ fontSize: '20px', fontWeight: '600', marginBottom: '16px' }}>Time Tracker</h3>
+
+        {activeTimer ? (
+          <div style={{ textAlign: 'center', padding: '32px' }}>
+            <div style={{ fontSize: '48px', fontFamily: 'monospace', fontWeight: '700', color: '#667eea', marginBottom: '8px' }}>
+              {formatTime(elapsedTime)}
+            </div>
+            <p style={{ color: '#64748b', marginBottom: '16px' }}>Working on: {activeTimer.tasks?.title}</p>
+            <button
+              onClick={stopTimer}
+              style={{
+                padding: '12px 24px',
+                background: '#ef4444',
+                color: 'white',
+                border: 'none',
+                borderRadius: '8px',
+                fontSize: '16px',
+                fontWeight: '600',
+                cursor: 'pointer'
+              }}
+            >
+              Stop Timer
+            </button>
           </div>
-
-          {activeTimer ? (
-            <div className="text-center py-6">
-              <div className="text-4xl font-mono font-bold text-blue-600 mb-2">
-                {formatTime(elapsedTime)}
-              </div>
-              <p className="text-gray-600 mb-4">Working on: {activeTimer.taskTitle}</p>
-              <Button color="danger" onPress={stopTimer}>
-                Stop Timer
-              </Button>
-            </div>
-          ) : (
-            <div className="text-center py-6">
-              <p className="text-gray-500 mb-4">Select a task to start tracking time</p>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                {availableTasks.slice(0, 3).map((task) => (
-                  <Button
-                    key={task.id}
-                    variant="bordered"
-                    className="h-auto p-4"
-                    onPress={() => startTimer(task.id, task.title)}
-                  >
-                    <div className="text-left">
-                      <div className="font-medium text-sm">{task.title}</div>
-                      <div className="text-xs text-gray-500">{task.project}</div>
-                    </div>
-                  </Button>
-                ))}
-              </div>
-            </div>
-          )}
-        </CardBody>
-      </Card>
-
-      {/* Recent Time Entries */}
-      <Card>
-        <CardBody className="p-6">
-          <h4 className="text-lg font-semibold mb-4">Recent Time Entries</h4>
-          <div className="space-y-3">
-            {entries.slice(0, 5).map((entry) => (
-              <div key={entry.id} className="flex justify-between items-center p-3 border rounded-lg">
-                <div className="flex items-center gap-3">
-                  <Avatar size="sm" name={entry.user.charAt(0)} />
-                  <div>
-                    <p className="font-medium text-sm">{entry.taskTitle}</p>
-                    <p className="text-xs text-gray-500">{entry.user} • {entry.date}</p>
-                  </div>
-                </div>
-                <Chip size="sm" color="primary" variant="flat">
-                  {formatDuration(entry.duration)}
-                </Chip>
-              </div>
-            ))}
-          </div>
-        </CardBody>
-      </Card>
-
-      {/* Weekly Summary */}
-      <Card>
-        <CardBody className="p-6">
-          <h4 className="text-lg font-semibold mb-4">This Week</h4>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-blue-600">32h</div>
-              <div className="text-sm text-gray-500">Total Hours</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-green-600">18</div>
-              <div className="text-sm text-gray-500">Tasks Completed</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-purple-600">6.4h</div>
-              <div className="text-sm text-gray-500">Daily Average</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-orange-600">94%</div>
-              <div className="text-sm text-gray-500">Productivity</div>
+        ) : (
+          <div style={{ textAlign: 'center', padding: '32px' }}>
+            <p style={{ color: '#64748b', marginBottom: '16px' }}>Select a task to start tracking time</p>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
+              {tasks.slice(0, 3).map((task) => (
+                <button
+                  key={task.id}
+                  onClick={() => startTimer(task.id, task.title)}
+                  style={{
+                    padding: '16px',
+                    background: '#f8fafc',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    textAlign: 'left'
+                  }}
+                >
+                  <div style={{ fontWeight: '500', fontSize: '14px' }}>{task.title}</div>
+                </button>
+              ))}
             </div>
           </div>
-          <Progress value={75} className="mt-4" color="primary" />
-          <p className="text-sm text-gray-500 mt-2">75% of weekly goal (40h)</p>
-        </CardBody>
-      </Card>
+        )}
+      </div>
     </div>
   );
 };

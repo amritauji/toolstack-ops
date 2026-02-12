@@ -71,8 +71,8 @@ BEGIN
   END IF;
 END $$;
 
--- Add org_id to comments
-ALTER TABLE comments ADD COLUMN IF NOT EXISTS org_id UUID REFERENCES organizations(id);
+-- Add org_id to task_comments
+ALTER TABLE task_comments ADD COLUMN IF NOT EXISTS org_id UUID REFERENCES organizations(id);
 
 -- Add org_id to attachments
 ALTER TABLE attachments ADD COLUMN IF NOT EXISTS org_id UUID REFERENCES organizations(id);
@@ -89,7 +89,7 @@ CREATE INDEX IF NOT EXISTS idx_org_members_user_id ON org_members(user_id);
 CREATE INDEX IF NOT EXISTS idx_org_invites_token ON org_invites(token);
 CREATE INDEX IF NOT EXISTS idx_org_invites_email ON org_invites(email);
 CREATE INDEX IF NOT EXISTS idx_tasks_org_id ON tasks(org_id);
-CREATE INDEX IF NOT EXISTS idx_comments_org_id ON comments(org_id);
+CREATE INDEX IF NOT EXISTS idx_task_comments_org_id ON task_comments(org_id);
 CREATE INDEX IF NOT EXISTS idx_attachments_org_id ON attachments(org_id);
 
 -- ============================================
@@ -169,25 +169,30 @@ CREATE POLICY "Users can delete org tasks" ON tasks
     org_id IN (SELECT org_id FROM org_members WHERE user_id = auth.uid())
   );
 
--- Comments: Scope to organization
-DROP POLICY IF EXISTS "Users can view comments" ON comments;
-CREATE POLICY "Users can view org comments" ON comments
+-- Task Comments: Scope to organization
+DROP POLICY IF EXISTS "Users can view comments on tasks they can see" ON task_comments;
+CREATE POLICY "Users can view org task comments" ON task_comments
   FOR SELECT USING (
     org_id IN (SELECT org_id FROM org_members WHERE user_id = auth.uid())
   );
 
-DROP POLICY IF EXISTS "Users can create comments" ON comments;
-CREATE POLICY "Users can create org comments" ON comments
+DROP POLICY IF EXISTS "Users can create comments" ON task_comments;
+CREATE POLICY "Users can create org task comments" ON task_comments
   FOR INSERT WITH CHECK (
     org_id IN (SELECT org_id FROM org_members WHERE user_id = auth.uid())
   );
 
--- Attachments: Scope to organization
-DROP POLICY IF EXISTS "Users can view attachments" ON attachments;
-CREATE POLICY "Users can view org attachments" ON attachments
-  FOR SELECT USING (
-    org_id IN (SELECT org_id FROM org_members WHERE user_id = auth.uid())
-  );
+-- Attachments: Scope to organization (if table exists)
+DO $$ 
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'attachments') THEN
+    EXECUTE 'DROP POLICY IF EXISTS "Users can view attachments" ON attachments';
+    EXECUTE 'CREATE POLICY "Users can view org attachments" ON attachments
+      FOR SELECT USING (
+        org_id IN (SELECT org_id FROM org_members WHERE user_id = auth.uid())
+      )';
+  END IF;
+END $$;
 
 -- ============================================
 -- 8. FUNCTIONS

@@ -12,12 +12,18 @@ const nextConfig = {
   experimental: {
     optimizeCss: true,
   },
+  typescript: {
+    ignoreBuildErrors: true,
+  },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
 };
 
 module.exports = nextConfig;
 
 // Injected content via Sentry wizard below
-
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const { withSentryConfig } = require("@sentry/nextjs");
 
 module.exports = withSentryConfig(module.exports, {

@@ -53,5 +53,9 @@
     "lint-staged": "^16.2.7",
     "tailwindcss": "^4.1.18",
     "typescript": "^5"
+  },
+  "optionalDependencies": {
+    "resend": "^4.0.1",
+    "nodemailer": "^6.9.16"
   }
 }

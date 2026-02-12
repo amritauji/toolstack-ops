@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useCallback, useEffect } from "react";
+import { DndContext, DragOverlay, closestCorners, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { TASK_COLUMNS } from "@/lib/constants";
 import CreateTaskForm from "./CreateTaskForm";
 import KanbanColumn from "./KanbanColumn";
@@ -23,6 +24,8 @@ import TaskPreview from "@/components/TaskPreview";
 import OnboardingTour from "@/components/OnboardingTour";
 import { importTasks } from "@/lib/importTasks";
 import { useRealtimeTasks } from "@/lib/useRealtime";
+import toast from 'react-hot-toast';
+import { changeTaskStatus } from './actions';
 import "@/lib/memoryCleanup";
 
 export default function DashboardClient({ initialTasks, users, activities, currentUser }) {
@@ -41,6 +44,43 @@ export default function DashboardClient({ initialTasks, users, activities, curre
   const [activeProject, setActiveProject] = useState(null);
   const [showAdvancedFeatures, setShowAdvancedFeatures] = useState(false);
   const [showMyTasks, setShowMyTasks] = useState(false);
+  const [activeId, setActiveId] = useState(null);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    })
+  );
+
+  const handleDragStart = (event) => {
+    setActiveId(event.active.id);
+  };
+
+  const handleDragEnd = async (event) => {
+    const { active, over } = event;
+    setActiveId(null);
+
+    if (!over) return;
+
+    const taskId = active.id;
+    const newStatus = over.id;
+
+    if (newStatus && ['todo', 'in_progress', 'done'].includes(newStatus)) {
+      const formData = new FormData();
+      formData.set('taskId', taskId);
+      formData.set('status', newStatus);
+      
+      const result = await changeTaskStatus(formData);
+      if (result.error) {
+        toast.error('Failed to update task');
+      } else {
+        toast.success('Task updated!');
+        window.location.reload();
+      }
+    }
+  };
 
   const isConnected = useRealtimeTasks(useCallback((payload) => {
     try {
@@ -482,6 +522,12 @@ export default function DashboardClient({ initialTasks, users, activities, curre
 
       <div>
         {viewMode === 'kanban' && (
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCorners}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+          >
           <div style={{
             background: 'white',
             borderRadius: '16px',
@@ -514,6 +560,7 @@ export default function DashboardClient({ initialTasks, users, activities, curre
               ))}
             </div>
           </div>
+          </DndContext>
         )}
         {viewMode === 'table' && (
           <TableView

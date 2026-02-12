@@ -1,8 +1,15 @@
+"use client";
+
+import { DndContext, DragOverlay, closestCorners, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { useState } from 'react';
 import { changeTaskStatus } from "./actions";
 import Avatar from "@/components/Avatar";
 import PriorityBadge from "@/components/PriorityBadge";
 import DueDate from "@/components/DueDate";
 import TaskPreview from "@/components/TaskPreview";
+import { useDroppable } from '@dnd-kit/core';
+import { useDraggable } from '@dnd-kit/core';
+import toast from 'react-hot-toast';
 
 const columnStyles = {
   todo: { border: "#e2e8f0", bg: "#f7fafc" },
@@ -12,9 +19,12 @@ const columnStyles = {
 
 export default function KanbanColumn({ title, tasks, users, status, selectedTasks, onSelectionChange, onTaskClick, emptyState }) {
   const styles = columnStyles[status] || columnStyles.todo;
+  const { setNodeRef } = useDroppable({ id: status });
 
   return (
-    <div style={{
+    <div 
+      ref={setNodeRef}
+      style={{
       background: styles.bg,
       borderRadius: 8,
       padding: 16,
@@ -87,6 +97,15 @@ export default function KanbanColumn({ title, tasks, users, status, selectedTask
 
 function TaskCard({ task, users, selectedTasks, onSelectionChange, onTaskClick }) {
   const isSelected = selectedTasks.includes(task.id);
+  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
+    id: task.id,
+    data: { task }
+  });
+
+  const style = transform ? {
+    transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
+    opacity: isDragging ? 0.5 : 1
+  } : {};
 
   const handleCheckboxChange = () => {
     if (isSelected) {
@@ -97,7 +116,12 @@ function TaskCard({ task, users, selectedTasks, onSelectionChange, onTaskClick }
   };
 
   return (
-    <div style={{
+    <div 
+      ref={setNodeRef}
+      {...listeners}
+      {...attributes}
+      style={{
+        ...style,
       background: "white",
       borderRadius: 6,
       padding: 16,

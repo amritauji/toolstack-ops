@@ -7,6 +7,8 @@ import { Avatar, Button, Badge } from "@/components/ui/ModernComponents";
 import Link from "next/link";
 import { ROUTES } from "@/lib/routes";
 
+import OrgSwitcher from "@/components/OrgSwitcher";
+
 export default function Navbar({ profile }) {
   const router = useRouter();
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
@@ -187,6 +189,9 @@ export default function Navbar({ profile }) {
 
           {/* Right Section */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            {/* Org Switcher */}
+            <OrgSwitcher currentOrgId={profile?.current_org_id} />
+            
             {/* Notifications */}
             <div style={{ position: 'relative' }} ref={notificationsRef}>
               <button

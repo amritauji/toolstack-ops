@@ -71,7 +71,7 @@ export default function LandingFooter() {
               <span style={{
                 fontSize: '20px',
                 fontWeight: 'bold'
-              }}>ToolStack Ops</span>
+              }}>NexBoard</span>
             </div>
             <p style={{
               color: '#9ca3af',
@@ -169,7 +169,7 @@ export default function LandingFooter() {
             color: '#9ca3af',
             fontSize: '14px'
           }}>
-            © 2024 ToolStack Ops. All rights reserved.
+            © 2024 NexBoard. All rights reserved.
           </p>
           <p style={{
             color: '#9ca3af',

@@ -81,7 +81,7 @@ export default function LoginPage() {
               <path d="M8 12h16v2H8v-2zm0 4h16v2H8v-2zm0 4h10v2H8v-2z" fill="white"/>
             </svg>
           </div>
-          <h1 style={styles.title}>Sign in to Dashboard</h1>
+          <h1 style={styles.title}>Sign in to NexBoard</h1>
           <p style={styles.subtitle}>Welcome back! Please sign in to continue</p>
         </div>
 

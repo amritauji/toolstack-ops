@@ -74,7 +74,7 @@ export default function ModernNavbar() {
                 <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-            <span style={{ fontSize: '20px', fontWeight: 700, color: isDark ? '#f1f5f9' : '#0f172a' }}>ToolStack</span>
+            <span style={{ fontSize: '20px', fontWeight: 700, color: isDark ? '#f1f5f9' : '#0f172a' }}>NexBoard</span>
           </Link>
 
           {/* Desktop Navigation */}

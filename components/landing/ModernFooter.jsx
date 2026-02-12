@@ -94,7 +94,7 @@ export default function ModernFooter() {
                   <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
-              <span style={{ fontSize: '24px', fontWeight: 700, color: 'white' }}>ToolStack</span>
+              <span style={{ fontSize: '24px', fontWeight: 700, color: 'white' }}>NexBoard</span>
             </Link>
             
             <p style={{
@@ -179,7 +179,7 @@ export default function ModernFooter() {
           }}>
             <div>
               <h3 style={{ fontSize: '18px', fontWeight: 600, color: 'white', marginBottom: '8px' }}>
-                Stay updated with ToolStack
+                Stay updated with NexBoard
               </h3>
               <p style={{ color: '#94a3b8', fontSize: '14px' }}>
                 Get the latest product updates, tips, and best practices delivered to your inbox.
@@ -234,7 +234,7 @@ export default function ModernFooter() {
             gap: '16px'
           }}>
             <div style={{ color: '#64748b', fontSize: '13px' }}>
-              © 2024 ToolStack. All rights reserved.
+              © 2024 NexBoard. All rights reserved.
             </div>
             <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '24px', fontSize: '13px' }}>
               <Link href="/privacy" style={{ color: '#64748b', textDecoration: 'none' }}>Privacy</Link>

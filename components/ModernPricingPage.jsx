@@ -1,140 +1,177 @@
 "use client";
 
-import { useState, useEffect } from 'react';
-import { REGIONS, BASE_PRICES, calculatePrice } from '@/lib/pricing';
-import { getTranslation, getLocaleFromRegion } from '@/lib/translations';
-import { useTheme } from '@/contexts/ThemeContext';
+import { useState } from 'react';
+import { useAuth } from '@/app/providers';
+import { createSubscriptionOrder, verifyPayment } from '@/lib/razorpay';
+import { PLANS } from '@/lib/clientPlans';
+import RazorpayScript from '@/components/RazorpayScript';
+import toast from 'react-hot-toast';
+import { useRouter } from 'next/navigation';
 
 export default function ModernPricingPage() {
-  const [selectedRegion, setSelectedRegion] = useState('US');
-  const [billingCycle, setBillingCycle] = useState('annual');
-  const [t, setT] = useState(getTranslation('en-US'));
-  const { isDark } = useTheme();
+  const [loading, setLoading] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState(null);
+  const { user } = useAuth();
+  const router = useRouter();
 
-  useEffect(() => {
-    const savedRegion = localStorage.getItem('selectedRegion') || 'US';
-    setSelectedRegion(savedRegion);
-    updateTranslations(savedRegion);
+  const handleSelectPlan = async (planId) => {
+    if (!user) {
+      toast.error('Please login to select a plan');
+      router.push('/login');
+      return;
+    }
 
-    const handleRegionChange = (event) => {
-      setSelectedRegion(event.detail);
-      updateTranslations(event.detail);
-    };
-    window.addEventListener('regionChanged', handleRegionChange);
-    return () => window.removeEventListener('regionChanged', handleRegionChange);
-  }, []);
+    if (planId === 'free') {
+      toast.success('You are already on the free plan!');
+      return;
+    }
 
-  const updateTranslations = (regionCode) => {
-    const locale = getLocaleFromRegion(regionCode);
-    setT(getTranslation(locale));
+    setLoading(true);
+    setSelectedPlan(planId);
+
+    try {
+      // Get user's current organization
+      const response = await fetch('/api/profile');
+      const { profile } = await response.json();
+      
+      if (!profile?.current_org_id) {
+        toast.error('Please create an organization first');
+        router.push('/dashboard');
+        return;
+      }
+
+      const { orderId, amount, currency, keyId } = await createSubscriptionOrder(profile.current_org_id, planId);
+
+      const options = {
+        key: keyId,
+        amount: amount,
+        currency: currency,
+        name: 'NexBoard',
+        description: `${PLANS[planId].name} Plan Subscription`,
+        order_id: orderId,
+        handler: async function (response) {
+          try {
+            await verifyPayment(
+              response.razorpay_order_id,
+              response.razorpay_payment_id,
+              response.razorpay_signature,
+              profile.current_org_id,
+              planId
+            );
+            toast.success(`Successfully upgraded to ${PLANS[planId].name} plan!`);
+            router.push('/dashboard');
+          } catch (error) {
+            toast.error('Payment verification failed');
+            console.error('Payment verification error:', error);
+          }
+        },
+        prefill: {
+          name: user.user_metadata?.full_name || '',
+          email: user.email || ''
+        },
+        theme: {
+          color: '#a855f7'
+        },
+        modal: {
+          ondismiss: function() {
+            setLoading(false);
+            setSelectedPlan(null);
+          }
+        }
+      };
+
+      const razorpay = new window.Razorpay(options);
+      razorpay.open();
+    } catch (error) {
+      toast.error(error.message || 'Failed to initiate payment');
+      console.error('Payment initiation error:', error);
+    } finally {
+      setLoading(false);
+      setSelectedPlan(null);
+    }
   };
 
-  const plans = ['free', 'starter', 'professional', 'enterprise'];
-
   return (
-    <section style={{...styles.section, background: isDark ? 'linear-gradient(180deg, #0f172a 0%, #1e293b 100%)' : 'linear-gradient(180deg, #f8fafc 0%, #ffffff 100%)'}}>
-      <div style={{...styles.decorativeBorder, background: isDark ? 'linear-gradient(90deg, transparent, #334155, transparent)' : 'linear-gradient(90deg, transparent, #e2e8f0, transparent)'}} />
+    <section style={styles.section}>
+      <RazorpayScript />
       
       <div style={styles.container}>
         {/* Header */}
         <div style={styles.header}>
-          <div style={{...styles.badge, background: isDark ? 'linear-gradient(135deg, #1e1b4b, #312e81)' : 'linear-gradient(135deg, #faf5ff, #fdf2f8)', border: isDark ? '1px solid rgba(168, 85, 247, 0.3)' : '1px solid rgba(168, 85, 247, 0.2)'}}>
-            <span style={{...styles.badgeText, color: isDark ? '#c084fc' : '#7e22ce'}}>{t.pricing.title.split(' ')[0]} {t.pricing.title.split(' ')[1]}</span>
+          <div style={styles.badge}>
+            <span style={styles.badgeText}>Simple Pricing</span>
           </div>
           <h2 style={styles.mainTitle}>
-            <span style={{...styles.titlePrimary, backgroundImage: isDark ? 'linear-gradient(135deg, #f1f5f9, #cbd5e1)' : 'linear-gradient(135deg, #0f172a, #334155)'}}>{t.pricing.title}</span>
+            <span style={styles.titlePrimary}>Choose the Perfect Plan</span>
             <br />
-            <span style={{...styles.titleGradient, backgroundImage: 'linear-gradient(135deg, #a855f7, #ec4899)'}}>{t.pricing.subtitle}</span>
+            <span style={styles.titleGradient}>for Your Team</span>
           </h2>
-          <p style={{...styles.description, color: isDark ? '#94a3b8' : '#475569'}}>{t.pricing.description}</p>
-
-          {/* Billing Toggle */}
-          <div style={{...styles.billingToggle, background: isDark ? '#1e293b' : '#f1f5f9'}}>
-            <button
-              onClick={() => setBillingCycle('monthly')}
-              style={{
-                ...styles.toggleButton,
-                ...(billingCycle === 'monthly' ? {...styles.toggleButtonActive, background: isDark ? '#334155' : 'white', color: isDark ? '#f1f5f9' : '#0f172a'} : {color: isDark ? '#94a3b8' : '#64748b'})
-              }}
-            >
-              {t.pricing.monthly}
-            </button>
-            <button
-              onClick={() => setBillingCycle('annual')}
-              style={{
-                ...styles.toggleButton,
-                ...(billingCycle === 'annual' ? {...styles.toggleButtonActive, background: isDark ? '#334155' : 'white', color: isDark ? '#f1f5f9' : '#0f172a'} : {color: isDark ? '#94a3b8' : '#64748b'})
-              }}
-            >
-              {t.pricing.annual}
-              <span style={styles.saveBadge}>{t.pricing.save}</span>
-            </button>
-          </div>
+          <p style={styles.description}>
+            Start free and scale as you grow. All plans include our core features with different usage limits.
+          </p>
         </div>
 
         {/* Pricing Cards */}
         <div style={styles.grid}>
-          {plans.map((plan) => {
-            const planData = t.pricing.plans[plan];
-            const pricing = calculatePrice(plan, billingCycle, selectedRegion);
-            const isPopular = plan === 'professional';
+          {Object.entries(PLANS).map(([planId, plan]) => {
+            const isPopular = planId === 'professional';
+            const isLoading = loading && selectedPlan === planId;
 
             return (
               <div
-                key={plan}
+                key={planId}
                 style={{
                   ...styles.card,
-                  ...(isPopular ? {...styles.cardPopular, background: isDark ? '#1e293b' : 'white', border: '2px solid #a855f7'} : {background: isDark ? '#1e293b' : 'white', border: isDark ? '2px solid #334155' : '2px solid #e2e8f0'})
+                  ...(isPopular ? styles.cardPopular : {})
                 }}
               >
                 {isPopular && (
                   <div style={styles.popularBadge}>
-                    <div style={styles.popularBadgeInner}>{t.pricing.mostPopular}</div>
+                    <div style={styles.popularBadgeInner}>Most Popular</div>
                   </div>
                 )}
 
                 <div style={{ ...styles.cardHeader, marginTop: isPopular ? '8px' : 0 }}>
-                  <h3 style={{...styles.planName, color: isDark ? '#f1f5f9' : '#0f172a'}}>{planData.name}</h3>
-                  <p style={{...styles.planDescription, color: isDark ? '#94a3b8' : '#64748b'}}>{planData.description}</p>
+                  <h3 style={styles.planName}>{plan.name}</h3>
                   
                   <div style={styles.priceSection}>
                     <div style={styles.priceContainer}>
-                      <span style={{...styles.price, color: isDark ? '#f1f5f9' : '#0f172a'}}>{pricing.formatted}</span>
-                      {plan !== 'free' && <span style={{...styles.period, color: isDark ? '#94a3b8' : '#64748b'}}>{t.pricing.perMonth}</span>}
+                      <span style={styles.price}>
+                        {plan.price === 0 ? 'Free' : `₹${(plan.price / 100).toFixed(0)}`}
+                      </span>
+                      {plan.price > 0 && <span style={styles.period}>/month</span>}
                     </div>
-                    {billingCycle === 'annual' && plan !== 'free' && (
-                      <div style={styles.annualNote}>
-                        {t.pricing.billedAnnually} ({pricing.symbol}{Math.round(pricing.amount * 12)}{t.pricing.perYear})
-                      </div>
-                    )}
                   </div>
 
                   <button
+                    onClick={() => handleSelectPlan(planId)}
+                    disabled={isLoading}
                     style={{
                       ...styles.ctaButton,
-                      ...(isPopular ? styles.ctaButtonPopular : styles.ctaButtonDefault)
+                      ...(isPopular ? styles.ctaButtonPopular : styles.ctaButtonDefault),
+                      ...(isLoading ? styles.ctaButtonLoading : {})
                     }}
                   >
-                    {plan === 'enterprise' ? t.pricing.contactSales : plan === 'free' ? t.pricing.getStarted : t.pricing.startTrial}
+                    {isLoading ? 'Processing...' : 
+                     planId === 'enterprise' ? 'Contact Sales' : 
+                     planId === 'free' ? 'Get Started Free' : 'Start Free Trial'}
                   </button>
                 </div>
 
                 <div style={styles.cardBody}>
-                  <div style={{...styles.featuresHeader, color: isDark ? '#f1f5f9' : '#0f172a'}}>{t.pricing.whatsIncluded}</div>
+                  <div style={styles.featuresHeader}>What&apos;s included:</div>
                   <div style={styles.featuresList}>
-                    {planData.features.map((feature, index) => (
+                    {plan.features.map((feature, index) => (
                       <div key={index} style={styles.featureItem}>
                         <div style={{
                           ...styles.checkIcon,
-                          background: isPopular 
-                            ? 'linear-gradient(135deg, #a855f7, #ec4899)' 
-                            : '#10b981'
+                          background: isPopular ? 'linear-gradient(135deg, #a855f7, #ec4899)' : '#10b981'
                         }}>
                           <svg style={styles.checkSvg} fill="currentColor" viewBox="0 0 24 24">
                             <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                           </svg>
                         </div>
-                        <span style={{...styles.featureText, color: isDark ? '#94a3b8' : '#475569'}}>{feature}</span>
+                        <span style={styles.featureText}>{feature}</span>
                       </div>
                     ))}
                   </div>
@@ -144,27 +181,22 @@ export default function ModernPricingPage() {
           })}
         </div>
 
-        {/* FAQ Section */}
-        <div style={{...styles.faqSection, background: isDark ? 'linear-gradient(135deg, #1e293b, #0f172a)' : 'linear-gradient(135deg, #f8fafc, #f1f5f9)', border: isDark ? '1px solid #334155' : '1px solid rgba(226, 232, 240, 0.8)'}}>
-          <h3 style={{...styles.faqTitle, color: isDark ? '#f1f5f9' : '#0f172a'}}>{t.pricing.faqTitle}</h3>
-          <div style={styles.faqGrid}>
-            {t.pricing.faqs.map((faq, i) => (
-              <div key={i} style={{...styles.faqCard, background: isDark ? '#0f172a' : 'white', border: isDark ? '1px solid #334155' : '1px solid rgba(226, 232, 240, 0.5)'}}>
-                <h4 style={{...styles.faqQuestion, color: isDark ? '#f1f5f9' : '#0f172a'}}>{faq.q}</h4>
-                <p style={{...styles.faqAnswer, color: isDark ? '#94a3b8' : '#64748b'}}>{faq.a}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-
         {/* Bottom CTA */}
         <div style={styles.bottomCta}>
-          <h3 style={{...styles.ctaTitle, color: isDark ? '#f1f5f9' : '#0f172a'}}>{t.pricing.readyTitle}</h3>
-          <p style={{...styles.ctaDescription, color: isDark ? '#94a3b8' : '#64748b'}}>{t.pricing.readyDescription}</p>
+          <h3 style={styles.ctaTitle}>Ready to get started?</h3>
+          <p style={styles.ctaDescription}>
+            Join thousands of teams already using NexBoard to manage their projects efficiently.
+          </p>
           <div style={styles.ctaButtons}>
-            <a href="/signup" style={styles.ctaButtonPrimary}>{t.pricing.startTrial}</a>
-            <a href="/contact" style={{...styles.ctaButtonSecondary, color: isDark ? '#cbd5e1' : '#475569'}}>
-              <span>{t.pricing.contactSales}</span>
+            <button 
+              onClick={() => handleSelectPlan('professional')}
+              style={styles.ctaButtonPrimary}
+              disabled={loading}
+            >
+              {loading && selectedPlan === 'professional' ? 'Processing...' : 'Start Free Trial'}
+            </button>
+            <a href="/contact" style={styles.ctaButtonSecondary}>
+              <span>Contact Sales</span>
               <svg style={styles.arrow} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
               </svg>
@@ -182,14 +214,6 @@ const styles = {
     background: 'linear-gradient(180deg, #f8fafc 0%, #ffffff 100%)',
     position: 'relative',
     minHeight: '100vh'
-  },
-  decorativeBorder: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    height: '1px',
-    background: 'linear-gradient(90deg, transparent, #e2e8f0, transparent)'
   },
   container: {
     maxWidth: '1280px',
@@ -239,40 +263,6 @@ const styles = {
     margin: '0 auto 32px',
     lineHeight: 1.7
   },
-  billingToggle: {
-    display: 'inline-flex',
-    alignItems: 'center',
-    background: '#f1f5f9',
-    borderRadius: '12px',
-    padding: '4px'
-  },
-  toggleButton: {
-    padding: '10px 24px',
-    borderRadius: '8px',
-    border: 'none',
-    fontWeight: 500,
-    cursor: 'pointer',
-    transition: 'all 0.2s',
-    background: 'transparent',
-    color: '#64748b',
-    position: 'relative'
-  },
-  toggleButtonActive: {
-    background: 'white',
-    color: '#0f172a',
-    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
-  },
-  saveBadge: {
-    position: 'absolute',
-    top: '-10px',
-    right: '-10px',
-    background: 'linear-gradient(135deg, #10b981, #0d9488)',
-    color: 'white',
-    fontSize: '10px',
-    padding: '4px 8px',
-    borderRadius: '9999px',
-    fontWeight: 600
-  },
   grid: {
     display: 'grid',
     gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
@@ -317,11 +307,6 @@ const styles = {
     fontSize: '24px',
     fontWeight: 700,
     color: '#0f172a',
-    marginBottom: '8px'
-  },
-  planDescription: {
-    color: '#64748b',
-    fontSize: '14px',
     marginBottom: '24px'
   },
   priceSection: {
@@ -340,12 +325,6 @@ const styles = {
   period: {
     color: '#64748b',
     marginLeft: '8px'
-  },
-  annualNote: {
-    fontSize: '13px',
-    color: '#10b981',
-    fontWeight: 500,
-    marginTop: '4px'
   },
   ctaButton: {
     width: '100%',
@@ -366,6 +345,10 @@ const styles = {
     background: '#0f172a',
     color: 'white',
     boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
+  },
+  ctaButtonLoading: {
+    opacity: 0.7,
+    cursor: 'not-allowed'
   },
   cardBody: {
     marginTop: '32px'
@@ -407,42 +390,6 @@ const styles = {
     color: '#475569',
     fontSize: '14px'
   },
-  faqSection: {
-    background: 'linear-gradient(135deg, #f8fafc, #f1f5f9)',
-    borderRadius: '24px',
-    padding: '48px',
-    border: '1px solid rgba(226, 232, 240, 0.8)',
-    marginBottom: '64px'
-  },
-  faqTitle: {
-    fontSize: '24px',
-    fontWeight: 700,
-    color: '#0f172a',
-    textAlign: 'center',
-    marginBottom: '40px'
-  },
-  faqGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-    gap: '24px'
-  },
-  faqCard: {
-    background: 'white',
-    padding: '24px',
-    borderRadius: '16px',
-    border: '1px solid rgba(226, 232, 240, 0.5)'
-  },
-  faqQuestion: {
-    fontWeight: 600,
-    color: '#0f172a',
-    marginBottom: '8px',
-    fontSize: '15px'
-  },
-  faqAnswer: {
-    color: '#64748b',
-    fontSize: '14px',
-    lineHeight: 1.6
-  },
   bottomCta: {
     textAlign: 'center'
   },
@@ -472,7 +419,8 @@ const styles = {
     borderRadius: '12px',
     fontSize: '16px',
     fontWeight: 600,
-    textDecoration: 'none',
+    border: 'none',
+    cursor: 'pointer',
     boxShadow: '0 8px 24px rgba(168, 85, 247, 0.3)'
   },
   ctaButtonSecondary: {

@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from 'react';
-import { createSubscriptionOrder, verifyPayment, cancelSubscription, PLANS } from '@/lib/razorpay';
+import { createSubscriptionOrder, verifyPayment, cancelSubscription } from '@/lib/razorpay';
+import { PLANS } from '@/lib/clientPlans';
 import RazorpayScript from '@/components/RazorpayScript';
 import toast from 'react-hot-toast';
 

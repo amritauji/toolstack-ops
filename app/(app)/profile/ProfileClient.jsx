@@ -152,7 +152,7 @@ export default function ProfileClient({ profile, usage }) {
       {activeTab === 'profile' && (
         <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 24 }}>
           <div style={{ background: "white", borderRadius: 16, padding: 24, border: "1px solid #e5e7eb" }}>
-            <h3 style={{ fontSize: 18, fontWeight: 600, marginBottom: 16 }}>Personal Information</h3>
+            <h3 style={{ fontSize: 18, fontWeight: 600, marginBottom: 16, color: "#111827" }}>Personal Information</h3>
 
             {!editing && (
               <button 
@@ -175,7 +175,7 @@ export default function ProfileClient({ profile, usage }) {
             {editing && (
               <form onSubmit={handleSubmit} style={{ marginTop: 20 }}>
             <div style={{ marginBottom: 16 }}>
-              <label style={{ display: "block", fontSize: 14, fontWeight: 500, marginBottom: 8 }}>
+              <label style={{ display: "block", fontSize: 14, fontWeight: 500, marginBottom: 8, color: "#374151" }}>
                 Profile Picture
               </label>
               <input
@@ -195,7 +195,7 @@ export default function ProfileClient({ profile, usage }) {
             </div>
 
             <div style={{ marginBottom: 16 }}>
-              <label style={{ display: "block", fontSize: 14, fontWeight: 500, marginBottom: 8 }}>
+              <label style={{ display: "block", fontSize: 14, fontWeight: 500, marginBottom: 8, color: "#374151" }}>
                 Full Name
               </label>
               <input
@@ -268,10 +268,10 @@ export default function ProfileClient({ profile, usage }) {
         <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 24 }}>
           {/* Change Password */}
           <div style={{ background: "white", borderRadius: 16, padding: 24, border: "1px solid #e5e7eb" }}>
-            <h3 style={{ fontSize: 18, fontWeight: 600, marginBottom: 16 }}>Change Password</h3>
+            <h3 style={{ fontSize: 18, fontWeight: 600, marginBottom: 16, color: "#111827" }}>Change Password</h3>
             <form onSubmit={(e) => { e.preventDefault(); alert('Password change coming soon!'); }}>
               <div style={{ marginBottom: 16 }}>
-                <label style={{ display: "block", fontSize: 14, fontWeight: 500, marginBottom: 8 }}>Current Password</label>
+                <label style={{ display: "block", fontSize: 14, fontWeight: 500, marginBottom: 8, color: "#374151" }}>Current Password</label>
                 <input
                   type="password"
                   value={passwordData.current}
@@ -286,7 +286,7 @@ export default function ProfileClient({ profile, usage }) {
                 />
               </div>
               <div style={{ marginBottom: 16 }}>
-                <label style={{ display: "block", fontSize: 14, fontWeight: 500, marginBottom: 8 }}>New Password</label>
+                <label style={{ display: "block", fontSize: 14, fontWeight: 500, marginBottom: 8, color: "#374151" }}>New Password</label>
                 <input
                   type="password"
                   value={passwordData.new}
@@ -301,7 +301,7 @@ export default function ProfileClient({ profile, usage }) {
                 />
               </div>
               <div style={{ marginBottom: 16 }}>
-                <label style={{ display: "block", fontSize: 14, fontWeight: 500, marginBottom: 8 }}>Confirm New Password</label>
+                <label style={{ display: "block", fontSize: 14, fontWeight: 500, marginBottom: 8, color: "#374151" }}>Confirm New Password</label>
                 <input
                   type="password"
                   value={passwordData.confirm}
@@ -335,7 +335,7 @@ export default function ProfileClient({ profile, usage }) {
 
           {/* Two-Factor Authentication */}
           <div style={{ background: "white", borderRadius: 16, padding: 24, border: "1px solid #e5e7eb" }}>
-            <h3 style={{ fontSize: 18, fontWeight: 600, marginBottom: 8 }}>Two-Factor Authentication</h3>
+            <h3 style={{ fontSize: 18, fontWeight: 600, marginBottom: 8, color: "#111827" }}>Two-Factor Authentication</h3>
             <p style={{ fontSize: 14, color: "#6b7280", marginBottom: 16 }}>Add an extra layer of security to your account</p>
             <button
               onClick={() => alert('2FA setup coming soon!')}
@@ -356,7 +356,7 @@ export default function ProfileClient({ profile, usage }) {
 
           {/* Active Sessions */}
           <div style={{ background: "white", borderRadius: 16, padding: 24, border: "1px solid #e5e7eb" }}>
-            <h3 style={{ fontSize: 18, fontWeight: 600, marginBottom: 16 }}>Active Sessions</h3>
+            <h3 style={{ fontSize: 18, fontWeight: 600, marginBottom: 16, color: "#111827" }}>Active Sessions</h3>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px', background: '#f9fafb', borderRadius: 8 }}>
               <div>
                 <p style={{ fontSize: 14, fontWeight: 600, marginBottom: 4 }}>Current Session</p>

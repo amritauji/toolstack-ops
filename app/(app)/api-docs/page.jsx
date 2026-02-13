@@ -9,30 +9,28 @@ export const metadata = {
 };
 
 export default async function ApiDocsPage() {
-  try {
-    const supabase = await createSupabaseServer();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) redirect('/login');
+  const supabase = await createSupabaseServer();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect('/login');
 
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', user.id)
-      .single();
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', user.id)
+    .single();
 
-    return (
-      <div style={{ padding: '24px' }}>
-        <DashboardHeader profile={profile} />
-        <ApiDocsClient profile={profile} />
-      </div>
-    );
-  } catch (error) {
-    console.error('API docs page error:', error);
+  if (!profile) {
     return (
       <div style={{ padding: '24px', textAlign: 'center' }}>
-        <h2>Failed to load API docs</h2>
-        <p>{error.message}</p>
+        <h2>Profile not found</h2>
       </div>
     );
   }
+
+  return (
+    <div style={{ padding: '24px' }}>
+      <DashboardHeader profile={profile} />
+      <ApiDocsClient profile={profile} />
+    </div>
+  );
 }

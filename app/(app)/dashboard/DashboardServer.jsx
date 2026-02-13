@@ -4,27 +4,17 @@ import { getActivityFeed } from "@/lib/activityFeed";
 import DashboardClient from "./DashboardClient";
 
 export default async function DashboardPage() {
-  try {
-    const [tasks, users, activities] = await Promise.all([
-      getTasks(),
-      getAssignableUsers(),
-      getActivityFeed()
-    ]);
+  const [tasks, users, activities] = await Promise.all([
+    getTasks().catch(() => []),
+    getAssignableUsers().catch(() => []),
+    getActivityFeed().catch(() => [])
+  ]);
 
-    return (
-      <DashboardClient 
-        initialTasks={tasks || []}
-        users={users || []}
-        activities={activities || []}
-      />
-    );
-  } catch (error) {
-    console.error('Dashboard load error:', error);
-    return (
-      <div style={{ padding: '24px', textAlign: 'center' }}>
-        <h2>Failed to load dashboard</h2>
-        <p>{error.message}</p>
-      </div>
-    );
-  }
+  return (
+    <DashboardClient 
+      initialTasks={tasks || []}
+      users={users || []}
+      activities={activities || []}
+    />
+  );
 }

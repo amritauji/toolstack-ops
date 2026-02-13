@@ -40,7 +40,7 @@ export default function UserManagement({ users, currentPlan = 'free' }) {
     <>
     <div style={{ background: "white", borderRadius: 8, padding: 20, boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-        <h2 style={{ fontSize: 18, fontWeight: 600, display: "flex", alignItems: "center", gap: 8 }}>
+        <h2 style={{ fontSize: 18, fontWeight: 600, display: "flex", alignItems: "center", gap: 8, color: "#111827" }}>
           👥 User Management
           <span style={{ 
             background: "#e5e7eb", 

@@ -269,7 +269,36 @@ export default function ProfileClient({ profile, usage }) {
           {/* Change Password */}
           <div style={{ background: "white", borderRadius: 16, padding: 24, border: "1px solid #e5e7eb" }}>
             <h3 style={{ fontSize: 18, fontWeight: 600, marginBottom: 16, color: "#111827" }}>Change Password</h3>
-            <form onSubmit={(e) => { e.preventDefault(); alert('Password change coming soon!'); }}>
+            <form onSubmit={async (e) => {
+              e.preventDefault();
+              if (passwordData.new !== passwordData.confirm) {
+                alert('New passwords do not match');
+                return;
+              }
+              if (passwordData.new.length < 8) {
+                alert('Password must be at least 8 characters');
+                return;
+              }
+              try {
+                const response = await fetch('/api/profile/password', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    currentPassword: passwordData.current,
+                    newPassword: passwordData.new
+                  })
+                });
+                if (response.ok) {
+                  alert('Password updated successfully');
+                  setPasswordData({ current: '', new: '', confirm: '' });
+                } else {
+                  const error = await response.text();
+                  alert('Failed to update password: ' + error);
+                }
+              } catch (error) {
+                alert('Failed to update password: ' + error.message);
+              }
+            }}>
               <div style={{ marginBottom: 16 }}>
                 <label style={{ display: "block", fontSize: 14, fontWeight: 500, marginBottom: 8, color: "#374151" }}>Current Password</label>
                 <input
@@ -338,11 +367,26 @@ export default function ProfileClient({ profile, usage }) {
             <h3 style={{ fontSize: 18, fontWeight: 600, marginBottom: 8, color: "#111827" }}>Two-Factor Authentication</h3>
             <p style={{ fontSize: 14, color: "#6b7280", marginBottom: 16 }}>Add an extra layer of security to your account</p>
             <button
-              onClick={() => alert('2FA setup coming soon!')}
+              onClick={async () => {
+                try {
+                  const response = await fetch('/api/profile/2fa', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                  });
+                  if (response.ok) {
+                    const { qrCode } = await response.json();
+                    alert('Scan the QR code with your authenticator app: ' + qrCode);
+                  } else {
+                    alert('Failed to setup 2FA. Please try again.');
+                  }
+                } catch (error) {
+                  alert('2FA setup failed: ' + error.message);
+                }
+              }}
               style={{
-                background: "#f3f4f6",
-                color: "#374151",
-                border: "1px solid #e5e7eb",
+                background: "linear-gradient(135deg, #667eea, #764ba2)",
+                color: "white",
+                border: "none",
                 borderRadius: 8,
                 padding: "10px 20px",
                 cursor: "pointer",

@@ -36,7 +36,12 @@ export default async function BillingPage() {
     .eq('user_id', user.id)
     .single();
   
-  const payments = await getPaymentHistory(profile.current_org_id);
+  let payments = [];
+  try {
+    payments = await getPaymentHistory(profile.current_org_id);
+  } catch (error) {
+    console.error('Failed to load payment history:', error);
+  }
   
   return <BillingClient org={org} userRole={membership?.role} payments={payments} />;
 }

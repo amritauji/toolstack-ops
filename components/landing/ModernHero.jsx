@@ -9,7 +9,11 @@ export default function ModernHero() {
   const { isDark } = useTheme();
 
   useEffect(() => {
-    setIsVisible(true);
+    // Use setTimeout to avoid synchronous setState in effect
+    const timer = setTimeout(() => {
+      setIsVisible(true);
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
   return (

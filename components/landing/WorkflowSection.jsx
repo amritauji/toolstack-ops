@@ -258,7 +258,7 @@ export default function WorkflowSection() {
                   fontSize: '16px',
                   color: '#6b7280'
                 }}>
-                  Interactive demo coming soon
+                  Experience the power of {workflows[activeTab].title.toLowerCase()}
                 </p>
               </div>
             </div>

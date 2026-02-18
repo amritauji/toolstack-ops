@@ -1,0 +1,26 @@
+{
+  "entity": "event",
+  "account_id": "acc_test",
+  "event": "payment.failed",
+  "contains": ["payment"],
+  "payload": {
+    "payment": {
+      "entity": {
+        "id": "pay_test_failed_001",
+        "entity": "payment",
+        "amount": 49900,
+        "currency": "INR",
+        "status": "failed",
+        "order_id": "order_test_001",
+        "error_description": "Card declined in test mode",
+        "notes": {
+          "org_id": "REPLACE_WITH_ORG_ID",
+          "plan": "professional",
+          "user_id": "REPLACE_WITH_USER_ID"
+        }
+      }
+    }
+  },
+  "created_at": 1739500010,
+  "event_id": "event_test_failed_001"
+}

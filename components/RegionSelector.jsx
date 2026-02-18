@@ -11,7 +11,11 @@ export default function RegionSelector() {
     // Check localStorage first
     const savedRegion = localStorage.getItem('selectedRegion');
     if (savedRegion) {
-      setSelectedRegion(savedRegion);
+      // Use setTimeout to avoid synchronous setState in effect
+      const timer = setTimeout(() => {
+        setSelectedRegion(savedRegion);
+      }, 0);
+      return () => clearTimeout(timer);
     } else {
       // Auto-detect region
       detectUserRegion().then(region => {

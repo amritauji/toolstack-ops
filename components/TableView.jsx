@@ -83,7 +83,7 @@ export default function TableView({
     });
   };
 
-  const SortIcon = ({ column }) => {
+  const renderSortIcon = (column) => {
     if (sortConfig.key !== column) {
       return <span style={{ color: '#cbd5e1' }}>↕️</span>;
     }
@@ -133,7 +133,7 @@ export default function TableView({
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   Task
-                  <SortIcon column="title" />
+                  {renderSortIcon('title')}
                 </div>
               </th>
               
@@ -151,7 +151,7 @@ export default function TableView({
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   Status
-                  <SortIcon column="status" />
+                  {renderSortIcon('status')}
                 </div>
               </th>
               
@@ -169,7 +169,7 @@ export default function TableView({
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   Priority
-                  <SortIcon column="priority" />
+                  {renderSortIcon('priority')}
                 </div>
               </th>
               
@@ -187,7 +187,7 @@ export default function TableView({
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   Assignee
-                  <SortIcon column="assigned_to" />
+                  {renderSortIcon('assigned_to')}
                 </div>
               </th>
               
@@ -205,7 +205,7 @@ export default function TableView({
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   Due Date
-                  <SortIcon column="due_date" />
+                  {renderSortIcon('due_date')}
                 </div>
               </th>
               
@@ -223,14 +223,14 @@ export default function TableView({
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   Created
-                  <SortIcon column="created_at" />
+                  {renderSortIcon('created_at')}
                 </div>
               </th>
             </tr>
           </thead>
           
           <tbody>
-            {sortedTasks.map((task, index) => {
+            {sortedTasks.map((task) => {
               const assignedUser = users.find(u => u.id === task.assigned_to);
               const isOverdue = task.due_date && new Date(task.due_date) < new Date() && task.status !== 'done';
               

@@ -10,8 +10,12 @@ export function ThemeProvider({ children }) {
   useEffect(() => {
     const saved = localStorage.getItem('theme');
     if (saved === 'dark') {
-      setIsDark(true);
-      document.documentElement.classList.add('dark');
+      // Use setTimeout to avoid synchronous setState in effect
+      const timer = setTimeout(() => {
+        setIsDark(true);
+        document.documentElement.classList.add('dark');
+      }, 0);
+      return () => clearTimeout(timer);
     }
   }, []);
 

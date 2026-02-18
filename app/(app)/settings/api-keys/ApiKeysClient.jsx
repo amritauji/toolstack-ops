@@ -15,7 +15,7 @@ export default function ApiKeysClient({ initialKeys }) {
       const result = await generateApiKey();
       setNewKey(result.key);
       setKeys([...keys, { key_prefix: result.prefix, created_at: new Date(), revoked: false }]);
-      toast.success('API key generated! Copy it now - you won\'t see it again.');
+      toast.success('API key generated! Copy it now - you won&apos;t see it again.');
     } catch (error) {
       toast.error(error.message);
     } finally {
@@ -57,7 +57,7 @@ export default function ApiKeysClient({ initialKeys }) {
         }}>
           <h3 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '8px' }}>⚠️ Save your API key</h3>
           <p style={{ fontSize: '14px', marginBottom: '12px', color: '#92400e' }}>
-            Copy this key now. You won't be able to see it again!
+            Copy this key now. You won&apos;t be able to see it again!
           </p>
           <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
             <code style={{
@@ -98,7 +98,7 @@ export default function ApiKeysClient({ initialKeys }) {
               fontSize: '14px'
             }}
           >
-            I've saved it
+            I&apos;ve saved it
           </button>
         </div>
       )}
@@ -199,7 +199,7 @@ export default function ApiKeysClient({ initialKeys }) {
           fontSize: '13px',
           fontFamily: 'monospace'
         }}>
-          curl -H "x-api-key: YOUR_API_KEY" https://nexboard.me/api/v1/tasks
+          curl -H &quot;x-api-key: YOUR_API_KEY&quot; https://nexboard.me/api/v1/tasks
         </code>
       </div>
     </div>

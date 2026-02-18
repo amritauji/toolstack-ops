@@ -1,6 +1,7 @@
 "use client";
 
 import { useTheme } from '@/contexts/ThemeContext';
+import Script from 'next/script';
 import ModernNavbar from '@/components/landing/ModernNavbar';
 import ModernHero from '@/components/landing/ModernHero';
 import ProblemStatement from '@/components/landing/ProblemStatement';
@@ -13,9 +14,44 @@ import ModernFooter from '@/components/landing/ModernFooter';
 
 export default function LandingPage() {
   const { isDark } = useTheme();
+
+  const organizationJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: "Nexboard",
+    url: "https://nexboard.me",
+    logo: "https://nexboard.me/icon.svg"
+  };
+
+  const softwareJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    name: "Nexboard",
+    applicationCategory: "BusinessApplication",
+    operatingSystem: "Web",
+    url: "https://nexboard.me",
+    offers: {
+      "@type": "Offer",
+      price: "0",
+      priceCurrency: "USD"
+    },
+    description: "Nexboard is a project management platform for task tracking, team collaboration, and workflow automation."
+  };
   
   return (
     <div className={`min-h-screen ${isDark ? 'dark bg-gradient-to-b from-slate-900 to-slate-800' : 'bg-white'} overflow-hidden relative`} data-barba-namespace="home">
+      <Script
+        id="nexboard-org-schema"
+        type="application/ld+json"
+        strategy="afterInteractive"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
+      />
+      <Script
+        id="nexboard-software-schema"
+        type="application/ld+json"
+        strategy="afterInteractive"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareJsonLd) }}
+      />
       {/* Animated background */}
       <div className="fixed inset-0 -z-10">
         <div className={`absolute inset-0 ${isDark ? 'bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900' : 'bg-gradient-to-br from-slate-50 via-white to-slate-100'}`} />
@@ -36,7 +72,7 @@ export default function LandingPage() {
         {/* Transition */}
         <div style={{ textAlign: 'center', padding: '40px 20px', background: isDark ? '#1e293b' : '#f9fafb' }}>
           <p style={{ fontSize: '20px', color: isDark ? '#cbd5e1' : '#374151', fontWeight: '600' }}>
-            But here's what makes us different →
+            But here&apos;s what makes us different →
           </p>
         </div>
         

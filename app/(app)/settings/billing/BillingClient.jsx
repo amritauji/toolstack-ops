@@ -1,16 +1,28 @@
 "use client";
 
 import { useState } from 'react';
-import { createSubscriptionOrder, verifyPayment, cancelSubscription } from '@/lib/razorpay';
+import { createSubscriptionOrder, verifyPayment, cancelSubscription, retryFailedPayment } from '@/lib/razorpay';
 import { PLANS } from '@/lib/clientPlans';
 import RazorpayScript from '@/components/RazorpayScript';
 import toast from 'react-hot-toast';
 
 export default function BillingClient({ org, userRole, payments }) {
   const [loading, setLoading] = useState(false);
+  const [retryingPayment, setRetryingPayment] = useState(null);
   const isOwner = userRole === 'owner';
+  
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'success': case 'active': return { bg: '#d1fae5', color: '#065f46' };
+      case 'failed': case 'cancelled': return { bg: '#fee2e2', color: '#991b1b' };
+      case 'pending': case 'processing': return { bg: '#fef3c7', color: '#92400e' };
+      default: return { bg: '#f3f4f6', color: '#374151' };
+    }
+  };
 
   const handleUpgrade = async (planId) => {
+    if (loading || retryingPayment) return;
+
     if (!isOwner) {
       toast.error('Only owners can upgrade');
       return;
@@ -39,7 +51,14 @@ export default function BillingClient({ org, userRole, payments }) {
             toast.success('Subscription activated!');
             window.location.reload();
           } catch (error) {
-            toast.error('Payment verification failed');
+            console.error('Payment verification failed:', error);
+            toast.error(`Payment verification failed: ${error?.message || 'Unknown error'}`);
+          }
+        },
+        modal: {
+          ondismiss: function() {
+            toast.error('Payment cancelled by user');
+            setLoading(false);
           }
         },
         prefill: {
@@ -54,21 +73,49 @@ export default function BillingClient({ org, userRole, payments }) {
       const razorpay = new window.Razorpay(options);
       razorpay.open();
     } catch (error) {
-      toast.error(error.message);
+      console.error('Upgrade failed:', error);
+      toast.error(`Upgrade failed: ${error?.message || 'Unknown error'}`);
     } finally {
       setLoading(false);
     }
   };
 
   const handleCancel = async () => {
+    if (loading || retryingPayment) return;
+
     if (!confirm('Cancel subscription? You will be downgraded to Free plan.')) return;
 
+    setLoading(true);
     try {
       await cancelSubscription(org.id);
       toast.success('Subscription cancelled');
       window.location.reload();
     } catch (error) {
-      toast.error(error.message);
+      console.error('Cancellation failed:', error);
+      toast.error(`Cancellation failed: ${error?.message || 'Unknown error'}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRetryPayment = async (paymentId) => {
+    if (loading || retryingPayment) return;
+
+    setRetryingPayment(paymentId);
+    try {
+      const result = await retryFailedPayment(org.id, paymentId);
+      if (result.requiresNewPayment) {
+        toast(result.message || 'Starting a new payment attempt');
+        await handleUpgrade(result.planId);
+      } else {
+        toast.success(result.message || 'Payment retry initiated');
+        window.location.reload();
+      }
+    } catch (error) {
+      console.error('Retry failed:', error);
+      toast.error(`Retry failed: ${error?.message || 'Unknown error'}`);
+    } finally {
+      setRetryingPayment(null);
     }
   };
 
@@ -83,24 +130,44 @@ export default function BillingClient({ org, userRole, payments }) {
           <h2 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '16px' }}>Current Plan</h2>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
             <div>
-              <div style={{ fontSize: '24px', fontWeight: '700', marginBottom: '4px' }}>
-                {PLANS[org.plan].name}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '4px' }}>
+                <div style={{ fontSize: '24px', fontWeight: '700' }}>
+                  {PLANS[org.plan].name}
+                </div>
+                {org.subscription_status && org.subscription_status !== 'active' && (
+                  <span style={{
+                    padding: '4px 8px',
+                    borderRadius: '12px',
+                    fontSize: '12px',
+                    fontWeight: '600',
+                    ...getStatusColor(org.subscription_status)
+                  }}>
+                    {org.subscription_status}
+                  </span>
+                )}
               </div>
               <div style={{ color: '#6b7280', fontSize: '14px' }}>
                 {org.plan === 'free' ? 'Free forever' : `${PLANS[org.plan].priceDisplay}/month`}
               </div>
+              {org.subscription_status === 'cancelled' && (
+                <div style={{ color: '#ef4444', fontSize: '12px', marginTop: '4px' }}>
+                  Subscription ends at current billing cycle
+                </div>
+              )}
             </div>
             {org.plan !== 'free' && isOwner && (
               <button
                 onClick={handleCancel}
+                disabled={loading || !!retryingPayment}
                 style={{
                   padding: '10px 20px',
                   background: 'transparent',
                   border: '1px solid #ef4444',
                   borderRadius: '8px',
                   color: '#ef4444',
-                  cursor: 'pointer',
-                  fontWeight: '600'
+                  cursor: loading || retryingPayment ? 'not-allowed' : 'pointer',
+                  fontWeight: '600',
+                  opacity: loading || retryingPayment ? 0.6 : 1
                 }}
               >
                 Cancel Subscription
@@ -156,19 +223,19 @@ export default function BillingClient({ org, userRole, payments }) {
               {org.plan !== key && plan.price > 0 && isOwner && (
                 <button
                   onClick={() => handleUpgrade(key)}
-                  disabled={loading}
+                  disabled={loading || !!retryingPayment}
                   style={{
                     width: '100%',
                     padding: '12px',
-                    background: loading ? '#9ca3af' : '#4f46e5',
+                    background: loading || retryingPayment ? '#9ca3af' : '#4f46e5',
                     color: 'white',
                     border: 'none',
                     borderRadius: '8px',
-                    cursor: loading ? 'not-allowed' : 'pointer',
+                    cursor: loading || retryingPayment ? 'not-allowed' : 'pointer',
                     fontWeight: '600'
                   }}
                 >
-                  {loading ? 'Processing...' : 'Upgrade'}
+                  {loading ? 'Processing...' : retryingPayment ? 'Please wait...' : 'Upgrade'}
                 </button>
               )}
             </div>
@@ -204,16 +271,35 @@ export default function BillingClient({ org, userRole, payments }) {
                         ₹{(payment.amount / 100).toFixed(2)}
                       </td>
                       <td style={{ padding: '16px 24px' }}>
-                        <span style={{
-                          padding: '4px 12px',
-                          borderRadius: '12px',
-                          fontSize: '12px',
-                          fontWeight: '600',
-                          background: '#d1fae5',
-                          color: '#065f46'
-                        }}>
-                          {payment.status}
-                        </span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <span style={{
+                            padding: '4px 12px',
+                            borderRadius: '12px',
+                            fontSize: '12px',
+                            fontWeight: '600',
+                            ...getStatusColor(payment.status)
+                          }}>
+                            {payment.status}
+                          </span>
+                          {payment.status === 'failed' && isOwner && (
+                            <button
+                              onClick={() => handleRetryPayment(payment.id)}
+                              disabled={loading || !!retryingPayment}
+                              style={{
+                                padding: '4px 8px',
+                                background: '#4f46e5',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '4px',
+                                fontSize: '11px',
+                                cursor: loading || retryingPayment ? 'not-allowed' : 'pointer',
+                                opacity: loading || retryingPayment ? 0.6 : 1
+                              }}
+                            >
+                              {retryingPayment === payment.id ? 'Retrying...' : 'Retry'}
+                            </button>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   ))}

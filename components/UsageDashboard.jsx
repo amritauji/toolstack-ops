@@ -1,56 +1,56 @@
 "use client";
 
-import { useEffect, useState } from 'react';
 import { PLAN_LIMITS, getUsagePercentage, isApproachingLimit } from '@/lib/planLimits';
 
-export default function UsageDashboard({ usage, plan = 'free' }) {
-  const limits = PLAN_LIMITS[plan];
+const UsageBar = ({ label, current, limit, type, plan }) => {
+  const percentage = getUsagePercentage(plan, type, current);
+  const isUnlimited = limit === -1;
+  const approaching = isApproachingLimit(plan, type, current);
   
   const getProgressColor = (percentage) => {
     if (percentage >= 90) return '#ef4444'; // red
     if (percentage >= 80) return '#f59e0b'; // orange
     return '#10b981'; // green
   };
+  
+  const color = getProgressColor(percentage);
 
-  const UsageBar = ({ label, current, limit, type }) => {
-    const percentage = getUsagePercentage(plan, type, current);
-    const isUnlimited = limit === -1;
-    const approaching = isApproachingLimit(plan, type, current);
-    const color = getProgressColor(percentage);
-
-    return (
-      <div style={styles.usageItem}>
-        <div style={styles.usageHeader}>
-          <span style={styles.usageLabel}>{label}</span>
-          <span style={styles.usageValue}>
-            {current} {isUnlimited ? '' : `/ ${limit}`}
-            {isUnlimited && <span style={styles.unlimited}>Unlimited</span>}
-          </span>
-        </div>
-        {!isUnlimited && (
-          <>
-            <div style={styles.progressBar}>
-              <div 
-                style={{
-                  ...styles.progressFill,
-                  width: `${percentage}%`,
-                  background: color
-                }}
-              />
-            </div>
-            {approaching && (
-              <div style={styles.warning}>
-                <svg style={styles.warningIcon} fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                </svg>
-                <span style={styles.warningText}>Approaching limit</span>
-              </div>
-            )}
-          </>
-        )}
+  return (
+    <div style={styles.usageItem}>
+      <div style={styles.usageHeader}>
+        <span style={styles.usageLabel}>{label}</span>
+        <span style={styles.usageValue}>
+          {current} {isUnlimited ? '' : `/ ${limit}`}
+          {isUnlimited && <span style={styles.unlimited}>Unlimited</span>}
+        </span>
       </div>
-    );
-  };
+      {!isUnlimited && (
+        <>
+          <div style={styles.progressBar}>
+            <div 
+              style={{
+                ...styles.progressFill,
+                width: `${percentage}%`,
+                background: color
+              }}
+            />
+          </div>
+          {approaching && (
+            <div style={styles.warning}>
+              <svg style={styles.warningIcon} fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              </svg>
+              <span style={styles.warningText}>Approaching limit</span>
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
+};
+
+export default function UsageDashboard({ usage, plan = 'free' }) {
+  const limits = PLAN_LIMITS[plan];
 
   return (
     <div style={styles.container}>
@@ -67,18 +67,21 @@ export default function UsageDashboard({ usage, plan = 'free' }) {
           current={usage.users} 
           limit={limits.maxUsers}
           type="users"
+          plan={plan}
         />
         <UsageBar 
           label="Tasks" 
           current={usage.tasks} 
           limit={limits.maxTasks}
           type="tasks"
+          plan={plan}
         />
         <UsageBar 
           label="Storage" 
           current={usage.storage} 
           limit={limits.maxStorage}
           type="storage"
+          plan={plan}
         />
       </div>
 

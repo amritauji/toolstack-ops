@@ -1,0 +1,25 @@
+{
+  "entity": "event",
+  "account_id": "acc_test",
+  "event": "payment.captured",
+  "contains": ["payment"],
+  "payload": {
+    "payment": {
+      "entity": {
+        "id": "pay_test_captured_001",
+        "entity": "payment",
+        "amount": 49900,
+        "currency": "INR",
+        "status": "captured",
+        "order_id": "order_test_001",
+        "notes": {
+          "org_id": "REPLACE_WITH_ORG_ID",
+          "plan": "professional",
+          "user_id": "REPLACE_WITH_USER_ID"
+        }
+      }
+    }
+  },
+  "created_at": 1739500000,
+  "event_id": "event_test_captured_001"
+}

@@ -10,14 +10,22 @@ export default function PricingPage() {
   useEffect(() => {
     // Get saved region
     const savedRegion = localStorage.getItem('selectedRegion') || 'US';
-    setSelectedRegion(savedRegion);
+    
+    // Use setTimeout to avoid synchronous setState in effect
+    const timer = setTimeout(() => {
+      setSelectedRegion(savedRegion);
+    }, 0);
 
     // Listen for region changes
     const handleRegionChange = (event) => {
       setSelectedRegion(event.detail);
     };
     window.addEventListener('regionChanged', handleRegionChange);
-    return () => window.removeEventListener('regionChanged', handleRegionChange);
+    
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('regionChanged', handleRegionChange);
+    };
   }, []);
 
   const plans = ['free', 'starter', 'professional', 'enterprise'];

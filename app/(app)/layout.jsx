@@ -4,6 +4,8 @@ import AppLayoutClient from "./AppLayoutClient";
 import Navbar from "@/components/Navbar";
 import ErrorBoundary from "@/components/ErrorBoundary";
 
+export const dynamic = "force-dynamic";
+
 export default async function AppLayout({ children }) {
   try {
     const supabase = await createSupabaseServer();

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function ModernFooter() {
   const footerSections = [
@@ -80,21 +81,13 @@ export default function ModernFooter() {
           {/* Brand Section */}
           <div style={{ gridColumn: 'span 2' }}>
             <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none', marginBottom: '24px' }}>
-              <div style={{
-                width: '40px',
-                height: '40px',
-                background: 'linear-gradient(135deg, #6366f1, #a855f7)',
-                borderRadius: '12px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                boxShadow: '0 4px 12px rgba(99, 102, 241, 0.3)'
-              }}>
-                <svg style={{ width: '24px', height: '24px', color: 'white' }} fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <span style={{ fontSize: '24px', fontWeight: 700, color: 'white' }}>NexBoard</span>
+              <Image
+                src="/nexboard-logo.svg"
+                alt="Nexboard logo"
+                width={200}
+                height={62}
+                style={{ width: '200px', height: '62px', objectFit: 'contain' }}
+              />
             </Link>
             
             <p style={{

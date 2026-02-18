@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import RegionSelector from '../RegionSelector';
 import { useTheme } from '@/contexts/ThemeContext';
 
@@ -61,14 +60,15 @@ export default function ModernNavbar() {
         }}>
           {/* Logo */}
           <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none' }} onClick={closeMobileMenu}>
-            <Image
-              src="/nexboard-logo.svg"
-              alt="Nexboard logo"
-              width={180}
-              height={55}
-              priority
-              style={{ width: '180px', height: '55px', objectFit: 'contain' }}
-            />
+            <span style={{
+              fontSize: '28px',
+              fontWeight: 800,
+              letterSpacing: '-0.03em',
+              lineHeight: 1,
+              color: isDark ? '#f8fafc' : '#0f172a'
+            }}>
+              Nexboard
+            </span>
           </Link>
 
           {/* Desktop Navigation */}
